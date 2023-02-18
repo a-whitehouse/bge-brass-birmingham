@@ -1,5 +1,4 @@
 import * as bge from "bge-core";
-import { PlayingCard } from "bge-playingcard";
 
 /**
  * @summary Custom player class for your game.
@@ -7,20 +6,15 @@ import { PlayingCard } from "bge-playingcard";
  */
 export class Player extends bge.Player {
 
-    finalScore?: number;
-
     /**
-     * @summary The player's personal hand of cards.
-     * @description It has a width in centimetres, and options like which way the cards face, and how to sort them.
+     * This player's total score.
      */
-    @bge.display()
-    readonly hand = new bge.Hand(PlayingCard, 20, {
-        orientation: bge.CardOrientation.FaceUp,
-        autoSort: PlayingCard.autoSortCompare
-    });
+    get victoryPoints(): number {
+        return 0;
+    }
 
     createZone(): bge.Zone {
-        const zone = new bge.Zone(this.hand.width + 2, this.hand.height + 2);
+        const zone = new bge.Zone(20, 10);
 
         zone.children.addProperties(this);
 
