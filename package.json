@@ -1,0 +1,15 @@
+{
+  "name": "template-cardgame",
+  "description": "Card game example, with prompts and scoring",
+  "scripts": {
+    "build": "bge build",
+    "start": "bge serve"
+  },
+  "devDependencies": {
+    "bge-dev": "^0.2.1"
+  },
+  "dependencies": {
+    "bge-core": "^0.2.0",
+    "bge-playingcard": "^0.1.6"
+  }
+}
