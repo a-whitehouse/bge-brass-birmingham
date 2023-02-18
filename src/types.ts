@@ -24,14 +24,20 @@ export enum City {
     Coventry,
     Nuneaton,
     Redditch,
-    
     Warrington,
     Nottingham,
     Shrewsbury,
     Gloucester,
     Oxford,
 
+    /**
+     * Location of a brewery near Cannock.
+     */
     Farm1,
+
+    /**
+     * Location of a brewery between Kidderminster and Worcester.
+     */
     Farm2,
     
     Any = -1
@@ -53,11 +59,23 @@ export enum Industry
 }
 
 /**
- * Represents a location on the board that a player can build an industry on.
+ * Definition of a location on the board that a player can build an industry on.
  */
 export interface IIndustryLocationData {
     city: City;
     industries: Industry;
     posX: number;
     posY: number;
+}
+
+/**
+ * Definition of a location on the board that a player can build a link on.
+ */
+export interface ILinkLocationData {
+    cities: City[];
+    posX: number;
+    posY: number;
+    angle: number;
+    canal: boolean;
+    rail: boolean;
 }

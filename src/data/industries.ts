@@ -1,4 +1,4 @@
-import { City, IIndustryLocationData, Industry } from "./types";
+import { City, IIndustryLocationData, Industry } from "../types";
 
 const REFERENCE_WIDTH = 4000;
 const REFERENCE_HEIGHT = 4000;
