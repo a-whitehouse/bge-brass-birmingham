@@ -1,5 +1,5 @@
 import * as bge from 'bge-core';
-import { CardGame } from './game';
+import { Game } from './game';
 
 /**
  * @summary Required default export describing our game's config.
@@ -7,7 +7,7 @@ import { CardGame } from './game';
  */
 export default {
     apiVersion: bge.API_VERSION,
-    Game: CardGame,
+    Game: Game,
     minPlayers: 4,
     maxPlayers: 8
 } as bge.IGameConfig;
