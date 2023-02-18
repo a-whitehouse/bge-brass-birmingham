@@ -22,6 +22,10 @@ export class Game extends bge.Game<Player> {
 
     protected async onRun(): Promise<bge.IGameResult> {
 
+        this.addPlayerZones(x => x.createZone(), {
+            avoid: this.board.footprint
+        });
+
         // Entry point for gameplay logic
         await main(this);
 
