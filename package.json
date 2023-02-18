@@ -9,7 +9,6 @@
     "bge-dev": "^0.2.3"
   },
   "dependencies": {
-    "bge-core": "^0.2.3",
-    "bge-playingcard": "^0.1.8"
+    "bge-core": "^0.2.4"
   }
 }
