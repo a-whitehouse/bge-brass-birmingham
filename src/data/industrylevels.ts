@@ -7,7 +7,7 @@ const BOARD_WIDTH = 28.6;
 const BOARD_HEIGHT = 22.8;
 
 /**
- * All the possible locations that players can build links.
+ * All the industry tiles, including positions on player boards.
  */
 export default {
     industries: new Map(([
