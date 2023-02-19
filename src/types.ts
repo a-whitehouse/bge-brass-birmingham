@@ -57,6 +57,12 @@ export enum Industry {
     Any = 63,
 }
 
+export enum Resource {
+    Coal = 0,
+    Iron = 1,
+    Beer = 2
+}
+
 /**
  * Definition of a location on the board that a player can build an industry on.
  */
@@ -154,4 +160,19 @@ export interface IIndustryLevelData {
 
 export interface IPlayerBoardData {
     industries: Map<Industry, IIndustryLevelData[]>;
+}
+
+/**
+ * Describes how the tokens in a resource market are positioned.
+ */
+export interface IResourceMarketData {
+    /**
+     * Vertical (z) coordinates for each row, relative to the player board center.
+     */
+    rows: number[];
+
+    /**
+     * Horizontal (x) coordinates for each column, relative to the player board center.
+     */
+    columns: number[];
 }

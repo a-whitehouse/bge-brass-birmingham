@@ -15,6 +15,9 @@ async function setup(game: Game) {
     deck.addRange(Card.generateDeck(game.players.length));
     deck.shuffle(game.random);
     deck.deal(game.players.map(x => x.hand), 8);
+
+    game.coalMarket.fill(13);
+    game.ironMarket.fill(8);
 }
 
 async function playerTurn(game: Game, player: Player) {
