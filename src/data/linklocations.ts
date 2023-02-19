@@ -1,4 +1,5 @@
 import { City, ILinkLocationData } from "../types";
+import * as gameboard from "./gameboard";
 
 const REFERENCE_WIDTH = 4000;
 const REFERENCE_HEIGHT = 4000;
@@ -47,7 +48,7 @@ export default ([
     { cities: [City.Redditch, City.Oxford], posX: 2662, posZ: 3337.3333, angle: 167.714, canal: true, rail: true },
     { cities: [City.Birmingham, City.Oxford], posX: 2864, posZ: 3080.3333, angle: 129.14, canal: true, rail: true },
 ] as ILinkLocationData[]).map(data => {
-    data.posX = (data.posX - REFERENCE_WIDTH * 0.5) * 57 / REFERENCE_WIDTH;
-    data.posZ = (REFERENCE_HEIGHT * 0.5 - data.posZ) * 57 / REFERENCE_HEIGHT;
+    data.posX = (data.posX - REFERENCE_WIDTH * 0.5) * gameboard.WIDTH / REFERENCE_WIDTH;
+    data.posZ = (REFERENCE_HEIGHT * 0.5 - data.posZ) * gameboard.HEIGHT / REFERENCE_HEIGHT;
     return data;
 });

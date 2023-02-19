@@ -1,7 +1,8 @@
 import * as bge from "bge-core";
 
-import INDUSTRY_LOCATIONS from "../data/industries";
-import LINK_LOCATIONS from "../data/links";
+import * as gameboard from "../data/gameboard";
+import INDUSTRY_LOCATIONS from "../data/buildinglocations";
+import LINK_LOCATIONS from "../data/linklocations";
 
 import { IndustryLocation } from "./industrylocation";
 import { LinkLocation } from "./linklocation";
@@ -9,13 +10,10 @@ import { LinkLocation } from "./linklocation";
 /**
  * The main board in the middle of the table.
  */
-@bge.width(GameBoard.WIDTH)
-@bge.height(GameBoard.HEIGHT)
+@bge.width(gameboard.WIDTH)
+@bge.height(gameboard.HEIGHT)
 @bge.thickness(0.5)
 export class GameBoard extends bge.Card {
-    static readonly WIDTH = 57;
-    static readonly HEIGHT = 57;
-
     /**
      * Array of {@link IndustryLocation}s that players can build on.
      */

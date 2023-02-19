@@ -1,10 +1,9 @@
-import { City, IIndustryLevelData, Industry, IPlayerBoardData } from "../types";
+import { IIndustryLevelData, Industry, IPlayerBoardData } from "../types";
+
+import * as playerboard from "./playerboard";
 
 const REFERENCE_WIDTH = 2113.5;
 const REFERENCE_HEIGHT = 1710;
-
-const BOARD_WIDTH = 28.6;
-const BOARD_HEIGHT = 22.8;
 
 /**
  * All the industry tiles, including positions on player boards.
@@ -663,8 +662,8 @@ export default {
         const [industry, levels] = entry;
 
         levels.forEach(data => {
-            data.posX = (data.posX - REFERENCE_WIDTH * 0.5) * BOARD_WIDTH / REFERENCE_WIDTH;
-            data.posZ = (REFERENCE_HEIGHT * 0.5 - data.posZ) * BOARD_HEIGHT / REFERENCE_HEIGHT;
+            data.posX = (data.posX - REFERENCE_WIDTH * 0.5) * playerboard.WIDTH / REFERENCE_WIDTH;
+            data.posZ = (REFERENCE_HEIGHT * 0.5 - data.posZ) * playerboard.HEIGHT / REFERENCE_HEIGHT;
         })
 
         return [industry, levels];

@@ -1,4 +1,5 @@
 import { City, IIndustryLocationData, Industry } from "../types";
+import * as gameboard from "./gameboard";
 
 const REFERENCE_WIDTH = 4000;
 const REFERENCE_HEIGHT = 4000;
@@ -57,7 +58,7 @@ export default ([
     { city: City.Worcester, posX: 1534.5, posZ: 3582.5, industries: Industry.Cotton },
     { city: City.Farm2, posX: 1039.5, posZ: 3362.5, industries: Industry.Brewery },
 ] as IIndustryLocationData[]).map(data => {
-    data.posX = (data.posX - REFERENCE_WIDTH * 0.5) * 57 / REFERENCE_WIDTH;
-    data.posZ = (REFERENCE_HEIGHT * 0.5 - data.posZ) * 57 / REFERENCE_HEIGHT;
+    data.posX = (data.posX - REFERENCE_WIDTH * 0.5) * gameboard.WIDTH / REFERENCE_WIDTH;
+    data.posZ = (REFERENCE_HEIGHT * 0.5 - data.posZ) * gameboard.HEIGHT / REFERENCE_HEIGHT;
     return data;
 });
