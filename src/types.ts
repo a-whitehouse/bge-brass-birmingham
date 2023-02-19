@@ -46,8 +46,7 @@ export enum City {
 /**
  * Types of industry that players can build.
  */
-export enum Industry
-{
+export enum Industry {
     None = 0,
     Iron = 1,
     Coal = 2,
@@ -65,7 +64,7 @@ export interface IIndustryLocationData {
     city: City;
     industries: Industry;
     posX: number;
-    posY: number;
+    posZ: number;
 }
 
 /**
@@ -74,7 +73,7 @@ export interface IIndustryLocationData {
 export interface ILinkLocationData {
     cities: City[];
     posX: number;
-    posY: number;
+    posZ: number;
     angle: number;
     canal: boolean;
     rail: boolean;

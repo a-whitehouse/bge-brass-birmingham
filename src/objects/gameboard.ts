@@ -38,7 +38,7 @@ export class GameBoard extends bge.Card {
             const location = new IndustryLocation(data);
 
             location.display = this.children.add(`industry[${i}]`, location, {
-                localPosition: { x: data.posX, z: data.posY },
+                localPosition: { x: data.posX, z: data.posZ },
                 visibleFor: [] // Visible to nobody by default
             }).options;
 
@@ -52,7 +52,7 @@ export class GameBoard extends bge.Card {
             const location = new LinkLocation(data);
 
             location.display = this.children.add(`link[${i}]`, location, {
-                localPosition: { x: data.posX, z: data.posY },
+                localPosition: { x: data.posX, z: data.posZ },
                 localRotation: { y: -data.angle },
                 visibleFor: [] // Visible to nobody by default
             }).options;
