@@ -16,6 +16,8 @@ function remapColumns(cols: number[]): number[] {
 }
 
 export const COAL_MARKET = {
+    initialCount: 13,
+
     rows: remapRows([
         2074.7059,
         1951.7059,
@@ -33,6 +35,8 @@ export const COAL_MARKET = {
 } as IResourceMarketData;
 
 export const IRON_MARKET = {
+    initialCount: 8,
+
     rows: remapRows([
         2074.7059,
         1951.7059,

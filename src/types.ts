@@ -167,6 +167,11 @@ export interface IPlayerBoardData {
  */
 export interface IResourceMarketData {
     /**
+     * Number of tokens the market contains at the start of the game.
+     */
+    initialCount: number;
+
+    /**
      * Vertical (z) coordinates for each row, relative to the player board center.
      */
     rows: number[];
