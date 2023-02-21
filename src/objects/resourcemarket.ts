@@ -1,6 +1,8 @@
-import { IResourceMarketData, Resource } from "../types";
+import * as bge from "bge-core";
+
+import { Resource } from "../types";
 import { GameBoard } from "./gameboard";
-import { ResourceToken } from "./resourcetoken";
+import { ResourceToken, ResourceTokenSlot } from "./resourcetoken";
 
 import * as marketdata from "../data/resourcemarkets";
 
@@ -9,7 +11,9 @@ import * as marketdata from "../data/resourcemarkets";
  * the market display to the right of the main board, and calculating how
  * much each token costs to purchase.
  */
-export class ResourceMarket {
+export class ResourceMarket extends bge.Zone {
+    private _count: number;
+
     /**
      * Central game board on which to position the market.
      */
@@ -20,19 +24,19 @@ export class ResourceMarket {
      */
     readonly resource: Resource;
 
-    private readonly _data: IResourceMarketData;
-    private readonly _tokens: ResourceToken[] = [];
+    readonly defaultCost: number;
 
-    /**
-     * Maximum number of tokens this market can contain.
-     */
-    readonly capacity: number;
+    private readonly _slots: ResourceTokenSlot<{ cost: number }>[];
+
+    get capacity() {
+        return this._slots.length;
+    }
 
     /**
      * Current number of tokens in the market.
      */
     get count() {
-        return this._tokens.length;
+        return this._count;
     }
 
     /**
@@ -57,38 +61,39 @@ export class ResourceMarket {
      * @param resource Resource type (coal or iron) of this market.
      */
     constructor(board: GameBoard, resource: Resource) {
+        super(0, 0);
+        
+        this.outlineStyle = bge.OutlineStyle.None;
+
         this.board = board;
         this.resource = resource;
 
-        this._data = resource === Resource.Coal
+        this._count = 0;
+        this._slots = [];
+
+        const data = resource === Resource.Coal
             ? marketdata.COAL_MARKET
             : marketdata.IRON_MARKET;
 
-        this.capacity = this._data.rows.length * this._data.columns.length;
+        for (let i = data.rows.length - 1; i >= 0; --i) {
+            const row = data.rows[i];
+            const rowCost = i + 1;
 
-        this.fill(this._data.initialCount);
-    }
-
-    private getRowCol(index: number): [row: number, col: number] {
-        const row = this._data.rows.length - 1
-            - Math.floor(index / this._data.columns.length);
-        const col = index % this._data.columns.length;
-
-        return [row, col];
-    }
-
-    /**
-     * Gets the coin value of tokens in the given row.
-     * The lowest value row (1 coin) is rowIndex 0.
-     * @param row Row index to determine the value of.
-     */
-    getRowValue(rowIndex: number): number {
-        if (rowIndex < 0) return 0;
-        if (rowIndex >= this._data.rows.length) {
-            return this._data.rows.length + 1;
+            for (let col of data.columns) {
+                const slot = new ResourceTokenSlot({ cost: rowCost });
+                this._slots.push(slot);
+                this.children.add(slot, {
+                    localPosition: {
+                        x: col,
+                        z: row
+                    }
+                });
+            }
         }
 
-        return Math.max(0, Math.min(rowIndex + 1, this._data.rows.length + 1));
+        this.defaultCost = data.rows.length + 1;
+
+        this.fill(data.initialCount);
     }
 
     /**
@@ -103,12 +108,11 @@ export class ResourceMarket {
             const index = this.count - i - 1;
 
             if (index < 0) {
-                total += this.getRowValue(this._data.rows.length);
+                total += this.defaultCost;
                 continue;
             }
 
-            const [row, col] = this.getRowCol(index);
-            total += this.getRowValue(row);
+            total += this._slots[index].data.cost;
         }
 
         return total;
@@ -127,8 +131,7 @@ export class ResourceMarket {
 
         for (let i = 0; i < count; ++i) {
             const index = this.count + i;
-            const [row, col] = this.getRowCol(index);
-            total += this.getRowValue(row);
+            total += this._slots[index].data.cost;
         }
 
         return total;
@@ -139,7 +142,7 @@ export class ResourceMarket {
      * @param count Total number of tokens the market should contain.
      */
     fill(count: number): void {
-        while (this._tokens.length < count) {
+        while (this.count < count) {
             this.add(new ResourceToken(this.resource));
         }
     }
@@ -157,17 +160,7 @@ export class ResourceMarket {
             throw new Error("Resource market is full");
         }
 
-        const index = this._tokens.length;
-        const [row, col] = this.getRowCol(index);
-
-        this.board.children.add(`_res_${this.resource}_${index}`, token, {
-            localPosition: {
-                x: this._data.columns[col],
-                z: this._data.rows[row]
-            }
-        });
-
-        this._tokens.push(token);
+        this._slots[this._count++].add(token);
     }
 
     /**
@@ -191,11 +184,11 @@ export class ResourceMarket {
      * @returns Token removed from the market.
      */
     take(): ResourceToken {
-        const token = this._tokens.pop();
+        if (this.count <= 0) {
+            return new ResourceToken(this.resource);
+        }
 
-        this.board.children.remove(token);
-
-        return token;
+        return this._slots[--this._count].take();
     }
 
     /**

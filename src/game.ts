@@ -14,7 +14,7 @@ import main from "./actions";
 export class Game extends bge.Game<Player> {
 
     @bge.display()
-    readonly board = new GameBoard();
+    readonly board = new GameBoard(this);
 
     readonly coalMarket: ResourceMarket;
     readonly ironMarket: ResourceMarket;

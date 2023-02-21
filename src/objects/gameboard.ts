@@ -6,6 +6,7 @@ import LINK_LOCATIONS from "../data/linklocations";
 
 import { IndustryLocation } from "./industrylocation";
 import { LinkLocation } from "./linklocation";
+import { Game } from "../game";
 
 /**
  * The main board in the middle of the table.
@@ -14,6 +15,8 @@ import { LinkLocation } from "./linklocation";
 @bge.height(gameboard.HEIGHT)
 @bge.thickness(0.5)
 export class GameBoard extends bge.Card {
+    private readonly _game: Game;
+
     /**
      * Array of {@link IndustryLocation}s that players can build on.
      */
@@ -24,9 +27,20 @@ export class GameBoard extends bge.Card {
      */
     readonly linkLocations: readonly LinkLocation[];
 
-    constructor() {
+    @bge.display()
+    get coalMarket() {
+        return this._game.coalMarket;
+    }
+
+    @bge.display()
+    get ironMarket() {
+        return this._game.ironMarket;
+    }
+
+    constructor(game: Game) {
         super();
 
+        this._game = game;
         this.front.image = bge.Image.simple("https://iili.io/HGzqKkx.jpg");
 
         // Read industry location definitions, create IndustryLocation instances,
@@ -35,10 +49,9 @@ export class GameBoard extends bge.Card {
         this.industryLocations = INDUSTRY_LOCATIONS.map((data, i) => {
             const location = new IndustryLocation(data);
 
-            location.display = this.children.add(`industry[${i}]`, location, {
-                localPosition: { x: data.posX, z: data.posZ },
-                visibleFor: [] // Visible to nobody by default
-            }).options;
+            location.display = this.children.add(location, {
+                localPosition: { x: data.posX, z: data.posZ }
+            });
 
             return location;
         });
@@ -49,11 +62,10 @@ export class GameBoard extends bge.Card {
         this.linkLocations = LINK_LOCATIONS.map((data, i) => {
             const location = new LinkLocation(data);
 
-            location.display = this.children.add(`link[${i}]`, location, {
+            location.display = this.children.add(location, {
                 localPosition: { x: data.posX, z: data.posZ },
-                localRotation: { y: -data.angle },
-                visibleFor: [] // Visible to nobody by default
-            }).options;
+                localRotation: { y: -data.angle }
+            });
 
             return location;
         });

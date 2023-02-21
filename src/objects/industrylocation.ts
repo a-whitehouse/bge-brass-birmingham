@@ -1,4 +1,5 @@
 import * as bge from "bge-core";
+import { OutlineStyle } from "bge-core";
 
 import { IIndustryLocationData } from "../types";
 
@@ -27,5 +28,7 @@ export class IndustryLocation extends bge.Zone {
         super(2.25, 2.25);
 
         this.data = data;
+        this.hideIfEmpty = true;
+        this.outlineStyle = OutlineStyle.None;
     }
 }
