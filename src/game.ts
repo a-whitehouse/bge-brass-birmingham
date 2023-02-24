@@ -6,6 +6,7 @@ import { ResourceMarket } from "./objects/resourcemarket";
 import { Resource } from "./types";
 
 import main from "./actions";
+import { Card } from "./objects/card";
 
 /**
  * @summary This class contains the meat of your game.
@@ -15,6 +16,15 @@ export class Game extends bge.Game<Player> {
 
     @bge.display()
     readonly board = new GameBoard(this);
+
+    @bge.display({
+        arrangement: new bge.RectangularArrangement({
+            size: new bge.Vector3(60, 60)
+        })
+    })
+    readonly playerZones: bge.Zone[] = [];
+
+    readonly drawPile = new bge.Deck(Card, { orientation: bge.CardOrientation.FACE_DOWN });
 
     readonly coalMarket: ResourceMarket;
     readonly ironMarket: ResourceMarket;
@@ -32,9 +42,7 @@ export class Game extends bge.Game<Player> {
 
     protected async onRun(): Promise<bge.IGameResult> {
 
-        this.addPlayerZones(x => x.createZone(), {
-            avoid: this.board.footprint
-        });
+        this.playerZones.push(...this.players.map(x => x.createZone()));
 
         // Entry point for gameplay logic
         await main(this);

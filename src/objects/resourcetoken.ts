@@ -6,10 +6,10 @@ import { Resource } from "../types";
  * A coal, iron, or beer token.
  */
 export class ResourceToken extends bge.Token {
-    private static readonly _colors = new Map<Resource, bge.Color>([
-        [Resource.Coal, { r: 0, g: 0, b: 0 }],
-        [Resource.Iron, { r: 255, g: 127, b: 0 }],
-        [Resource.Beer, { r: 255, g: 255, b: 0 }]
+    private static readonly COLORS = new Map<Resource, bge.Color>([
+        [Resource.Coal, bge.Color.BLACK],
+        [Resource.Iron, bge.Color.parse("ff7f00")],
+        [Resource.Beer, bge.Color.parse("ffff00")]
     ]);
 
     /**
@@ -24,9 +24,9 @@ export class ResourceToken extends bge.Token {
     constructor(resource: Resource) {
         super({
             name: Resource[resource],
-            shape: bge.TokenShape.Cube,
+            shape: bge.TokenShape.CUBE,
             scale: 0.75,
-            color: ResourceToken._colors.get(resource)
+            color: ResourceToken.COLORS.get(resource)
         });
 
         this.resource = resource;
@@ -52,7 +52,7 @@ export class ResourceTokenSlot<TData = undefined> extends bge.Zone {
 
         this.data = data;
         this.hideIfEmpty = true;
-        this.outlineStyle = bge.OutlineStyle.None;
+        this.outlineStyle = bge.OutlineStyle.NONE;
     }
 
     add(token: ResourceToken): void {

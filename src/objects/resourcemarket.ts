@@ -63,7 +63,7 @@ export class ResourceMarket extends bge.Zone {
     constructor(board: GameBoard, resource: Resource) {
         super(0, 0);
         
-        this.outlineStyle = bge.OutlineStyle.None;
+        this.outlineStyle = bge.OutlineStyle.NONE;
 
         this.board = board;
         this.resource = resource;
@@ -83,10 +83,7 @@ export class ResourceMarket extends bge.Zone {
                 const slot = new ResourceTokenSlot({ cost: rowCost });
                 this._slots.push(slot);
                 this.children.add(slot, {
-                    localPosition: {
-                        x: col,
-                        z: row
-                    }
+                    position: new bge.Vector3(col, row)
                 });
             }
         }

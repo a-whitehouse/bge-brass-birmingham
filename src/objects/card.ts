@@ -111,10 +111,10 @@ export class Card extends bge.Card {
 		super();
 
 		let x = index % 7;
-		let y = Math.floor(index / 7);
+		let y = 4 - Math.floor(index / 7);
 
 		this.front.image = bge.Image.tile("https://iili.io/HGIUIEu.jpg", 5, 7, y, x);
-		this.back.image = bge.Image.tile("https://iili.io/HGIUEEg.jpg", 1, 1, 0, 0);
+		this.back.image = this.hidden.image = bge.Image.tile("https://iili.io/HGIUEEg.jpg", 1, 1, 0, 0);
 	}
 }
 

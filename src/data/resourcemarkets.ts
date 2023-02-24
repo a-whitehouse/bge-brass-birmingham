@@ -6,7 +6,7 @@ const REFERENCE_WIDTH = 4000;
 const REFERENCE_HEIGHT = 4000;
 
 function remapRows(rows: number[]): number[] {
-    return rows.map(posZ => (REFERENCE_HEIGHT * 0.5 - posZ)
+    return rows.map(posY => (REFERENCE_HEIGHT * 0.5 - posY)
         * gameboard.HEIGHT / REFERENCE_HEIGHT);
 }
 

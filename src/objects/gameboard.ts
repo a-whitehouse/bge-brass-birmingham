@@ -27,20 +27,17 @@ export class GameBoard extends bge.Card {
      */
     readonly linkLocations: readonly LinkLocation[];
 
-    @bge.display()
-    get coalMarket() {
-        return this._game.coalMarket;
-    }
+    @bge.display({ rotation: 90, position: { x: -20.6, y: 19.7 } })
+    get drawPile() { return this._game.drawPile; }
 
-    @bge.display()
-    get ironMarket() {
-        return this._game.ironMarket;
-    }
+    @bge.display() get coalMarket() { return this._game.coalMarket; }
+    @bge.display() get ironMarket() { return this._game.ironMarket; }
 
     constructor(game: Game) {
         super();
 
         this._game = game;
+        
         this.front.image = bge.Image.simple("https://iili.io/HGzqKkx.jpg");
 
         // Read industry location definitions, create IndustryLocation instances,
@@ -50,7 +47,7 @@ export class GameBoard extends bge.Card {
             const location = new IndustryLocation(data);
 
             location.display = this.children.add(location, {
-                localPosition: { x: data.posX, z: data.posZ }
+                position: new bge.Vector3(data.posX, data.posY)
             });
 
             return location;
@@ -63,22 +60,11 @@ export class GameBoard extends bge.Card {
             const location = new LinkLocation(data);
 
             location.display = this.children.add(location, {
-                localPosition: { x: data.posX, z: data.posZ },
-                localRotation: { y: -data.angle }
+                position: new bge.Vector3(data.posX, data.posY),
+                rotation: bge.Rotation.z(-data.angle)
             });
 
             return location;
         });
-    }
-
-    override get footprint(): bge.Footprint {
-        const baseFootprint = super.footprint;
-
-        // Add a few cm of clearance around the board
-
-        return {
-            width: baseFootprint.width + 4,
-            height: baseFootprint.height + 4
-        }
     }
 }

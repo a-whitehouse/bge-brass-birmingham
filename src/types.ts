@@ -70,7 +70,7 @@ export interface IIndustryLocationData {
     city: City;
     industries: Industry;
     posX: number;
-    posZ: number;
+    posY: number;
 }
 
 /**
@@ -79,7 +79,7 @@ export interface IIndustryLocationData {
 export interface ILinkLocationData {
     cities: City[];
     posX: number;
-    posZ: number;
+    posY: number;
     angle: number;
     canal: boolean;
     rail: boolean;
@@ -118,7 +118,7 @@ export interface IIndustryLevelData {
     tileIndex: number;
 
     posX: number;
-    posZ: number;
+    posY: number;
 
     cost: IIndustryCostData;
 
@@ -156,10 +156,6 @@ export interface IIndustryLevelData {
      * If undefined, you should default to false.
      */
     railOnly?: true;
-}
-
-export interface IPlayerBoardData {
-    industries: Map<Industry, IIndustryLevelData[]>;
 }
 
 /**
