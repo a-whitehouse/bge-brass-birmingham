@@ -1,7 +1,9 @@
 import * as bge from "bge-core";
+import { LinearArrangement } from "bge-core";
 
 import { Player } from "../player";
 import { IIndustryLevelData, Industry } from "../types";
+import { ResourceToken } from "./resourcetoken";
 
 @bge.width(2.25)
 @bge.height(2.25)
@@ -11,6 +13,13 @@ export class IndustryTile extends bge.Card {
     readonly player: Player;
     readonly industry: Industry;
     readonly data: IIndustryLevelData;
+
+    @bge.display({
+        arrangement: new LinearArrangement({
+            axis: "z"
+        })
+    })
+    readonly resources: ResourceToken[] = [];
 
     constructor(player: Player, industry: Industry, data: IIndustryLevelData) {
         super();

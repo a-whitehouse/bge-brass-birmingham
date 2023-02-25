@@ -7,6 +7,7 @@ import { Resource } from "./types";
 
 import main from "./actions";
 import { Card } from "./objects/card";
+import { ScoreTrack } from "./objects/scoring";
 
 /**
  * @summary This class contains the meat of your game.
@@ -29,6 +30,8 @@ export class Game extends bge.Game<Player> {
     readonly coalMarket: ResourceMarket;
     readonly ironMarket: ResourceMarket;
 
+    readonly scoreTrack: ScoreTrack;
+
     /**
      * Game runners expect games to have a public parameterless constructor, like this.
      */
@@ -38,6 +41,8 @@ export class Game extends bge.Game<Player> {
 
         this.coalMarket = new ResourceMarket(this.board, Resource.Coal);
         this.ironMarket = new ResourceMarket(this.board, Resource.Iron);
+
+        this.scoreTrack = new ScoreTrack();
     }
 
     protected async onRun(): Promise<bge.IGameResult> {

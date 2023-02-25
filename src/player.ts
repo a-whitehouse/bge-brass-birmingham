@@ -1,7 +1,10 @@
 import * as bge from "bge-core";
-import { CardOrientation } from "bge-core";
+
 import { Card } from "./objects/card";
-import { PlayerBoard } from "./objects/playerboard";
+import { IndustryTile } from "./objects/industrytile";
+import { IndustryLevelSlot, PlayerBoard } from "./objects/playerboard";
+import { ScoreToken } from "./objects/scoring";
+import { Industry } from "./types";
 
 /**
  * @summary Custom player class for your game.
@@ -19,17 +22,33 @@ export class Player extends bge.Player {
     readonly hand = new bge.Hand(Card, 20);
 
     @bge.display({ position: { x: 8.15, y: 5 }, label: "Discard" })
-    readonly discardPile = new bge.Deck(Card, { orientation: CardOrientation.FACE_UP });
+    readonly discardPile = new bge.Deck(Card, { orientation: bge.CardOrientation.FACE_UP });
 
     @bge.display({ position: { x: -12.2 }})
     readonly playerBoard = new PlayerBoard(this);
+
+    victoryPointToken: ScoreToken;
+    incomeToken: ScoreToken;
+
+    money: number = 17;
+    spent: number = 0;
 
     /**
      * This player's total score.
      */
     get victoryPoints(): number {
-        return 0;
+        return this.victoryPointToken?.value ?? 0;
     }
+
+    get income(): number {
+        return this.incomeToken?.slot.income ?? 0;
+    }
+
+    @bge.display({ position: { x: 19, y: 8 }, label: "Money" })
+    get moneyDisplay() { return `£${this.money}`; }
+    
+    @bge.display({ position: { x: 19, y: 2 }, label: "Spent This Round" })
+    get spentDisplay() { return `£${this.spent}`; }
 
     override get color(): bge.Color {
         return Player.DEFAULT_COLORS[this.index];
@@ -46,5 +65,43 @@ export class Player extends bge.Player {
         zone.children.getOptions("discardPile").revealedFor = [this];
 
         return zone;
+    }
+
+    spendMoney(amount: number): void {
+        if (this.money < amount) {
+            throw new Error("Not enough money!");
+        }
+
+        this.spent += amount;
+        this.money -= amount;
+    }
+
+    increaseIncome(delta: number): void {
+        this.incomeToken.increase(delta);
+    }
+
+    decreaseIncome(delta: number): void {
+        this.incomeToken.decrease(delta);
+    }
+
+    increaseVictoryPoints(delta: number): void {
+        this.incomeToken.increase(delta);
+    }
+
+    getNextIndustryLevelSlot(industry: Industry): IndustryLevelSlot | null {
+        const slots = this.playerBoard.industryLevels.get(industry);
+
+        for (let slot of slots) {
+            if (slot.tiles.length > 0) {
+                return slot;
+            }
+        }
+
+        return null;
+    }
+
+    takeNextIndustryTile(industry: Industry): IndustryTile {
+        const slot = this.getNextIndustryLevelSlot(industry);
+        return slot.tiles.pop();
     }
 }

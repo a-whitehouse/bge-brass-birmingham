@@ -32,6 +32,7 @@ export class GameBoard extends bge.Card {
 
     @bge.display() get coalMarket() { return this._game.coalMarket; }
     @bge.display() get ironMarket() { return this._game.ironMarket; }
+    @bge.display() get scoreTrack() { return this._game.scoreTrack; }
 
     constructor(game: Game) {
         super();
@@ -46,7 +47,7 @@ export class GameBoard extends bge.Card {
         this.industryLocations = INDUSTRY_LOCATIONS.map((data, i) => {
             const location = new IndustryLocation(data);
 
-            location.display = this.children.add(location, {
+            this.children.add(location, {
                 position: new bge.Vector3(data.posX, data.posY)
             });
 

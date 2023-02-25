@@ -12,7 +12,7 @@ export default new Map(([
     [Industry.Coal, [
         {
             level: 1,
-            count: undefined,
+            count: 1,
             canalOnly: true,
             
             tileIndex: 12,
@@ -34,7 +34,7 @@ export default new Map(([
         },
         {
             level: 2,
-            count: undefined,
+            count: 2,
             
             tileIndex: 13,
 
@@ -55,7 +55,7 @@ export default new Map(([
         },
         {
             level: 3,
-            count: undefined,
+            count: 2,
             
             tileIndex: 14,
 
@@ -77,7 +77,7 @@ export default new Map(([
         },
         {
             level: 4,
-            count: undefined,
+            count: 2,
             
             tileIndex: 15,
 
@@ -101,7 +101,7 @@ export default new Map(([
     [Industry.Iron, [
         {
             level: 1,
-            count: undefined,
+            count: 1,
             canalOnly: true,
 
             tileIndex: 4,
@@ -124,7 +124,7 @@ export default new Map(([
         },
         {
             level: 2,
-            count: undefined,
+            count: 1,
 
             tileIndex: 5,
 
@@ -146,7 +146,7 @@ export default new Map(([
         },
         {
             level: 3,
-            count: undefined,
+            count: 1,
             
             tileIndex: 6,
 
@@ -168,7 +168,7 @@ export default new Map(([
         },
         {
             level: 4,
-            count: undefined,
+            count: 1,
             
             tileIndex: 7,
 
@@ -192,7 +192,7 @@ export default new Map(([
     [Industry.Brewery, [
         {
             level: 1,
-            count: undefined,
+            count: 2,
             canalOnly: true,
             
             tileIndex: 8,
@@ -213,7 +213,7 @@ export default new Map(([
         },
         {
             level: 2,
-            count: undefined,
+            count: 2,
             
             tileIndex: 9,
 
@@ -233,7 +233,7 @@ export default new Map(([
         },
         {
             level: 3,
-            count: undefined,
+            count: 2,
             
             tileIndex: 10,
 
@@ -253,7 +253,7 @@ export default new Map(([
         },
         {
             level: 4,
-            count: undefined,
+            count: 1,
             railOnly: true,
             
             tileIndex: 11,
@@ -276,7 +276,7 @@ export default new Map(([
     [Industry.Goods, [
         {
             level: 1,
-            count: undefined,
+            count: 1,
             canalOnly: true,
             
             tileIndex: 21,
@@ -299,7 +299,7 @@ export default new Map(([
         },
         {
             level: 2,
-            count: undefined,
+            count: 2,
             
             tileIndex: 22,
 
@@ -321,7 +321,7 @@ export default new Map(([
         },
         {
             level: 3,
-            count: undefined,
+            count: 1,
             
             tileIndex: 24,
 
@@ -343,7 +343,7 @@ export default new Map(([
         },
         {
             level: 4,
-            count: undefined,
+            count: 1,
             
             tileIndex: 25,
 
@@ -365,7 +365,7 @@ export default new Map(([
         },
         {
             level: 5,
-            count: undefined,
+            count: 2,
             
             tileIndex: 26,
 
@@ -387,7 +387,7 @@ export default new Map(([
         },
         {
             level: 6,
-            count: undefined,
+            count: 1,
             
             tileIndex: 28,
 
@@ -408,7 +408,7 @@ export default new Map(([
         },
         {
             level: 7,
-            count: undefined,
+            count: 1,
             
             tileIndex: 29,
 
@@ -431,7 +431,7 @@ export default new Map(([
         },
         {
             level: 8,
-            count: undefined,
+            count: 2,
             
             tileIndex: 30,
 
@@ -455,7 +455,7 @@ export default new Map(([
     [Industry.Cotton, [
         {
             level: 1,
-            count: undefined,
+            count: 3,
             canalOnly: true,
 
             tileIndex: 0,
@@ -477,7 +477,7 @@ export default new Map(([
         },
         {
             level: 2,
-            count: undefined,
+            count: 2,
 
             tileIndex: 1,
 
@@ -499,7 +499,7 @@ export default new Map(([
         },
         {
             level: 3,
-            count: undefined,
+            count: 3,
 
             tileIndex: 2,
 
@@ -522,7 +522,7 @@ export default new Map(([
         },
         {
             level: 4,
-            count: undefined,
+            count: 3,
 
             tileIndex: 3,
 
@@ -547,7 +547,7 @@ export default new Map(([
     [Industry.Pottery, [
         {
             level: 1,
-            count: undefined,
+            count: 1,
             canDevelop: false,
             
             tileIndex: 16,
@@ -570,7 +570,7 @@ export default new Map(([
         },
         {
             level: 2,
-            count: undefined,
+            count: 1,
             
             tileIndex: 17,
 
@@ -591,7 +591,7 @@ export default new Map(([
         },
         {
             level: 3,
-            count: undefined,
+            count: 1,
             canDevelop: false,
             
             tileIndex: 18,
@@ -614,7 +614,7 @@ export default new Map(([
         },
         {
             level: 4,
-            count: undefined,
+            count: 1,
             
             tileIndex: 19,
 
@@ -635,7 +635,7 @@ export default new Map(([
         },
         {
             level: 5,
-            count: undefined,
+            count: 1,
             railOnly: true,
             
             tileIndex: 20,

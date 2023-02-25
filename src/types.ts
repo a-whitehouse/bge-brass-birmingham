@@ -177,3 +177,13 @@ export interface IResourceMarketData {
      */
     columns: number[];
 }
+
+export interface IScoreSlotData {
+    posX: number;
+    posY: number;
+}
+
+export interface IIncomeSlotData extends IScoreSlotData {
+    income: number;
+    slotCount: number;
+}

@@ -1,16 +1,12 @@
 import * as bge from "bge-core";
 
 import { IIndustryLocationData } from "../types";
+import { IndustryTile } from "./industrytile";
 
 /**
  * A location that an industry can be built on by a player.
  */
 export class IndustryLocation extends bge.Zone {
-    /**
-     * The display options used by this location on the {@link GameBoard}.
-     */
-    display: bge.IDisplayOptions;
-
     /**
      * Original definition of this industry location.
      */
@@ -22,6 +18,9 @@ export class IndustryLocation extends bge.Zone {
     get city() {
         return this.data.city;
     }
+
+    @bge.display()
+    tile?: IndustryTile;
 
     constructor(data: IIndustryLocationData) {
         super(2.25, 2.25);
