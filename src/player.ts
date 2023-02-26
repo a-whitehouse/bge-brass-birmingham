@@ -35,6 +35,8 @@ export class Player extends bge.Player {
     money: number = 17;
     spent: number = 0;
 
+    game: Game;
+
     /**
      * This player's total score.
      */
@@ -99,8 +101,6 @@ export class Player extends bge.Player {
      * player can afford to build.
      */
     get availableIndustries(): Industry[] {
-        const game = this.game as Game;
-
         return ALL_INDUSTRIES.filter(industry => {
             const slot = this.getNextIndustryLevelSlot(industry);
 

@@ -7,6 +7,7 @@ import LINK_LOCATIONS from "../data/linklocations";
 import { IndustryLocation } from "./industrylocation";
 import { LinkLocation } from "./linklocation";
 import { Game } from "../game";
+import { City } from "../types";
 
 /**
  * The main board in the middle of the table.
@@ -67,5 +68,18 @@ export class GameBoard extends bge.Card {
 
             return location;
         });
+    }
+
+    /**
+     * Get all industry locations at the given city.
+     */
+    getIndustryLocations(city: City): readonly IndustryLocation[] {
+        if (city === City.Any) {
+            return this.industryLocations;
+        }
+
+        // TODO: use a Map!
+
+        return this.industryLocations.filter(x => x.city === city);
     }
 }

@@ -130,6 +130,16 @@ function getBuildableIndustriesAtLocation(location: IndustryLocation, player: Pl
 
 	const result: Industry[] = [];
 
+	let locations = player.game.board.getIndustryLocations(location.city);
+
+	if (player.game.era == Era.Canal) {
+		for (let loc of locations) {
+			if (loc.tile?.player == player) {
+				return [];
+			}
+		}
+	}
+
 	for (let industry of location.data.industries) {
 		if (!availableIndustries.includes(industry)) {
 			continue;
