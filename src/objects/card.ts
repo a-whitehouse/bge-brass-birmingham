@@ -114,7 +114,8 @@ export class Card extends bge.Card {
 		let y = 4 - Math.floor(index / 7);
 
 		this.front.image = bge.Image.tile("https://iili.io/HGIUIEu.jpg", 5, 7, y, x);
-		this.back.image = this.hidden.image = bge.Image.tile("https://iili.io/HGIUEEg.jpg", 1, 1, 0, 0);
+		this.back.image = bge.Image.tile("https://iili.io/HGIUEEg.jpg", 1, 1, 0, 0);
+		this.hidden.image = this.back.image;
 	}
 }
 
