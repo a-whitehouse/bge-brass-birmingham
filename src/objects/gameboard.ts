@@ -4,6 +4,8 @@ import * as gameboard from "../data/gameboard";
 import INDUSTRY_LOCATIONS from "../data/buildinglocations";
 import LINK_LOCATIONS from "../data/linklocations";
 
+import { ResourceMarket } from "./resourcemarket";
+
 import { IndustryLocation } from "./industrylocation";
 import { LinkLocation } from "./linklocation";
 import { IndustryTile } from "./industrytile";
@@ -11,7 +13,7 @@ import { LinkTile } from "./linktile";
 
 import { Player } from "../player";
 import { Game } from "../game";
-import { City } from "../types";
+import { City, Resource, MARKET_CITIES, BUILDABLE_CITIES } from "../types";
 
 /**
  * The main board in the middle of the table.
@@ -161,16 +163,27 @@ export class GameBoard extends bge.Card {
     /**
      * Iterates through all cities linked to the given one, following built links.
      * Each yielded item contains a city, and the shortest distance to reach it.
-     * @param city City to start iterating from.
+     * @param source One or more cities to start searching from
      */
-    *getLinkedCities(city: City): Iterable<{ city: City, distance: number }> {
-        yield { city: city, distance: 0 };
+    *getLinkedCities(sources: LinkLocation | IndustryLocation | City | City[]): Iterable<{ city: City, distance: number }> {
+
+        const sourceSet = GameBoard.getCitiesOfAny(sources);
 
         const queue: { city: City, distance: number }[] = [];
         const visited = new Set<City>();
 
-        visited.add(city);
-        queue.push({ city: city, distance: 0 });
+        for (let source of sourceSet) {
+            if (visited.has(source)) {
+                continue;
+            }
+
+            visited.add(source);
+
+            const info = { city: source, distance: 0 };
+            yield info;
+
+            queue.push(info);
+        }
 
         while (queue.length > 0) {
             const next = queue.pop();
@@ -182,14 +195,35 @@ export class GameBoard extends bge.Card {
                 }
 
                 for (let linkedCity of link.data.cities) {
-                    if (visited.add(linkedCity)) {
-                        const info = { city: linkedCity, distance: next.distance + 1 };
-                        yield info;
-                        queue.push(info);
+                    if (visited.has(linkedCity)) {
+                        continue;
                     }
+
+                    visited.add(linkedCity);
+
+                    const info = { city: linkedCity, distance: next.distance + 1 };
+                    yield info;
+
+                    queue.push(info);
                 }
             }
         }
+    }
+
+    private static getCitiesOfAny(loc: LinkLocation | IndustryLocation | City | City[]): Set<City> {
+        if (loc instanceof LinkLocation) {
+            return new Set(loc.data.cities);
+        }
+
+        if (loc instanceof IndustryLocation) {
+            return new Set([loc.city]);
+        }
+
+        if (Array.isArray(loc)) {
+            return new Set(loc);
+        }
+
+        return new Set([loc]);
     }
 
     /**
@@ -197,47 +231,124 @@ export class GameBoard extends bge.Card {
      * @param a A city, industry, or link location to start from
      * @param b A city, industry, or link location that we're trying to reach
      */
-    isLinked(a: LinkLocation | IndustryLocation | City, b: LinkLocation | IndustryLocation | City): boolean {
-        if (a instanceof LinkLocation) {
-            for (let city of a.data.cities) {
-                if (this.isLinked(city, b)) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        if (b instanceof LinkLocation) {
-            for (let city of b.data.cities) {
-                if (this.isLinked(a, city)) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        if (a instanceof IndustryLocation) {
-            a = a.city;
-        }
-
-        if (b instanceof IndustryLocation) {
-            b = b.city;
-        }
-
-        if (a === b) {
-            return true;
-        }
+    isLinked(a: LinkLocation | IndustryLocation | City | City[], b: LinkLocation | IndustryLocation | City | City[]): boolean {
+        const destinations = GameBoard.getCitiesOfAny(b);
 
         // Both a and b must both be cities from here on
 
         for (let item of this.getLinkedCities(a)) {
-            if (item.city === b) {
+            if (destinations.has(item.city)) {
                 return true;
             }
         }
 
         return false;
     }
+
+    /**
+     * Get information about where a given resource can be obtained, when trying
+     * to deliver to a given destination.
+     * @param destination Location or city that the resource should be delivered to
+     * @param resource Resource type to search for
+     * @param player Player that is requesting the resource (only needed for beer)
+     */
+    getResourceSources(
+        destination: LinkLocation | IndustryLocation | City,
+        resource: Resource,
+        player?: Player): IResourceSources {
+
+        // TODO: market beer!
+
+        const result: IResourceSources = {
+            tiles: [],
+            connectedToMarket: resource === Resource.Iron
+        };
+
+        if (destination instanceof LinkLocation) {
+            throw new Error("Very not implemented!");
+        }
+
+        if (destination instanceof IndustryLocation) {
+            destination = destination.city;
+        }
+
+        const cityDistances = resource === Resource.Iron
+            ? BUILDABLE_CITIES.map(x => ({ city: x, distance: 0 }))
+            : this.getLinkedCities(destination);
+
+        if (resource === Resource.Beer) {
+            if (player == null) {
+                throw new Error("Expected a player");
+            }
+
+            for (let tile of this.getBuiltIndustries(player)) {
+                if (tile.resources.length === 0) {
+                    continue;
+                }
+
+                if (tile.resources[0].resource !== Resource.Beer) {
+                    continue;
+                }
+
+                result.tiles.push(...tile.resources
+                    .map(x => ({ tile: tile, distance: 0 })));
+            }
+        }
+
+        for (let item of cityDistances) {
+
+            if (MARKET_CITIES.includes(item.city)) {
+                result.connectedToMarket = true;
+            }
+
+            const locs = this.getIndustryLocations(item.city);
+
+            for (let loc of locs) {
+
+                if (loc.tile == null) {
+                    continue;
+                }
+
+                if (loc.tile.resources.length === 0) {
+                    continue;
+                }
+
+                if (loc.tile.resources[0].resource !== resource) {
+                    continue;
+                }
+
+                // Don't double-count connected beer owned by the player!
+                if (resource === Resource.Beer && loc.tile.player === player) {
+                    continue;
+                }
+
+                result.tiles.push(...loc.tile.resources
+                    .map(x => ({
+                        tile: loc.tile, distance: resource === Resource.Beer
+                            ? 0 : item.distance
+                    })));
+            }
+        }
+
+        result.tiles.sort((a, b) => a.distance - b.distance);
+
+        return result;
+    }
+}
+
+/**
+ * Describes the locations and distances of a requested resource.
+ * See {@link GameBoard.getResourceSources}
+ */
+interface IResourceSources {
+    /**
+     * Array with an item for each resource token found, including the distance.
+     * Sorted by distance, ascending.
+     */
+    tiles: { tile: IndustryTile, distance: number }[];
+
+    /**
+     * If true, the corresponding resource market can be used.
+     */
+    connectedToMarket: boolean;
 }

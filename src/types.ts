@@ -24,6 +24,7 @@ export enum City {
     Coventry,
     Nuneaton,
     Redditch,
+
     Warrington,
     Nottingham,
     Shrewsbury,
@@ -42,6 +43,39 @@ export enum City {
 
     Any = -1
 }
+
+export const BUILDABLE_CITIES = [
+    City.Belper,
+    City.Derby,
+    City.Leek,
+    City.StokeOnTrent,
+    City.Stone,
+    City.Uttoxeter,
+    City.Stafford,
+    City.BurtonOnTrent,
+    City.Cannock,
+    City.Tamworth,
+    City.Walsall,
+    City.Coalbrookdale,
+    City.Dudley,
+    City.Kidderminster,
+    City.Wolverhampton,
+    City.Worcester,
+    City.Birmingham,
+    City.Coventry,
+    City.Nuneaton,
+    City.Redditch,
+    City.Farm1,
+    City.Farm2
+];
+
+export const MARKET_CITIES = [
+    City.Warrington,
+    City.Nottingham,
+    City.Shrewsbury,
+    City.Gloucester,
+    City.Oxford
+];
 
 /**
  * Types of industry that players can build.

@@ -126,7 +126,6 @@ function getBuildableIndustriesAtLocation(location: IndustryLocation, player: Pl
 	}
 
 	const availableIndustries = player.availableIndustries;
-	const handCards = [...player.hand];
 
 	const result: Industry[] = [];
 
@@ -147,6 +146,18 @@ function getBuildableIndustriesAtLocation(location: IndustryLocation, player: Pl
 
 		if (player.getMatchingCards(location, industry).length === 0) {
 			continue;
+		}
+
+		const slot = player.getNextIndustryLevelSlot(industry);
+
+		slot.data.cost
+
+		let cost_coal = slot.data.cost.coal;
+		if (cost_coal > 0) {
+			let closest_coal = player.game.board.getResourceSources(location.city, Resource.Coal);
+			if (cost_coal > closest_coal.tiles.length && !closest_coal.connectedToMarket) {
+				continue;
+			}
 		}
 
 		result.push(industry);
