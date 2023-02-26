@@ -6,6 +6,8 @@ import LINK_LOCATIONS from "../data/linklocations";
 
 import { IndustryLocation } from "./industrylocation";
 import { LinkLocation } from "./linklocation";
+import { IndustryTile } from "./industrytile";
+import { LinkTile } from "./linktile";
 
 import { Player } from "../player";
 import { Game } from "../game";
@@ -127,6 +129,14 @@ export class GameBoard extends bge.Card {
         return this._cityLinkLocations.get(city) ?? [];
     }
 
+    getBuiltIndustries(player: Player): readonly IndustryTile[] {
+        return this.industryLocations.filter(x => x.tile?.player === player).map(x => x.tile);
+    }
+
+    getBuiltLinks(player: Player): readonly LinkTile[] {
+        return this.linkLocations.filter(x => x.tile?.player === player).map(x => x.tile);
+    }
+
     /**
      * Checks if the given location is adjacent to a player placed tile.
      * @param loc Location to check
@@ -148,18 +158,23 @@ export class GameBoard extends bge.Card {
         return false;
     }
 
-    *getLinkedCities(loc: City): Iterable<City> {
-        const queue: City[] = [];
+    /**
+     * Iterates through all cities linked to the given one, following built links.
+     * Each yielded item contains a city, and the shortest distance to reach it.
+     * @param city City to start iterating from.
+     */
+    *getLinkedCities(city: City): Iterable<{ city: City, distance: number }> {
+        yield { city: city, distance: 0 };
+
+        const queue: { city: City, distance: number }[] = [];
         const visited = new Set<City>();
 
-        visited.add(loc);
-        queue.push(loc);
-
-        yield loc;
+        visited.add(city);
+        queue.push({ city: city, distance: 0 });
 
         while (queue.length > 0) {
-            const nextCity = queue.pop();
-            const links = this.getNeighbouringLinks(nextCity);
+            const next = queue.pop();
+            const links = this.getNeighbouringLinks(next.city);
 
             for (let link of links) {
                 if (link.tile == null) {
@@ -167,10 +182,10 @@ export class GameBoard extends bge.Card {
                 }
 
                 for (let linkedCity of link.data.cities) {
-                    yield linkedCity;
-
                     if (visited.add(linkedCity)) {
-                        queue.push(linkedCity);
+                        const info = { city: linkedCity, distance: next.distance + 1 };
+                        yield info;
+                        queue.push(info);
                     }
                 }
             }
@@ -217,8 +232,8 @@ export class GameBoard extends bge.Card {
 
         // Both a and b must both be cities from here on
 
-        for (let city of this.getLinkedCities(a)) {
-            if (city === b) {
+        for (let item of this.getLinkedCities(a)) {
+            if (item.city === b) {
                 return true;
             }
         }

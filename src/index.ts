@@ -8,6 +8,6 @@ import { Game } from './game';
 export default {
     apiVersion: bge.API_VERSION,
     Game: Game,
-    minPlayers: 4,
-    maxPlayers: 8
+    minPlayers: 2,
+    maxPlayers: 4
 } as bge.IGameConfig;
