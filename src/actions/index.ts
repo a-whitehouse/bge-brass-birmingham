@@ -2,14 +2,19 @@ import * as bge from "bge-core";
 
 import { Game } from "../game";
 import { Card } from "../objects/card";
+import { IndustryLocation } from "../objects/industrylocation";
 import { ResourceToken } from "../objects/resourcetoken";
 import { ScoreTokenKind } from "../objects/scoring";
 import { Player } from "../player";
-import { Industry, Resource } from "../types";
+import { City, Industry, Resource } from "../types";
 
 export default async function main(game: Game) {
     await setup(game);
-    await playerTurn(game, game.players[0]);
+    while (true) {
+        for (let player of game.players) {
+            await playerTurn(game, player);
+        }
+    }
 }
 
 async function setup(game: Game) {
@@ -28,30 +33,55 @@ async function setup(game: Game) {
 
     for (let i = 0; i < 8; ++i) {
         game.drawPile.deal(game.players.map(x => x.hand));
-        await game.delay.beat();
+        // await game.delay.beat();
     }
-    
+
     await game.delay.short();
 }
 
 async function playerTurn(game: Game, player: Player) {
-    while (player.getNextIndustryLevelSlot(Industry.Coal) != null) {
-        const industry = Industry.Coal;
-    
-        const loc = await player.prompt.clickAny(game.board.industryLocations
-            .filter(x => x.tile == null && (x.data.industries & industry) !== 0), {
-                
-            message: "Click on a location!"
-        });
-    
-        loc.tile = player.takeNextIndustryTile(industry);
+    const buildableIndustries = player.buildableIndustries;
 
-        await game.delay.beat();
+    const loc = await player.prompt.clickAny(filterIndustries(game.board.industryLocations, buildableIndustries), {
 
-        for (let i = 0; i < loc.tile.data.productionCount ?? 0; ++i) {
-            loc.tile.resources.push(new ResourceToken(Resource.Coal));
-        }
+        message: "Click on a location!"
+    });
 
-        await game.delay.beat();
+    let industry: Industry;
+
+    switch (loc.data.industries.length) {
+        case 0:
+            throw new Error("An industry location should always have at least one industry.");
+
+        case 1:
+            industry = loc.data.industries[0];
+            break;
+
+        default:
+            let selectableIndustries = loc.data.industries.map(x => player.getNextIndustryLevelSlot(x));
+            industry = (await player.prompt.clickAny(selectableIndustries, {
+                "message": "Click the industry tile on your player board to build."
+            })).industry;
+            break;
     }
+
+    loc.tile = player.takeNextIndustryTile(industry);
+
+    await game.delay.beat();
+
+    for (let i = 0; i < loc.tile.data.productionCount ?? 0; ++i) {
+        loc.tile.resources.push(new ResourceToken(Resource.Coal));
+    }
+
+    await game.delay.beat();
+}
+
+
+function filterIndustries(industryLocations: readonly IndustryLocation[], buildableIndustries: Industry[]) {
+
+    industryLocations = industryLocations.filter(x => x.tile == null
+        && x.data.industries.some(x => buildableIndustries.includes(x))
+    );
+
+    return industryLocations;
 }

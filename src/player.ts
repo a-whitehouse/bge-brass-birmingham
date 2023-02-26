@@ -1,10 +1,11 @@
 import * as bge from "bge-core";
 
+import { Game } from "./game";
 import { Card } from "./objects/card";
 import { IndustryTile } from "./objects/industrytile";
 import { IndustryLevelSlot, PlayerBoard } from "./objects/playerboard";
 import { ScoreToken } from "./objects/scoring";
-import { Industry } from "./types";
+import { ALL_INDUSTRIES, Industry } from "./types";
 
 /**
  * @summary Custom player class for your game.
@@ -24,7 +25,7 @@ export class Player extends bge.Player {
     @bge.display({ position: { x: 8.15, y: 5 }, label: "Discard" })
     readonly discardPile = new bge.Deck(Card, { orientation: bge.CardOrientation.FACE_UP });
 
-    @bge.display({ position: { x: -12.2 }})
+    @bge.display({ position: { x: -12.2 } })
     readonly playerBoard = new PlayerBoard(this);
 
     victoryPointToken: ScoreToken;
@@ -46,7 +47,7 @@ export class Player extends bge.Player {
 
     @bge.display({ position: { x: 19, y: 8 }, label: "Money" })
     get moneyDisplay() { return `£${this.money}`; }
-    
+
     @bge.display({ position: { x: 19, y: 2 }, label: "Spent This Round" })
     get spentDisplay() { return `£${this.spent}`; }
 
@@ -86,6 +87,40 @@ export class Player extends bge.Player {
 
     increaseVictoryPoints(delta: number): void {
         this.incomeToken.increase(delta);
+    }
+
+    get hasBuiltAnything(): boolean {
+        return false;
+    }
+
+    /**
+     * Gets a bit flag value with a 1 for each industry that this
+     * player can afford to build.
+     */
+    get buildableIndustries(): Industry[] {
+        const game = this.game as Game;
+
+        return ALL_INDUSTRIES.filter(industry => {
+            const slot = this.getNextIndustryLevelSlot(industry);
+
+            if (slot == null) {
+                return false;
+            }
+
+            // TODO: era check
+            // TODO: source resources from markets / built industries
+
+            let totalCost = slot.data.cost.coins ?? 0;
+            const ironAmount = slot.data.cost.iron ?? 0;
+
+            totalCost += game.ironMarket.getCost(ironAmount);
+
+            if (totalCost > this.money) {
+                return false;
+            }
+
+            return true;
+        });
     }
 
     getNextIndustryLevelSlot(industry: Industry): IndustryLevelSlot | null {

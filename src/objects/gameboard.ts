@@ -21,7 +21,7 @@ export class GameBoard extends bge.Card {
      * Array of {@link IndustryLocation}s that players can build on.
      */
     readonly industryLocations: readonly IndustryLocation[];
-    
+
     /**
      * Array of {@link LinkLocation}s that players can build on.
      */
@@ -38,13 +38,13 @@ export class GameBoard extends bge.Card {
         super();
 
         this._game = game;
-        
+
         this.front.image = bge.Image.simple("https://iili.io/HGzqKkx.jpg");
 
         // Read industry location definitions, create IndustryLocation instances,
         // then add them as children to be displayed.
 
-        this.industryLocations = INDUSTRY_LOCATIONS.map((data, i) => {
+        this.industryLocations = INDUSTRY_LOCATIONS.map(data => {
             const location = new IndustryLocation(data);
 
             this.children.add(location, {
@@ -53,11 +53,11 @@ export class GameBoard extends bge.Card {
 
             return location;
         });
-        
+
         // Read link location definitions, create LinkLocation instances,
         // then add them as children to be displayed.
 
-        this.linkLocations = LINK_LOCATIONS.map((data, i) => {
+        this.linkLocations = LINK_LOCATIONS.map(data => {
             const location = new LinkLocation(data);
 
             location.display = this.children.add(location, {

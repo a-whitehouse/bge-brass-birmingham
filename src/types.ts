@@ -39,7 +39,7 @@ export enum City {
      * Location of a brewery between Kidderminster and Worcester.
      */
     Farm2,
-    
+
     Any = -1
 }
 
@@ -47,15 +47,25 @@ export enum City {
  * Types of industry that players can build.
  */
 export enum Industry {
+    Any = -1,
     None = 0,
-    Iron = 1,
-    Coal = 2,
-    Goods = 4,
-    Cotton = 8,
-    Pottery = 16,
-    Brewery = 32,
-    Any = 63,
+
+    Iron,
+    Coal,
+    Goods,
+    Cotton,
+    Pottery,
+    Brewery,
 }
+
+export const ALL_INDUSTRIES = [
+    Industry.Iron,
+    Industry.Coal,
+    Industry.Goods,
+    Industry.Cotton,
+    Industry.Pottery,
+    Industry.Brewery
+]
 
 export enum Resource {
     Coal = 0,
@@ -68,7 +78,7 @@ export enum Resource {
  */
 export interface IIndustryLocationData {
     city: City;
-    industries: Industry;
+    industries: Industry[];
     posX: number;
     posY: number;
 }
@@ -150,7 +160,7 @@ export interface IIndustryLevelData {
      * If undefined, you should default to false.
      */
     canalOnly?: true;
-    
+
     /**
      * Can this industry level only be built in the rail era.
      * If undefined, you should default to false.
