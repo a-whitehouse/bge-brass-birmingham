@@ -13,18 +13,29 @@ import { buildIndustry } from "./buildindustry";
 
 export default async function main(game: Game) {
     await setup(game);
+
+    let firstTurn = true;
+
     while (true) {
         for (let player of game.players) {
-            await playerTurn(game, player);
+            await playerTurn(game, player, firstTurn ? 1 : 2);
         }
+
+        firstTurn = false;
     }
 }
 
-async function playerTurn(game: Game, player: Player) {
-    await game.anyExclusive(() => [
-        takeLoan(game, player),
-        buildIndustry(game, player)
-    ]);
+async function playerTurn(game: Game, player: Player, actionCount: number) {
+    game.message.clear();
+
+    for (let i = 0; i < actionCount; ++i) {
+        game.message.set(player, "It's your turn, action {0} of {1}", i + 1, actionCount);
+
+        await game.anyExclusive(() => [
+            takeLoan(game, player),
+            buildIndustry(game, player)
+        ]);
+    }
 }
 
 async function setup(game: Game) {
