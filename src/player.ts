@@ -5,6 +5,7 @@ import { Card, IndustryCard, CityCard } from "./objects/card";
 import { IndustryTile } from "./objects/industrytile";
 import { IndustryLevelSlot, PlayerBoard } from "./objects/playerboard";
 import { ScoreToken } from "./objects/scoring";
+import { IndustryLocation } from "./objects/industrylocation";
 import { ALL_INDUSTRIES, Industry, City } from "./types";
 
 /**
@@ -128,35 +129,7 @@ export class Player extends bge.Player {
         return slot.tiles.pop();
     }
 
-    hasIndustryCard(industry: Industry): boolean {
-        for (let card of this.hand) {
-            if (!(card instanceof IndustryCard)) {
-                continue;
-            }
-
-            if (card.industries.includes(industry)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    hasLocationCard(city: City): boolean {
-        for (let card of this.hand) {
-            if (!(card instanceof CityCard)) {
-                continue;
-            }
-
-            if (card.city === city) {
-                return true;
-            }
-
-            if (card.city === City.Any) {
-                return true;
-            }
-        }
-
-        return false;
+    getMatchingCards(location: IndustryLocation): Card[] {
+        return [...this.hand].filter(x => x.matchesIndustryLocation(location));
     }
 }

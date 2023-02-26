@@ -48,8 +48,6 @@ async function setup(game: Game) {
     game.drawPile.addRange(Card.generateDeck(game.players.length));
     game.drawPile.shuffle(game.random);
 
-    await game.delay.short();
-
     game.drawPile.deal(game.players.map(x => x.discardPile));
 
     for (let i = 0; i < 8; ++i) {
@@ -57,6 +55,6 @@ async function setup(game: Game) {
         // await game.delay.beat();
     }
 
-    await game.delay.short();
+    await game.delay.beat();
 }
 

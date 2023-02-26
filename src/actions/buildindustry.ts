@@ -7,7 +7,7 @@ import { ResourceToken } from "../objects/resourcetoken";
 import { ScoreTokenKind } from "../objects/scoring";
 import { IndustryCard } from "../objects/card";
 import { Player } from "../player";
-import { City, Industry, Resource } from "../types";
+import { City, Industry, Resource, Era } from "../types";
 
 export async function buildIndustry(game: Game, player: Player) {
 	const buildableIndustries = new Map(game.board.industryLocations
@@ -43,9 +43,61 @@ export async function buildIndustry(game: Game, player: Player) {
 
 	await game.delay.beat();
 
-	for (let i = 0; i < loc.tile.data.productionCount ?? 0; ++i) {
-		loc.tile.resources.push(new ResourceToken(Resource.Coal));
+	let producedResourceType: Resource = undefined;
+	let producedAmount = loc.tile.data.productionCount ?? 0;
+
+	switch (loc.tile.industry) {
+		case Industry.Coal:
+			producedResourceType = Resource.Coal;
+			break;
+
+		case Industry.Iron:
+			producedResourceType = Resource.Iron;
+			break;
+
+		case Industry.Brewery:
+			producedResourceType = Resource.Beer;
+			producedAmount = game.era === Era.Canal ? 1 : 2;
+			break;
 	}
+
+	for (let i = 0; i < producedAmount; ++i) {
+		loc.tile.resources.push(new ResourceToken(producedResourceType));
+	}
+
+	await game.delay.beat();
+
+	let discardedCard: Card;
+
+	const matchingCards = player.getMatchingCards(loc);
+
+	switch (matchingCards.length) {
+		case 0:
+			throw new Error("There should be at least one matching card after building.");
+
+		case 1:
+			discardedCard = matchingCards[0];
+			break;
+
+		default:
+			if (matchingCards.every(x => x.equals(matchingCards[0]))) {
+				discardedCard = matchingCards[0];
+				break;
+			}
+
+			for (let card of matchingCards) {
+				player.hand.setSelected(card, true);
+			}
+
+			discardedCard = await player.prompt.clickAny(matchingCards, {
+				message: "Discard a matching card for that location"
+			});
+
+			player.hand.setSelected(false);
+			break;
+	}
+
+	player.discardPile.add(player.hand.remove(discardedCard));
 
 	await game.delay.beat();
 }
@@ -66,7 +118,7 @@ function getBuildableIndustriesAtLocation(location: IndustryLocation, player: Pl
 			continue;
 		}
 
-		if (!player.hasIndustryCard(industry) && !player.hasLocationCard(location.data.city)) {
+		if (player.getMatchingCards(location).length === 0) {
 			continue;
 		}
 

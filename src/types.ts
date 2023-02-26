@@ -66,6 +66,11 @@ export const ALL_INDUSTRIES = [
     Industry.Brewery
 ]
 
+export enum Era {
+    Canal,
+    Rail
+}
+
 export enum Resource {
     Coal = 0,
     Iron = 1,

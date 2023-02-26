@@ -1,6 +1,9 @@
 import * as bge from "bge-core";
+
+import { IndustryLocation } from "./industrylocation";
 import { City, Industry } from "../types";
 
+import { areArrayContentsMatching } from "../helpers";
 
 @bge.width(Card.WIDTH)
 @bge.height(Card.HEIGHT)
@@ -117,8 +120,10 @@ export class Card extends bge.Card {
 		this.back.image = bge.Image.tile("https://iili.io/HGIUEEg.jpg", 1, 1, 0, 0);
 		this.hidden.image = this.back.image;
 	}
-}
 
+	matchesIndustryLocation(location: IndustryLocation): boolean { throw new Error("Not implemented"); }
+	equals(card: Card): boolean { throw new Error("Not implemented"); }
+}
 
 export class IndustryCard extends Card {
 	readonly industries: Industry[];
@@ -127,6 +132,14 @@ export class IndustryCard extends Card {
 		super(index);
 
 		this.industries = industries;
+	}
+
+	override matchesIndustryLocation(location: IndustryLocation): boolean {
+		return this.industries.some(x => location.data.industries.includes(x));
+	}
+
+	override equals(card: Card): boolean {
+		return card instanceof IndustryCard && areArrayContentsMatching(this.industries, card.industries);
 	}
 }
 
@@ -137,5 +150,13 @@ export class CityCard extends Card {
 		super(index);
 
 		this.city = city;
+	}
+
+	override matchesIndustryLocation(location: IndustryLocation): boolean {
+		return this.city === City.Any || this.city === location.city;
+	}
+
+	override equals(card: Card): boolean {
+		return card instanceof CityCard && this.city === card.city;
 	}
 }

@@ -3,7 +3,7 @@ import * as bge from "bge-core";
 import { Player } from "./player";
 import { GameBoard } from "./objects/gameboard";
 import { ResourceMarket } from "./objects/resourcemarket";
-import { Resource } from "./types";
+import { Resource, Era } from "./types";
 
 import main from "./actions";
 import { Card } from "./objects/card";
@@ -14,6 +14,8 @@ import { ScoreTrack } from "./objects/scoring";
  * @details In this example game, players take turns discarding cards, and then either drawing from a Deck or a Hand.
  */
 export class Game extends bge.Game<Player> {
+
+    era: Era = Era.Canal;
 
     @bge.display()
     readonly board = new GameBoard(this);
