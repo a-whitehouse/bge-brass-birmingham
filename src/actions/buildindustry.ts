@@ -5,29 +5,34 @@ import { Card } from "../objects/card";
 import { IndustryLocation } from "../objects/industrylocation";
 import { ResourceToken } from "../objects/resourcetoken";
 import { ScoreTokenKind } from "../objects/scoring";
+import { IndustryCard } from "../objects/card";
 import { Player } from "../player";
 import { City, Industry, Resource } from "../types";
 
 export async function buildIndustry(game: Game, player: Player) {
-	const buildableIndustries = player.buildableIndustries;
+	const buildableIndustries = new Map(game.board.industryLocations
+		.map(x => [x, getBuildableIndustriesAtLocation(x, player)])
+		.filter(entry => (entry[1] as Industry[]).length > 0) as [IndustryLocation, Industry[]][]);
 
-	const loc = await player.prompt.clickAny(filterIndustries(game.board.industryLocations, buildableIndustries), {
+	const loc = await player.prompt.clickAny(buildableIndustries.keys(), {
 
 		message: "Click on a location!"
 	});
 
+	const validIndustriesAtLocation = buildableIndustries.get(loc);
+
 	let industry: Industry;
 
-	switch (loc.data.industries.length) {
+	switch (validIndustriesAtLocation.length) {
 		case 0:
 			throw new Error("An industry location should always have at least one industry.");
 
 		case 1:
-			industry = loc.data.industries[0];
+			industry = validIndustriesAtLocation[0];
 			break;
 
 		default:
-			let selectableIndustries = loc.data.industries.map(x => player.getNextIndustryLevelSlot(x));
+			let selectableIndustries = validIndustriesAtLocation.map(x => player.getNextIndustryLevelSlot(x));
 			industry = (await player.prompt.clickAny(selectableIndustries, {
 				"message": "Click the industry tile on your player board to build."
 			})).industry;
@@ -45,12 +50,28 @@ export async function buildIndustry(game: Game, player: Player) {
 	await game.delay.beat();
 }
 
+function getBuildableIndustriesAtLocation(location: IndustryLocation, player: Player): Industry[] {
+	if (location.tile != null) {
+		// TODO: overbuilding
+		return [];
+	}
 
-function filterIndustries(industryLocations: readonly IndustryLocation[], buildableIndustries: Industry[]) {
+	const availableIndustries = player.availableIndustries;
+	const handCards = [...player.hand];
 
-	industryLocations = industryLocations.filter(x => x.tile == null
-		&& x.data.industries.some(x => buildableIndustries.includes(x))
-	);
+	const result: Industry[] = [];
 
-	return industryLocations;
+	for (let industry of location.data.industries) {
+		if (!availableIndustries.includes(industry)) {
+			continue;
+		}
+
+		if (!player.hasIndustryCard(industry) && !player.hasLocationCard(location.data.city)) {
+			continue;
+		}
+
+		result.push(industry);
+	}
+
+	return result;
 }

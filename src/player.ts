@@ -1,11 +1,11 @@
 import * as bge from "bge-core";
 
 import { Game } from "./game";
-import { Card } from "./objects/card";
+import { Card, IndustryCard, CityCard } from "./objects/card";
 import { IndustryTile } from "./objects/industrytile";
 import { IndustryLevelSlot, PlayerBoard } from "./objects/playerboard";
 import { ScoreToken } from "./objects/scoring";
-import { ALL_INDUSTRIES, Industry } from "./types";
+import { ALL_INDUSTRIES, Industry, City } from "./types";
 
 /**
  * @summary Custom player class for your game.
@@ -97,25 +97,13 @@ export class Player extends bge.Player {
      * Gets a bit flag value with a 1 for each industry that this
      * player can afford to build.
      */
-    get buildableIndustries(): Industry[] {
+    get availableIndustries(): Industry[] {
         const game = this.game as Game;
 
         return ALL_INDUSTRIES.filter(industry => {
             const slot = this.getNextIndustryLevelSlot(industry);
 
             if (slot == null) {
-                return false;
-            }
-
-            // TODO: era check
-            // TODO: source resources from markets / built industries
-
-            let totalCost = slot.data.cost.coins ?? 0;
-            const ironAmount = slot.data.cost.iron ?? 0;
-
-            totalCost += game.ironMarket.getCost(ironAmount);
-
-            if (totalCost > this.money) {
                 return false;
             }
 
@@ -138,5 +126,37 @@ export class Player extends bge.Player {
     takeNextIndustryTile(industry: Industry): IndustryTile {
         const slot = this.getNextIndustryLevelSlot(industry);
         return slot.tiles.pop();
+    }
+
+    hasIndustryCard(industry: Industry): boolean {
+        for (let card of this.hand) {
+            if (!(card instanceof IndustryCard)) {
+                continue;
+            }
+
+            if (card.industries.includes(industry)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    hasLocationCard(city: City): boolean {
+        for (let card of this.hand) {
+            if (!(card instanceof CityCard)) {
+                continue;
+            }
+
+            if (card.city === city) {
+                return true;
+            }
+
+            if (card.city === City.Any) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

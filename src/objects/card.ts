@@ -15,9 +15,9 @@ export class Card extends bge.Card {
 				{
 					// industries
 					for (let i = 0; i < 2; i++)
-						yield new IndustryCard(Industry.Coal, 18);
+						yield new IndustryCard([Industry.Coal], 18);
 					for (let i = 0; i < 2; i++)
-						yield new IndustryCard(Industry.Pottery, 6);
+						yield new IndustryCard([Industry.Pottery], 6);
 					break;
 				}
 			case 3:
@@ -33,11 +33,11 @@ export class Card extends bge.Card {
 						yield new CityCard(City.Uttoxeter, 23);
 					// industries
 					for (let i = 0; i < 2; i++)
-						yield new IndustryCard(Industry.Coal, 18);
+						yield new IndustryCard([Industry.Coal], 18);
 					for (let i = 0; i < 6; i++)
-						yield new IndustryCard(Industry.Goods | Industry.Cotton, 5);
+						yield new IndustryCard([Industry.Goods, Industry.Cotton], 5);
 					for (let i = 0; i < 2; i++)
-						yield new IndustryCard(Industry.Pottery, 6);
+						yield new IndustryCard([Industry.Pottery], 6);
 					break;
 				}
 			case 4:
@@ -58,11 +58,11 @@ export class Card extends bge.Card {
 						yield new CityCard(City.Uttoxeter, 23);
 					// industries
 					for (let i = 0; i < 3; i++)
-						yield new IndustryCard(Industry.Coal, 18);
+						yield new IndustryCard([Industry.Coal], 18);
 					for (let i = 0; i < 8; i++)
-						yield new IndustryCard(Industry.Goods | Industry.Cotton, 5);
+						yield new IndustryCard([Industry.Goods, Industry.Cotton], 5);
 					for (let i = 0; i < 3; i++)
-						yield new IndustryCard(Industry.Pottery, 6);
+						yield new IndustryCard([Industry.Pottery], 6);
 					break;
 				}
 		}
@@ -102,9 +102,9 @@ export class Card extends bge.Card {
 			yield new CityCard(City.Redditch, 31);
 		// industries
 		for (let i = 0; i < 4; i++)
-			yield new IndustryCard(Industry.Iron, 11);
+			yield new IndustryCard([Industry.Iron], 11);
 		for (let i = 0; i < 5; i++)
-			yield new IndustryCard(Industry.Brewery, 12);
+			yield new IndustryCard([Industry.Brewery], 12);
 	}
 
 	constructor(index: number) {
@@ -121,14 +121,15 @@ export class Card extends bge.Card {
 
 
 export class IndustryCard extends Card {
-	readonly industry: Industry;
+	readonly industries: Industry[];
 
-	constructor(industry: Industry, index: number) {
+	constructor(industries: Industry[], index: number) {
 		super(index);
 
-		this.industry = industry;
+		this.industries = industries;
 	}
 }
+
 export class CityCard extends Card {
 	readonly city: City;
 

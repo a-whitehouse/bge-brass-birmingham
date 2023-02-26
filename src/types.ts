@@ -47,7 +47,6 @@ export enum City {
  * Types of industry that players can build.
  */
 export enum Industry {
-    Any = -1,
     None = 0,
 
     Iron,
