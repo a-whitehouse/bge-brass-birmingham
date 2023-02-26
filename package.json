@@ -9,6 +9,6 @@
     "bge-dev": "^0.3.0"
   },
   "dependencies": {
-    "bge-core": "^0.3.1"
+    "bge-core": "^0.3.2"
   }
 }

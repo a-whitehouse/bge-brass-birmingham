@@ -35,7 +35,7 @@ async function setup(game: Game) {
 }
 
 async function playerTurn(game: Game, player: Player) {
-    while (true) {
+    while (player.getNextIndustryLevelSlot(Industry.Coal) != null) {
         const industry = Industry.Coal;
     
         const loc = await player.prompt.clickAny(game.board.industryLocations
@@ -46,10 +46,12 @@ async function playerTurn(game: Game, player: Player) {
     
         loc.tile = player.takeNextIndustryTile(industry);
 
+        await game.delay.beat();
+
         for (let i = 0; i < loc.tile.data.productionCount ?? 0; ++i) {
             loc.tile.resources.push(new ResourceToken(Resource.Coal));
         }
 
-        console.log(loc.tile.resources.length);
+        await game.delay.beat();
     }
 }
