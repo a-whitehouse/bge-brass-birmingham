@@ -1,6 +1,7 @@
 import * as bge from "bge-core";
 
 import { City, ILinkLocationData } from "../types";
+import { LinkTile } from "./linktile";
 
 /**
  * A location that a link can be built on by a player.
@@ -23,8 +24,11 @@ export class LinkLocation extends bge.Zone {
         return this.data.cities;
     }
 
+    @bge.display()
+    tile?: LinkTile;
+
     constructor(data: ILinkLocationData) {
-        super(2.25, 1);
+        super(3, 1.6);
 
         this.data = data;
         this.hideIfEmpty = true;

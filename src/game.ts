@@ -28,6 +28,8 @@ export class Game extends bge.Game<Player> {
     readonly playerZones: bge.Zone[] = [];
 
     readonly drawPile = new bge.Deck(Card, { orientation: bge.CardOrientation.FACE_DOWN });
+    readonly wildLocationPile = new bge.Deck(Card, { orientation: bge.CardOrientation.FACE_UP });
+    readonly wildIndustryPile = new bge.Deck(Card, { orientation: bge.CardOrientation.FACE_UP });
 
     readonly coalMarket: ResourceMarket;
     readonly ironMarket: ResourceMarket;

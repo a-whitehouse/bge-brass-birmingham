@@ -1,7 +1,7 @@
 import * as bge from "bge-core";
 
 import { IndustryLocation } from "./industrylocation";
-import { City, Industry } from "../types";
+import { City, Industry, ALL_INDUSTRIES } from "../types";
 
 import { areArrayContentsMatching } from "../helpers";
 
@@ -11,8 +11,7 @@ export class Card extends bge.Card {
 	static readonly WIDTH = 6.3;
 	static readonly HEIGHT = 8.5;
 
-
-	public static *generateDeck(playerCount: number): Iterable<Card> {
+	static *generateDeck(playerCount: number): Iterable<Card> {
 		switch (playerCount) {
 			case 2:
 				{
@@ -123,6 +122,7 @@ export class Card extends bge.Card {
 
 	matchesIndustryLocation(location: IndustryLocation, industry?: Industry): boolean { throw new Error("Not implemented"); }
 	equals(card: Card): boolean { throw new Error("Not implemented"); }
+	get isWild(): boolean { throw new Error("Not implemented"); }
 }
 
 export class IndustryCard extends Card {
@@ -146,6 +146,10 @@ export class IndustryCard extends Card {
 	override equals(card: Card): boolean {
 		return card instanceof IndustryCard && areArrayContentsMatching(this.industries, card.industries);
 	}
+
+	override get isWild(): boolean {
+		return this.industries.length === ALL_INDUSTRIES.length;
+	}
 }
 
 export class CityCard extends Card {
@@ -164,5 +168,9 @@ export class CityCard extends Card {
 
 	override equals(card: Card): boolean {
 		return card instanceof CityCard && this.city === card.city;
+	}
+
+	override get isWild(): boolean {
+		return this.city === City.Any;
 	}
 }

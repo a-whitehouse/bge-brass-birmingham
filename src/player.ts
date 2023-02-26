@@ -3,6 +3,7 @@ import * as bge from "bge-core";
 import { Game } from "./game";
 import { Card, IndustryCard, CityCard } from "./objects/card";
 import { IndustryTile } from "./objects/industrytile";
+import { LinkTile } from "./objects/linktile"
 import { IndustryLevelSlot, PlayerBoard } from "./objects/playerboard";
 import { ScoreToken } from "./objects/scoring";
 import { IndustryLocation } from "./objects/industrylocation";
@@ -29,6 +30,9 @@ export class Player extends bge.Player {
     @bge.display({ position: { x: -12.2 } })
     readonly playerBoard = new PlayerBoard(this);
 
+    @bge.display({ position: { x: 15, y: 5 }, label: "Link Tiles" })
+    readonly linkTiles = new bge.Deck(LinkTile, { orientation: bge.CardOrientation.FACE_UP })
+
     victoryPointToken: ScoreToken;
     incomeToken: ScoreToken;
 
@@ -48,10 +52,10 @@ export class Player extends bge.Player {
         return this.incomeToken?.slot.income ?? 0;
     }
 
-    @bge.display({ position: { x: 19, y: 8 }, label: "Money" })
+    @bge.display({ position: { x: 23, y: 8 }, label: "Money" })
     get moneyDisplay() { return `£${this.money}`; }
 
-    @bge.display({ position: { x: 19, y: 2 }, label: "Spent This Round" })
+    @bge.display({ position: { x: 23, y: 2 }, label: "Spent This Round" })
     get spentDisplay() { return `£${this.spent}`; }
 
     override get color(): bge.Color {
@@ -110,6 +114,16 @@ export class Player extends bge.Player {
 
             return true;
         });
+    }
+
+    get hasWildCardInHand(): boolean {
+        for (let card of this.hand) {
+            if (card.isWild) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     getNextIndustryLevelSlot(industry: Industry): IndustryLevelSlot | null {

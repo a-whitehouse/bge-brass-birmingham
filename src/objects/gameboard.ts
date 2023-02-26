@@ -31,6 +31,12 @@ export class GameBoard extends bge.Card {
     @bge.display({ rotation: 90, position: { x: -20.6, y: 19.7 } })
     get drawPile() { return this._game.drawPile; }
 
+    @bge.display({ rotation: 90, position: { x: -20.6, y: 12 } })
+    get wildLocationPile() { return this._game.wildLocationPile; }
+
+    @bge.display({ rotation: 90, position: { x: -20.6, y: 4.4 } })
+    get wildIndustryPile() { return this._game.wildIndustryPile; }
+
     @bge.display() get coalMarket() { return this._game.coalMarket; }
     @bge.display() get ironMarket() { return this._game.ironMarket; }
     @bge.display() get scoreTrack() { return this._game.scoreTrack; }
@@ -63,7 +69,7 @@ export class GameBoard extends bge.Card {
 
             location.display = this.children.add(location, {
                 position: new bge.Vector3(data.posX, data.posY),
-                rotation: bge.Rotation.z(-data.angle)
+                rotation: bge.Rotation.z(data.angle)
             });
 
             return location;
