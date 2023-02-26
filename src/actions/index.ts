@@ -15,10 +15,15 @@ export default async function main(game: Game) {
     await setup(game);
 
     let firstTurn = true;
+    let numActions;
 
     while (true) {
+
+        numActions = firstTurn ? 1 : 2;
+
         for (let player of game.players) {
-            await playerTurn(game, player, firstTurn ? 1 : 2);
+            await playerTurn(game, player, numActions);
+            game.drawPile.deal([player.hand], numActions);
         }
 
         firstTurn = false;
