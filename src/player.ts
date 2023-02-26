@@ -146,4 +146,42 @@ export class Player extends bge.Player {
     getMatchingCards(location: IndustryLocation, industry?: Industry): Card[] {
         return [...this.hand].filter(x => x.matchesIndustryLocation(location, industry));
     }
+
+    async discardAnyCard() {
+        const card = await this.prompt.clickAny(this.hand, {
+            message: "Discard any card"
+        });
+
+        this.discardPile.add(this.hand.remove(card));
+
+        await this.game.delay.beat();
+    }
+
+    async discardCards(count: number) {
+        while (true) {
+            const clicked = await this.game.anyExclusive(() => [
+                this.prompt.clickAny([...this.hand].filter(x => this.hand.selected.length < count || this.hand.getSelected(x)), {
+                    message: "Discard any three cards"
+                }),
+                this.prompt.click(new bge.Button("Discard"), {
+                    return: null,
+                    if: this.hand.selected.length === count
+                })
+            ]);
+
+            if (clicked instanceof Card) {
+                this.hand.toggleSelected(clicked);
+                continue;
+            }
+
+            break;
+        }
+
+        const selected = this.hand.selected;
+
+        this.hand.removeAll(selected);
+        this.discardPile.addRange(selected);
+
+        await this.game.delay.beat();
+    }
 }

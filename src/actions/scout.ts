@@ -23,32 +23,7 @@ export async function scout(game: Game, player: Player) {
 
 	await player.prompt.click(new bge.Button("Scout"), {});
 
-	while (true) {
-		const clicked = await game.anyExclusive(() => [
-			player.prompt.clickAny([...player.hand].filter(x => player.hand.selected.length < 3 || player.hand.getSelected(x)), {
-				message: "Discard any three cards"
-			}),
-			player.prompt.click(new bge.Button("Discard"), {
-				return: null,
-				if: player.hand.selected.length === 3
-			})
-		]);
-
-		if (clicked instanceof Card) {
-			player.hand.toggleSelected(clicked);
-			continue;
-		}
-
-		break;
-	}
-
-
-	const selected = player.hand.selected;
-
-	player.hand.removeAll(selected);
-	player.discardPile.addRange(selected);
-
-	await game.delay.beat();
+	await player.discardCards(3);
 
 	player.hand.add(game.wildIndustryPile.draw());
 	player.hand.add(game.wildLocationPile.draw());

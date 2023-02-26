@@ -20,11 +20,5 @@ export async function takeLoan(game: Game, player: Player) {
 	player.money += 30;
 	player.decreaseIncome(3);
 
-	const card = await player.prompt.clickAny(player.hand, {
-		message: "Discard any card"
-	});
-
-	player.discardPile.add(player.hand.remove(card));
-
-	await game.delay.beat();
+	await player.discardAnyCard();
 }
