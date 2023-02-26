@@ -129,7 +129,7 @@ export class Player extends bge.Player {
         return slot.tiles.pop();
     }
 
-    getMatchingCards(location: IndustryLocation): Card[] {
-        return [...this.hand].filter(x => x.matchesIndustryLocation(location));
+    getMatchingCards(location: IndustryLocation, industry?: Industry): Card[] {
+        return [...this.hand].filter(x => x.matchesIndustryLocation(location, industry));
     }
 }

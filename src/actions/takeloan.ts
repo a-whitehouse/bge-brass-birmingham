@@ -10,8 +10,6 @@ import { City, Industry, Resource } from "../types";
 
 export async function takeLoan(game: Game, player: Player) {
 
-	console.log("Choice to take a loan")
-
 	// TODO: Can you always take loans? Maybe not if income is -10?
 
 	const button = new bge.Button("Take a loan");

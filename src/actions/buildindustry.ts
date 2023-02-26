@@ -9,6 +9,14 @@ import { IndustryCard } from "../objects/card";
 import { Player } from "../player";
 import { City, Industry, Resource, Era } from "../types";
 
+const DEBUG_LOGGING = false;
+
+function debugLog(message: string) {
+	if (DEBUG_LOGGING) {
+		console.log(message);
+	}
+}
+
 export async function buildIndustry(game: Game, player: Player) {
 	const buildableIndustries = new Map(game.board.industryLocations
 		.map(x => [x, getBuildableIndustriesAtLocation(x, player)])
@@ -19,7 +27,11 @@ export async function buildIndustry(game: Game, player: Player) {
 		message: "Click on a location!"
 	});
 
+	debugLog(`${player.name} clicked on ${loc.name}`);
+
 	const validIndustriesAtLocation = buildableIndustries.get(loc);
+
+	debugLog(`Valid industries: ${validIndustriesAtLocation.map(x => Industry[x])}`);
 
 	let industry: Industry;
 
@@ -69,7 +81,10 @@ export async function buildIndustry(game: Game, player: Player) {
 
 	let discardedCard: Card;
 
-	const matchingCards = player.getMatchingCards(loc);
+	const matchingCards = player.getMatchingCards(loc, industry);
+
+	debugLog(`All cards: ${[...player.hand].map(x => x.name).join(", ")}`);
+	debugLog(`Matching cards: ${matchingCards.map(x => x.name).join(", ")}`);
 
 	switch (matchingCards.length) {
 		case 0:
@@ -97,6 +112,8 @@ export async function buildIndustry(game: Game, player: Player) {
 			break;
 	}
 
+	debugLog(`${player.name} discards ${discardedCard.name}`);
+
 	player.discardPile.add(player.hand.remove(discardedCard));
 
 	await game.delay.beat();
@@ -118,7 +135,7 @@ function getBuildableIndustriesAtLocation(location: IndustryLocation, player: Pl
 			continue;
 		}
 
-		if (player.getMatchingCards(location).length === 0) {
+		if (player.getMatchingCards(location, industry).length === 0) {
 			continue;
 		}
 

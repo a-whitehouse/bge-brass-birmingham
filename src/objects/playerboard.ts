@@ -22,7 +22,7 @@ export class IndustryLevelSlot extends bge.Zone {
     readonly tiles: IndustryTile[] = [];
 
     constructor(player: Player, industry: Industry, data: IIndustryLevelData) {
-        super(2.25, 2.25);
+        super(2.5, 2.5);
 
         this.player = player;
         this.industry = industry;
