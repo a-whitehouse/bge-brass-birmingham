@@ -7,6 +7,10 @@ import { Player } from "../player";
 
 export async function buildLink(game: Game, player: Player) {
 
+	if (player.linkTiles.count === 0) {
+		await Promise.reject("Must have link tiles remaining.")
+	}
+
 	let loc = await player.prompt.clickAny(getBuildableLinks(game, player), { message: "Click on a link!" });
 
 	const card = await player.prompt.clickAny(player.hand, {
