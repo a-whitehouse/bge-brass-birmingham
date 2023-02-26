@@ -1,5 +1,6 @@
 import * as bge from "bge-core";
 
+import { Era } from "../types";
 import { Game } from "../game";
 import { LinkLocation } from "../objects/linklocation";
 import { LinkTile } from "../objects/linktile";
@@ -11,6 +12,19 @@ export async function buildLink(game: Game, player: Player) {
 		await Promise.reject("Must have link tiles remaining.")
 	}
 
+	switch (game.era) {
+		case Era.Canal:
+			if (player.money < 3) {
+				await Promise.reject("Must have 3 pounds.");
+			}
+			break;
+		case Era.Rail:
+			throw new Error("To be implemented.");
+			break;
+		default:
+			break;
+	}
+
 	let loc = await player.prompt.clickAny(getBuildableLinks(game, player), { message: "Click on a link!" });
 
 	const card = await player.prompt.clickAny(player.hand, {
@@ -20,6 +34,10 @@ export async function buildLink(game: Game, player: Player) {
 	loc.tile = player.linkTiles.draw();
 
 	player.discardPile.add(player.hand.remove(card));
+
+	player.spendMoney(3);
+
+	// TODO: make nicer version for rail era.
 
 	await game.delay.beat();
 
