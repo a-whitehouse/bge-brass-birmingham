@@ -6,9 +6,9 @@
     "start": "bge serve"
   },
   "devDependencies": {
-    "bge-dev": "^0.2.4"
+    "bge-dev": "^0.3.0"
   },
   "dependencies": {
-    "bge-core": "^0.2.5"
+    "bge-core": "^0.3.2"
   }
 }

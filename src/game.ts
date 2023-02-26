@@ -1,7 +1,13 @@
 import * as bge from "bge-core";
+
 import { Player } from "./player";
-import main from "./actions";
 import { GameBoard } from "./objects/gameboard";
+import { ResourceMarket } from "./objects/resourcemarket";
+import { Resource } from "./types";
+
+import main from "./actions";
+import { Card } from "./objects/card";
+import { ScoreTrack } from "./objects/scoring";
 
 /**
  * @summary This class contains the meat of your game.
@@ -10,7 +16,21 @@ import { GameBoard } from "./objects/gameboard";
 export class Game extends bge.Game<Player> {
 
     @bge.display()
-    readonly board = new GameBoard();
+    readonly board = new GameBoard(this);
+
+    @bge.display({
+        arrangement: new bge.RectangularArrangement({
+            size: new bge.Vector3(60, 60)
+        })
+    })
+    readonly playerZones: bge.Zone[] = [];
+
+    readonly drawPile = new bge.Deck(Card, { orientation: bge.CardOrientation.FACE_DOWN });
+
+    readonly coalMarket: ResourceMarket;
+    readonly ironMarket: ResourceMarket;
+
+    readonly scoreTrack: ScoreTrack;
 
     /**
      * Game runners expect games to have a public parameterless constructor, like this.
@@ -18,13 +38,16 @@ export class Game extends bge.Game<Player> {
     constructor() {
         // We need to tell Game<TPlayer> how to construct a player here.
         super(Player);
+
+        this.coalMarket = new ResourceMarket(this.board, Resource.Coal);
+        this.ironMarket = new ResourceMarket(this.board, Resource.Iron);
+
+        this.scoreTrack = new ScoreTrack();
     }
 
     protected async onRun(): Promise<bge.IGameResult> {
 
-        this.addPlayerZones(x => x.createZone(), {
-            avoid: this.board.footprint
-        });
+        this.playerZones.push(...this.players.map(x => x.createZone()));
 
         // Entry point for gameplay logic
         await main(this);

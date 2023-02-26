@@ -27,5 +27,7 @@ export class LinkLocation extends bge.Zone {
         super(2.25, 1);
 
         this.data = data;
+        this.hideIfEmpty = true;
+        this.outlineStyle = bge.OutlineStyle.NONE;
     }
 }

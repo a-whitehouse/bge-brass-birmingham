@@ -6,6 +6,7 @@ import LINK_LOCATIONS from "../data/linklocations";
 
 import { IndustryLocation } from "./industrylocation";
 import { LinkLocation } from "./linklocation";
+import { Game } from "../game";
 
 /**
  * The main board in the middle of the table.
@@ -14,6 +15,8 @@ import { LinkLocation } from "./linklocation";
 @bge.height(gameboard.HEIGHT)
 @bge.thickness(0.5)
 export class GameBoard extends bge.Card {
+    private readonly _game: Game;
+
     /**
      * Array of {@link IndustryLocation}s that players can build on.
      */
@@ -24,9 +27,18 @@ export class GameBoard extends bge.Card {
      */
     readonly linkLocations: readonly LinkLocation[];
 
-    constructor() {
+    @bge.display({ rotation: 90, position: { x: -20.6, y: 19.7 } })
+    get drawPile() { return this._game.drawPile; }
+
+    @bge.display() get coalMarket() { return this._game.coalMarket; }
+    @bge.display() get ironMarket() { return this._game.ironMarket; }
+    @bge.display() get scoreTrack() { return this._game.scoreTrack; }
+
+    constructor(game: Game) {
         super();
 
+        this._game = game;
+        
         this.front.image = bge.Image.simple("https://iili.io/HGzqKkx.jpg");
 
         // Read industry location definitions, create IndustryLocation instances,
@@ -35,10 +47,9 @@ export class GameBoard extends bge.Card {
         this.industryLocations = INDUSTRY_LOCATIONS.map((data, i) => {
             const location = new IndustryLocation(data);
 
-            location.display = this.children.add(`industry[${i}]`, location, {
-                localPosition: { x: data.posX, z: data.posZ },
-                visibleFor: [] // Visible to nobody by default
-            }).options;
+            this.children.add(location, {
+                position: new bge.Vector3(data.posX, data.posY)
+            });
 
             return location;
         });
@@ -49,24 +60,12 @@ export class GameBoard extends bge.Card {
         this.linkLocations = LINK_LOCATIONS.map((data, i) => {
             const location = new LinkLocation(data);
 
-            location.display = this.children.add(`link[${i}]`, location, {
-                localPosition: { x: data.posX, z: data.posZ },
-                localRotation: { y: -data.angle },
-                visibleFor: [] // Visible to nobody by default
-            }).options;
+            location.display = this.children.add(location, {
+                position: new bge.Vector3(data.posX, data.posY),
+                rotation: bge.Rotation.z(-data.angle)
+            });
 
             return location;
         });
-    }
-
-    override get footprint(): bge.Footprint {
-        const baseFootprint = super.footprint;
-
-        // Add a few cm of clearance around the board
-
-        return {
-            width: baseFootprint.width + 4,
-            height: baseFootprint.height + 4
-        }
     }
 }
