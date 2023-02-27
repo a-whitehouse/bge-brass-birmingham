@@ -22,7 +22,9 @@ export class Player extends bge.Player {
     ];
 
     @bge.display({ position: { x: 15, y: -7 }, label: "Hand" })
-    readonly hand = new bge.Hand(Card, 20);
+    readonly hand = new bge.Hand(Card, 20, {
+        autoSort: Card.compare
+    });
 
     @bge.display({ position: { x: 8.15, y: 5 }, label: "Discard" })
     readonly discardPile = new bge.Deck(Card, { orientation: bge.CardOrientation.FACE_UP });
