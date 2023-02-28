@@ -24,7 +24,7 @@ export class ResourceToken extends bge.Token {
     constructor(resource: Resource) {
         super({
             name: Resource[resource],
-            shape: bge.TokenShape.CUBE,
+            sides: 4,
             scale: 0.75,
             color: ResourceToken.COLORS.get(resource)
         });
