@@ -46,6 +46,7 @@ export default async function main(game: Game) {
         console.info("About to reorder players");
 
         reorderPlayers(playerOrder);
+        resetSpentMoney(playerOrder);
 
         firstTurn = false;
     }
@@ -117,5 +118,11 @@ function reorderPlayers(players: Player[]) {
             }
         }
 
+    }
+}
+
+function resetSpentMoney(players: Player[]) {
+    for (let player of players) {
+        player.spent = 0;
     }
 }
