@@ -271,6 +271,7 @@ export class GameBoard extends bge.Card {
 
         const result: IResourceSources = {
             tiles: [],
+            count: 0,
             connectedToMarket: resource === Resource.Iron
         };
 
@@ -341,6 +342,7 @@ export class GameBoard extends bge.Card {
         }
 
         result.tiles.sort((a, b) => a.distance - b.distance);
+        result.count = result.tiles.length;
 
         return result;
     }
@@ -350,12 +352,17 @@ export class GameBoard extends bge.Card {
  * Describes the locations and distances of a requested resource.
  * See {@link GameBoard.getResourceSources}
  */
-interface IResourceSources {
+export interface IResourceSources {
     /**
      * Array with an item for each resource token found, including the distance.
      * Sorted by distance, ascending.
      */
     tiles: { tile: IndustryTile, distance: number }[];
+
+    /**
+     * The number of free (player produced) resource tokens accessible.
+     */
+    count: number;
 
     /**
      * If true, the corresponding resource market can be used.

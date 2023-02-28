@@ -2,18 +2,32 @@ import * as bge from "bge-core";
 
 import { Game } from "../game";
 import { Card } from "../objects/card";
+import { IResourceSources } from "../objects/gameboard";
 import { IndustryLocation } from "../objects/industrylocation";
 import { ResourceToken } from "../objects/resourcetoken";
 import { Player } from "../player";
-import { Industry, Resource, Era } from "../types";
+import { Industry, Resource, Era, City } from "../types";
 
 const console = bge.Logger.get("build-industry");
+
+interface IBuildableAtLocationInfo {
+	industries: Industry[];
+	coalSources: IResourceSources;
+	ironSources: IResourceSources;
+}
 
 export async function buildIndustry(game: Game, player: Player) {
 
 	const buildableIndustries = new Map(game.board.industryLocations
-		.map(x => [x, getBuildableIndustriesAtLocation(x, player)])
-		.filter(entry => (entry[1] as Industry[]).length > 0) as [IndustryLocation, Industry[]][]);
+		.map(x => {
+			const coalSources = game.board.getResourceSources(x, Resource.Coal, player);
+			const ironSources = game.board.getResourceSources(x, Resource.Iron, player);
+
+			const buildableIndustries = getBuildableIndustriesAtLocation(x, player, coalSources, ironSources);
+
+			return [x, { industries: buildableIndustries, coalSources: coalSources, ironSources: ironSources }];
+		})
+		.filter(entry => (entry[1] as IBuildableAtLocationInfo).industries.length > 0) as [IndustryLocation, IBuildableAtLocationInfo][]);
 
 	const loc = await player.prompt.clickAny(buildableIndustries.keys(), {
 
@@ -22,7 +36,8 @@ export async function buildIndustry(game: Game, player: Player) {
 
 	console.info(`${player.name} clicked on ${loc.name}`);
 
-	const validIndustriesAtLocation = buildableIndustries.get(loc);
+	const locationInfo = buildableIndustries.get(loc);
+	const validIndustriesAtLocation = locationInfo.industries;
 
 	console.info(`Valid industries: ${validIndustriesAtLocation.map(x => Industry[x])}`);
 
@@ -91,7 +106,9 @@ export async function buildIndustry(game: Game, player: Player) {
 	await player.discardAnyCard(player.getMatchingCards(loc, industry));
 }
 
-function getBuildableIndustriesAtLocation(location: IndustryLocation, player: Player): Industry[] {
+function getBuildableIndustriesAtLocation(location: IndustryLocation, player: Player,
+	coalSources: IResourceSources, ironSources: IResourceSources): Industry[] {
+
 	if (location.tile != null) {
 		// TODO: overbuilding
 		return [];
@@ -122,14 +139,26 @@ function getBuildableIndustriesAtLocation(location: IndustryLocation, player: Pl
 
 		const slot = player.getNextIndustryLevelSlot(industry);
 
-		slot.data.cost
+		const coalMarket = player.game.board.coalMarket;
+		const ironMarket = player.game.board.ironMarket;
 
-		let cost_coal = slot.data.cost.coal;
-		if (cost_coal > 0) {
-			let closest_coal = player.game.board.getResourceSources(location.city, Resource.Coal);
-			if (cost_coal > closest_coal.tiles.length && !closest_coal.connectedToMarket) {
-				continue;
-			}
+		let totalCost = slot.data.cost.coins ?? 0;
+
+		let costCoal = slot.data.cost.coal ?? 0;
+		let costIron = slot.data.cost.iron ?? 0;
+
+		let residualCoal = costCoal - coalSources.count;
+		let residualIron = costIron - ironSources.count;
+
+		totalCost += coalMarket.getCost(residualCoal);
+		totalCost += ironMarket.getCost(residualIron);
+
+		console.log(`${City[location.city]} ${Industry[industry]} ${totalCost}`);
+
+		if (costCoal > coalSources.tiles.length && !coalSources.connectedToMarket) {
+			continue;
+		} else if (player.money < totalCost) {
+			continue;
 		}
 
 		result.push(industry);
