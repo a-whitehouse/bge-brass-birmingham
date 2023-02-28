@@ -16,20 +16,31 @@ import { scout } from "./scout";
 import { buildLink } from "./buildlink";
 import { buildIndustry } from "./buildindustry";
 
+const console = bge.Logger.get("player-turn");
+
 export default async function main(game: Game) {
     await setup(game);
 
     let firstTurn = true;
     let numActions;
 
+    let playerOrder: Player[] = [...game.players];
+
     while (true) {
 
         numActions = firstTurn ? 1 : 2;
 
-        for (let player of game.players) {
+        console.info(`Round starts with ${numActions}`);
+        console.info(`Player order: ${playerOrder.map(x => x.name).join(", ")}`);
+
+        for (let player of playerOrder) {
             await playerTurn(game, player, numActions);
             player.hand.addRange(game.drawPile.drawRange(numActions));
         }
+
+        console.info("About to reorder players");
+
+        reorderPlayers(playerOrder);
 
         firstTurn = false;
     }
@@ -79,3 +90,25 @@ async function setup(game: Game) {
     await game.delay.beat();
 }
 
+function reorderPlayers(players: Player[]) {
+    let tmp: Player;
+
+    let successfulComparisons = 0;
+
+    while (successfulComparisons < players.length - 1) {
+        successfulComparisons = 0;
+
+        for (let i = 0; i < players.length - 1; i++) {
+            if (players[i].spent > players[i + 1].spent) {
+                tmp = players[i];
+
+                players[i] = players[i + 1];
+                players[i + 1] = tmp;
+            }
+            else {
+                ++successfulComparisons;
+            }
+        }
+
+    }
+}
