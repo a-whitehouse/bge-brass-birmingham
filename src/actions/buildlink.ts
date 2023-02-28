@@ -37,16 +37,15 @@ export async function buildLink(game: Game, player: Player) {
 
 
 function getBuildableLinks(game: Game, player: Player): LinkLocation[] {
-	let buildableLinks: LinkLocation[];
+	let buildableLinks = game.board.linkLocations.filter(x => x.tile == null &&
+		((x.data.canal && game.era == Era.Canal) || (x.data.rail && game.era == Era.Rail))
+	);
 
 	let builtIndustries = game.board.getBuiltIndustries(player);
 	let builtLinks = game.board.getBuiltLinks(player);
 
 	if (builtIndustries.length != 0 || builtLinks.length != 0) {
-		buildableLinks = game.board.linkLocations.filter(x => x.tile == null && game.board.isInPlayerNetwork(x, player));
-	}
-	else {
-		buildableLinks = game.board.linkLocations.filter(x => x.tile == null);
+		buildableLinks = buildableLinks.filter(x => game.board.isInPlayerNetwork(x, player));
 	}
 
 	return buildableLinks;
