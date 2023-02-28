@@ -10,6 +10,7 @@ import { IndustryLocation } from "./industrylocation";
 import { LinkLocation } from "./linklocation";
 import { IndustryTile } from "./industrytile";
 import { LinkTile } from "./linktile";
+import { PlayerTokenSlot } from "./playertoken";
 
 import { Player } from "../player";
 import { Game } from "../game";
@@ -50,12 +51,21 @@ export class GameBoard extends bge.Card {
     @bge.display() get ironMarket() { return this._game.ironMarket; }
     @bge.display() get scoreTrack() { return this._game.scoreTrack; }
 
+    readonly playerTokenSlots: PlayerTokenSlot[] = [];
+
     constructor(game: Game) {
         super();
 
         this._game = game;
 
         this.front.image = bge.Image.simple("https://iili.io/HGzqKkx.jpg");
+
+        for (let i = 0; i < 4; ++i) {
+            this.playerTokenSlots[i] = new PlayerTokenSlot();
+            this.children.add(this.playerTokenSlots[i], {
+                position: { x: -22.65, y: -9.8 - i * 4.62 }
+            });
+        }
 
         // Read industry location definitions, create IndustryLocation instances,
         // then add them as children to be displayed.

@@ -15,6 +15,7 @@ import { takeLoan } from "./takeloan";
 import { scout } from "./scout";
 import { buildLink } from "./buildlink";
 import { buildIndustry } from "./buildindustry";
+import { PlayerToken } from "../objects/playertoken";
 
 const console = bge.Logger.get("player-turn");
 
@@ -32,6 +33,10 @@ export default async function main(game: Game) {
 
         console.info(`Round starts with ${numActions}`);
         console.info(`Player order: ${playerOrder.map(x => x.name).join(", ")}`);
+
+        playerOrder.forEach((player, index) => {
+            player.game.board.playerTokenSlots[index].playerToken = player.playerToken;
+        });
 
         for (let player of playerOrder) {
             await playerTurn(game, player, numActions);
@@ -65,6 +70,8 @@ async function setup(game: Game) {
     for (let player of game.players) {
         player.victoryPointToken = game.scoreTrack.createScoreToken(player, ScoreTokenKind.VICTORY_POINTS);
         player.incomeToken = game.scoreTrack.createScoreToken(player, ScoreTokenKind.INCOME);
+
+        player.playerToken = new PlayerToken(player);
 
         for (let i = 0; i < 15; ++i) {
             player.linkTiles.add(new LinkTile(player));

@@ -8,6 +8,7 @@ import { IndustryLevelSlot, PlayerBoard } from "./objects/playerboard";
 import { ScoreToken } from "./objects/scoring";
 import { IndustryLocation } from "./objects/industrylocation";
 import { ALL_INDUSTRIES, Industry, City } from "./types";
+import { PlayerToken } from "./objects/playertoken";
 
 /**
  * @summary Custom player class for your game.
@@ -35,6 +36,7 @@ export class Player extends bge.Player {
     @bge.display({ position: { x: 15, y: 5 }, label: "Link Tiles" })
     readonly linkTiles = new bge.Deck(LinkTile, { orientation: bge.CardOrientation.FACE_UP })
 
+    playerToken: PlayerToken;
     victoryPointToken: ScoreToken;
     incomeToken: ScoreToken;
 
@@ -154,7 +156,7 @@ export class Player extends bge.Player {
         cards ??= [...this.hand];
 
         let discardedCard: Card;
-        
+
         switch (cards.length) {
             case 0:
                 throw new Error("There should be at least one matching card after building.");
@@ -218,7 +220,7 @@ export class Player extends bge.Player {
 
         this.game.wildIndustryPile.addRange(cards.filter(x => x.isWild && x instanceof IndustryCard));
         this.game.wildLocationPile.addRange(cards.filter(x => x.isWild && x instanceof CityCard));
-        
+
         await this.game.delay.beat();
     }
 }
