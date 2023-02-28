@@ -28,7 +28,7 @@ export default async function main(game: Game) {
 
         for (let player of game.players) {
             await playerTurn(game, player, numActions);
-            game.drawPile.deal([player.hand], numActions);
+            player.hand.addRange(game.drawPile.drawRange(numActions));
         }
 
         firstTurn = false;
