@@ -27,7 +27,9 @@ export class ScoreToken extends bge.Token {
 
     constructor(track: ScoreTrack, player: Player, kind: ScoreTokenKind) {
         super({
-            shape: bge.TokenShape.CUBE,
+            sides: kind === ScoreTokenKind.INCOME ? 6 : 12,
+            thickness: 0.25,
+            scale: 1.5,
             color: player.color
         });
 

@@ -27,20 +27,12 @@ export async function buildLink(game: Game, player: Player) {
 
 	let loc = await player.prompt.clickAny(getBuildableLinks(game, player), { message: "Click on a link!" });
 
-	const card = await player.prompt.clickAny(player.hand, {
-		message: "Discard any card"
-	});
-
 	loc.tile = player.linkTiles.draw();
-
-	player.discardPile.add(player.hand.remove(card));
-
 	player.spendMoney(3);
 
 	// TODO: make nicer version for rail era.
 
-	await game.delay.beat();
-
+	await player.discardAnyCard();
 }
 
 

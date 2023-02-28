@@ -109,6 +109,19 @@ export class Card extends bge.Card {
 			yield new IndustryCard([Industry.Brewery], 12);
 	}
 
+	static compare(a: Card, b: Card): number {
+
+		if (a instanceof CityCard && b instanceof CityCard) {
+			return CityCard.compare(a, b);
+		}
+		
+		if (a instanceof IndustryCard && b instanceof IndustryCard) {
+			return IndustryCard.compare(a, b);
+		}
+
+		return (a instanceof CityCard ? 1 : 0) - (b instanceof CityCard ? 1 : 0);
+	}
+
 	constructor(index: number) {
 		super();
 
@@ -126,6 +139,14 @@ export class Card extends bge.Card {
 }
 
 export class IndustryCard extends Card {
+	static compare(a: IndustryCard, b: IndustryCard): number {
+		if (a.industries.length !== b.industries.length) {
+			return a.industries.length - b.industries.length;
+		}
+
+		return a.industries[0] - b.industries[0];
+	}
+
 	readonly industries: Industry[];
 
 	constructor(industries: Industry[], index: number) {
@@ -153,6 +174,10 @@ export class IndustryCard extends Card {
 }
 
 export class CityCard extends Card {
+	static compare(a: CityCard, b: CityCard): number {
+		return a.city - b.city;
+	}
+
 	readonly city: City;
 
 	constructor(city: City, index: number) {

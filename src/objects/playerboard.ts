@@ -13,13 +13,8 @@ export class IndustryLevelSlot extends bge.Zone {
     readonly industry: Industry;
     readonly data: IIndustryLevelData;
 
-    @bge.display({
-        arrangement: new LinearArrangement({
-            axis: "z",
-            offset: new Vector3(0, 0.1, 0)
-        })
-    })
-    readonly tiles: IndustryTile[] = [];
+    @bge.display()
+    readonly tiles = new bge.Deck(IndustryTile);
 
     constructor(player: Player, industry: Industry, data: IIndustryLevelData) {
         super(2.5, 2.5);
@@ -34,7 +29,7 @@ export class IndustryLevelSlot extends bge.Zone {
         const count = data.count ?? 1;
 
         for (let i = 0; i < count; ++i) {
-            this.tiles.push(new IndustryTile(player, industry, data));
+            this.tiles.add(new IndustryTile(player, industry, data));
         }
     }
 }
