@@ -149,17 +149,46 @@ export class Player extends bge.Player {
         return [...this.hand].filter(x => x.matchesIndustryLocation(location, industry));
     }
 
-    async discardAnyCard() {
-        const card = await this.prompt.clickAny(this.hand, {
-            message: "Discard any card"
-        });
+    async discardAnyCard(cards?: readonly Card[]) {
 
-        this.discardPile.add(this.hand.remove(card));
+        cards ??= [...this.hand];
 
-        await this.game.delay.beat();
+        let discardedCard: Card;
+        
+        switch (cards.length) {
+            case 0:
+                throw new Error("There should be at least one matching card after building.");
+
+            case 1:
+                discardedCard = cards[0];
+                break;
+
+            default:
+                if (cards.every(x => x.equals(cards[0]))) {
+                    discardedCard = cards[0];
+                    break;
+                }
+
+                if (cards.length < this.hand.count) {
+                    for (let card of cards) {
+                        this.hand.setSelected(card, true);
+                    }
+                }
+
+                discardedCard = await this.prompt.clickAny(cards, {
+                    message: cards.length < this.hand.count
+                        ? "Discard a matching card"
+                        : "Discard any card"
+                });
+
+                this.hand.setSelected(false);
+                break;
+        }
+
+        await this.finishDiscardingCards([discardedCard]);
     }
 
-    async discardCards(count: number) {
+    async discardAnyCards(count: number) {
         while (true) {
             const clicked = await this.game.anyExclusive(() => [
                 this.prompt.clickAny([...this.hand].filter(x => this.hand.selected.length < count || this.hand.getSelected(x)), {
@@ -179,11 +208,17 @@ export class Player extends bge.Player {
             break;
         }
 
-        const selected = this.hand.selected;
+        await this.finishDiscardingCards(this.hand.selected);
+    }
 
-        this.hand.removeAll(selected);
-        this.discardPile.addRange(selected);
+    private async finishDiscardingCards(cards: readonly Card[]) {
+        this.hand.removeAll(cards);
 
+        this.discardPile.addRange(cards.filter(x => !x.isWild));
+
+        this.game.wildIndustryPile.addRange(cards.filter(x => x.isWild && x instanceof IndustryCard));
+        this.game.wildLocationPile.addRange(cards.filter(x => x.isWild && x instanceof CityCard));
+        
         await this.game.delay.beat();
     }
 }

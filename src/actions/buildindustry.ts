@@ -4,20 +4,13 @@ import { Game } from "../game";
 import { Card } from "../objects/card";
 import { IndustryLocation } from "../objects/industrylocation";
 import { ResourceToken } from "../objects/resourcetoken";
-import { ScoreTokenKind } from "../objects/scoring";
-import { IndustryCard } from "../objects/card";
 import { Player } from "../player";
-import { City, Industry, Resource, Era } from "../types";
+import { Industry, Resource, Era } from "../types";
 
-const DEBUG_LOGGING = false;
-
-function debugLog(message: string) {
-	if (DEBUG_LOGGING) {
-		console.log(message);
-	}
-}
+const console = bge.Logger.get("build-industry");
 
 export async function buildIndustry(game: Game, player: Player) {
+
 	const buildableIndustries = new Map(game.board.industryLocations
 		.map(x => [x, getBuildableIndustriesAtLocation(x, player)])
 		.filter(entry => (entry[1] as Industry[]).length > 0) as [IndustryLocation, Industry[]][]);
@@ -27,11 +20,11 @@ export async function buildIndustry(game: Game, player: Player) {
 		message: "Click on a location!"
 	});
 
-	debugLog(`${player.name} clicked on ${loc.name}`);
+	console.info(`${player.name} clicked on ${loc.name}`);
 
 	const validIndustriesAtLocation = buildableIndustries.get(loc);
 
-	debugLog(`Valid industries: ${validIndustriesAtLocation.map(x => Industry[x])}`);
+	console.info(`Valid industries: ${validIndustriesAtLocation.map(x => Industry[x])}`);
 
 	let industry: Industry;
 
@@ -78,45 +71,8 @@ export async function buildIndustry(game: Game, player: Player) {
 	}
 
 	await game.delay.beat();
-
-	let discardedCard: Card;
-
-	const matchingCards = player.getMatchingCards(loc, industry);
-
-	debugLog(`All cards: ${[...player.hand].map(x => x.name).join(", ")}`);
-	debugLog(`Matching cards: ${matchingCards.map(x => x.name).join(", ")}`);
-
-	switch (matchingCards.length) {
-		case 0:
-			throw new Error("There should be at least one matching card after building.");
-
-		case 1:
-			discardedCard = matchingCards[0];
-			break;
-
-		default:
-			if (matchingCards.every(x => x.equals(matchingCards[0]))) {
-				discardedCard = matchingCards[0];
-				break;
-			}
-
-			for (let card of matchingCards) {
-				player.hand.setSelected(card, true);
-			}
-
-			discardedCard = await player.prompt.clickAny(matchingCards, {
-				message: "Discard a matching card for that location"
-			});
-
-			player.hand.setSelected(false);
-			break;
-	}
-
-	debugLog(`${player.name} discards ${discardedCard.name}`);
-
-	player.discardPile.add(player.hand.remove(discardedCard));
-
-	await game.delay.beat();
+	
+	await player.discardAnyCard(player.getMatchingCards(loc, industry));
 }
 
 function getBuildableIndustriesAtLocation(location: IndustryLocation, player: Player): Industry[] {
