@@ -71,7 +71,16 @@ export async function buildIndustry(game: Game, player: Player) {
 	}
 
 	await game.delay.beat();
-	
+
+	switch (producedResourceType) {
+		case Resource.Iron:
+			let value = game.ironMarket.sell(loc.tile.resources);
+			player.money += value;
+			break;
+		default:
+			break;
+	}
+
 	await player.discardAnyCard(player.getMatchingCards(loc, industry));
 }
 

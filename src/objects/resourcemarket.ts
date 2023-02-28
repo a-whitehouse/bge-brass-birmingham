@@ -42,15 +42,15 @@ export class ResourceMarket extends bge.Zone {
     /**
      * How many empty slots are available for players to fill.
      */
-    get remainingSpace() {
-        return this.capacity - this.count; 
+    get remainingSlots() {
+        return this.capacity - this.count;
     }
 
     /**
      * If true, the market can't be sold to.
      */
     get isFull() {
-        return this.remainingSpace <= 0;
+        return this.remainingSlots <= 0;
     }
 
     /**
@@ -62,7 +62,7 @@ export class ResourceMarket extends bge.Zone {
      */
     constructor(board: GameBoard, resource: Resource) {
         super(0, 0);
-        
+
         this.outlineStyle = bge.OutlineStyle.NONE;
 
         this.board = board;
@@ -124,7 +124,7 @@ export class ResourceMarket extends bge.Zone {
     getSaleValue(count: number): number {
         let total = 0;
 
-        count = Math.min(count, this.remainingSpace);
+        count = Math.min(count, this.remainingSlots);
 
         for (let i = 0; i < count; ++i) {
             const index = this.count + i;
@@ -166,7 +166,7 @@ export class ResourceMarket extends bge.Zone {
      * @param tokens Array of tokens to add to the market.
      */
     addRange(tokens: ResourceToken[]): void {
-        if (tokens.length > this.remainingSpace) {
+        if (tokens.length > this.remainingSlots) {
             throw new Error("Resource market would overflow");
         }
 
@@ -199,21 +199,17 @@ export class ResourceMarket extends bge.Zone {
 
     /**
      * Fills up the next slots in the market with the given range of tokens,
-     * counting how many coins are earned in the process. Surplus tokens are
-     * included in the return value if the market becomes full.
+     * counting how many coins are earned in the process. The sold tokens are
+     * removed from {@link tokens}.
      * @param tokens Array of tokens to sell to the market.
-     * @return Object describing how many coins were earned, and which tokens
-     * were not added to the market if it became full.
+     * @return The coins earned by selling.
      */
-    sell(tokens: ResourceToken[]): { surplus: ResourceToken[], value: number } {
-        const toSell = Math.min(tokens.length, this.remainingSpace);
+    sell(tokens: ResourceToken[]): number {
+        const toSell = Math.min(tokens.length, this.remainingSlots);
         const saleValue = this.getSaleValue(toSell);
 
-        this.addRange(tokens.slice(0, toSell));
+        this.addRange(tokens.splice(tokens.length - toSell, toSell));
 
-        return {
-            surplus: tokens.slice(toSell),
-            value: saleValue
-        };
+        return saleValue;
     }
 }
