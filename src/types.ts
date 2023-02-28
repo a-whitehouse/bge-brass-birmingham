@@ -134,9 +134,9 @@ export interface ILinkLocationData {
 }
 
 export interface IIndustryCostData {
-    coins?: number;
-    coal?: number;
-    iron?: number;
+    coins: number;
+    coal: number;
+    iron: number;
 }
 
 export interface IIndustryRewardData {

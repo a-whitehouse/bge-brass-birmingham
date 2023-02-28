@@ -14,7 +14,7 @@ export default new Map(([
             level: 1,
             count: 1,
             canalOnly: true,
-            
+
             tileIndex: 12,
 
             posX: 766.7794,
@@ -35,7 +35,7 @@ export default new Map(([
         {
             level: 2,
             count: 2,
-            
+
             tileIndex: 13,
 
             posX: 1098.8676,
@@ -56,7 +56,7 @@ export default new Map(([
         {
             level: 3,
             count: 2,
-            
+
             tileIndex: 14,
 
             posX: 1436.8676,
@@ -78,7 +78,7 @@ export default new Map(([
         {
             level: 4,
             count: 2,
-            
+
             tileIndex: 15,
 
             posX: 1771.8676,
@@ -147,7 +147,7 @@ export default new Map(([
         {
             level: 3,
             count: 1,
-            
+
             tileIndex: 6,
 
             posX: 1862.8676,
@@ -169,7 +169,7 @@ export default new Map(([
         {
             level: 4,
             count: 1,
-            
+
             tileIndex: 7,
 
             posX: 1862.8676,
@@ -194,7 +194,7 @@ export default new Map(([
             level: 1,
             count: 2,
             canalOnly: true,
-            
+
             tileIndex: 8,
 
             posX: 229.7794,
@@ -214,7 +214,7 @@ export default new Map(([
         {
             level: 2,
             count: 2,
-            
+
             tileIndex: 9,
 
             posX: 229.7794,
@@ -234,7 +234,7 @@ export default new Map(([
         {
             level: 3,
             count: 2,
-            
+
             tileIndex: 10,
 
             posX: 229.7794,
@@ -255,7 +255,7 @@ export default new Map(([
             level: 4,
             count: 1,
             railOnly: true,
-            
+
             tileIndex: 11,
 
             posX: 229.7794,
@@ -278,7 +278,7 @@ export default new Map(([
             level: 1,
             count: 1,
             canalOnly: true,
-            
+
             tileIndex: 21,
 
             posX: 221.7794,
@@ -300,7 +300,7 @@ export default new Map(([
         {
             level: 2,
             count: 2,
-            
+
             tileIndex: 22,
 
             posX: 221.7794,
@@ -322,7 +322,7 @@ export default new Map(([
         {
             level: 3,
             count: 1,
-            
+
             tileIndex: 24,
 
             posX: 221.7794,
@@ -344,7 +344,7 @@ export default new Map(([
         {
             level: 4,
             count: 1,
-            
+
             tileIndex: 25,
 
             posX: 554.7794,
@@ -366,7 +366,7 @@ export default new Map(([
         {
             level: 5,
             count: 2,
-            
+
             tileIndex: 26,
 
             posX: 886.7794,
@@ -388,7 +388,7 @@ export default new Map(([
         {
             level: 6,
             count: 1,
-            
+
             tileIndex: 28,
 
             posX: 1220.7794,
@@ -409,7 +409,7 @@ export default new Map(([
         {
             level: 7,
             count: 1,
-            
+
             tileIndex: 29,
 
             posX: 1553.7794,
@@ -432,7 +432,7 @@ export default new Map(([
         {
             level: 8,
             count: 2,
-            
+
             tileIndex: 30,
 
             posX: 1887.7794,
@@ -549,7 +549,7 @@ export default new Map(([
             level: 1,
             count: 1,
             canDevelop: false,
-            
+
             tileIndex: 16,
 
             posX: 1095.25,
@@ -571,7 +571,7 @@ export default new Map(([
         {
             level: 2,
             count: 1,
-            
+
             tileIndex: 17,
 
             posX: 1095.25,
@@ -593,7 +593,7 @@ export default new Map(([
             level: 3,
             count: 1,
             canDevelop: false,
-            
+
             tileIndex: 18,
 
             posX: 1095.25,
@@ -615,7 +615,7 @@ export default new Map(([
         {
             level: 4,
             count: 1,
-            
+
             tileIndex: 19,
 
             posX: 1095.25,
@@ -637,7 +637,7 @@ export default new Map(([
             level: 5,
             count: 1,
             railOnly: true,
-            
+
             tileIndex: 20,
 
             posX: 1422.25,
@@ -663,6 +663,10 @@ export default new Map(([
     levels.forEach(data => {
         data.posX = (data.posX - REFERENCE_WIDTH * 0.5) * playerboard.WIDTH / REFERENCE_WIDTH;
         data.posY = (REFERENCE_HEIGHT * 0.5 - data.posY) * playerboard.HEIGHT / REFERENCE_HEIGHT;
+
+        data.cost.coins ??= 0;
+        data.cost.coal ??= 0;
+        data.cost.iron ??= 0;
     })
 
     return [industry, levels];

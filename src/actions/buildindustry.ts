@@ -59,7 +59,26 @@ export async function buildIndustry(game: Game, player: Player) {
 			break;
 	}
 
+	console.info(`We're building a ${Industry[industry]}!`);
+
 	loc.tile = player.takeNextIndustryTile(industry);
+
+	let coalCost = loc.tile.data.cost.coal;
+	let remainingCoalCost = coalCost;
+
+	const coalMarket = game.board.coalMarket;
+	const ironMarket = game.board.ironMarket;
+
+	for (let i = 0; i < coalCost && i < locationInfo.coalSources.count; ++i) {
+		locationInfo.coalSources.tiles[i].tile.resources.pop();
+		remainingCoalCost--;
+	}
+
+	console.info(`Taking ${remainingCoalCost} from the coal market`);
+
+	coalMarket.takeRange(remainingCoalCost);
+	player.money -= coalMarket.getCost(remainingCoalCost);
+
 
 	await game.delay.beat();
 
@@ -142,18 +161,16 @@ function getBuildableIndustriesAtLocation(location: IndustryLocation, player: Pl
 		const coalMarket = player.game.board.coalMarket;
 		const ironMarket = player.game.board.ironMarket;
 
-		let totalCost = slot.data.cost.coins ?? 0;
+		let totalCost = slot.data.cost.coins;
 
-		let costCoal = slot.data.cost.coal ?? 0;
-		let costIron = slot.data.cost.iron ?? 0;
+		let costCoal = slot.data.cost.coal;
+		let costIron = slot.data.cost.iron;
 
 		let residualCoal = costCoal - coalSources.count;
 		let residualIron = costIron - ironSources.count;
 
 		totalCost += coalMarket.getCost(residualCoal);
 		totalCost += ironMarket.getCost(residualIron);
-
-		console.log(`${City[location.city]} ${Industry[industry]} ${totalCost}`);
 
 		if (costCoal > coalSources.tiles.length && !coalSources.connectedToMarket) {
 			continue;

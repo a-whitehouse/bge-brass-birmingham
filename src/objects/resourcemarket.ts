@@ -194,7 +194,7 @@ export class ResourceMarket extends bge.Zone {
      * @param count Number of tokens to take.
      */
     takeRange(count: number): ResourceToken[] {
-        return Array(count).map(_ => this.take());
+        return Array.from(new Array(count)).map(_ => this.take());
     }
 
     /**
