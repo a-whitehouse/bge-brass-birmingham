@@ -132,7 +132,7 @@ export class Player extends bge.Player {
         const slots = this.playerBoard.industryLevels.get(industry);
 
         for (let slot of slots) {
-            if (slot.tiles.length > 0) {
+            if (slot.tiles.count > 0) {
                 return slot;
             }
         }
@@ -142,7 +142,7 @@ export class Player extends bge.Player {
 
     takeNextIndustryTile(industry: Industry): IndustryTile {
         const slot = this.getNextIndustryLevelSlot(industry);
-        return slot.tiles.pop();
+        return slot.tiles.draw();
     }
 
     getMatchingCards(location: IndustryLocation, industry?: Industry): Card[] {
