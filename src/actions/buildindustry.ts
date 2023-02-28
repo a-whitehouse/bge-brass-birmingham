@@ -77,6 +77,13 @@ export async function buildIndustry(game: Game, player: Player) {
 			let value = game.ironMarket.sell(loc.tile.resources);
 			player.money += value;
 			break;
+		case Resource.Coal:
+			let sources = game.board.getResourceSources(loc, Resource.Coal);
+			if (sources.connectedToMarket) {
+				let value = game.coalMarket.sell(loc.tile.resources);
+				player.money += value;
+			}
+			break;
 		default:
 			break;
 	}
