@@ -86,7 +86,7 @@ export class GameBoard extends bge.Card {
         this.linkLocations = LINK_LOCATIONS.map(data => {
             const location = new LinkLocation(data);
 
-            location.display = this.children.add(location, {
+            this.children.add(location, {
                 position: new bge.Vector3(data.posX, data.posY),
                 rotation: bge.Rotation.z(data.angle)
             });
@@ -139,35 +139,6 @@ export class GameBoard extends bge.Card {
      */
     getNeighbouringLinks(city: City): readonly LinkLocation[] {
         return this._cityLinkLocations.get(city) ?? [];
-    }
-
-    getBuiltIndustries(player: Player): readonly IndustryTile[] {
-        return this.industryLocations.filter(x => x.tile?.player === player).map(x => x.tile);
-    }
-
-    getBuiltLinks(player: Player): readonly LinkTile[] {
-        return this.linkLocations.filter(x => x.tile?.player === player).map(x => x.tile);
-    }
-
-    /**
-     * Checks if the given location is adjacent to a player placed tile.
-     * @param loc Location to check
-     * @param player Player's network to check
-     */
-    isInPlayerNetwork(loc: LinkLocation | IndustryLocation, player: Player): boolean {
-        let cities = loc instanceof LinkLocation ? loc.data.cities : [loc.city];
-
-        for (let city of cities) {
-            if (this.getIndustryLocations(city).some(x => x.tile?.player === player)) {
-                return true;
-            }
-
-            if (this.getNeighbouringLinks(city).some(x => x.tile?.player === player)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /**
@@ -271,7 +242,6 @@ export class GameBoard extends bge.Card {
 
         const result: IResourceSources = {
             tiles: [],
-            count: 0,
             connectedToMarket: resource === Resource.Iron
         };
 
@@ -292,7 +262,7 @@ export class GameBoard extends bge.Card {
                 throw new Error("Expected a player");
             }
 
-            for (let tile of this.getBuiltIndustries(player)) {
+            for (let tile of player.builtIndustries) {
                 if (tile.resources.length === 0) {
                     continue;
                 }
@@ -342,7 +312,6 @@ export class GameBoard extends bge.Card {
         }
 
         result.tiles.sort((a, b) => a.distance - b.distance);
-        result.count = result.tiles.length;
 
         return result;
     }
@@ -358,11 +327,6 @@ export interface IResourceSources {
      * Sorted by distance, ascending.
      */
     tiles: { tile: IndustryTile, distance: number }[];
-
-    /**
-     * The number of free (player produced) resource tokens accessible.
-     */
-    count: number;
 
     /**
      * If true, the corresponding resource market can be used.

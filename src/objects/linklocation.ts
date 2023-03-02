@@ -7,10 +7,7 @@ import { LinkTile } from "./linktile";
  * A location that a link can be built on by a player.
  */
 export class LinkLocation extends bge.Zone {
-    /**
-     * The display options used by this location on the {@link GameBoard}.
-     */
-    display: bge.IDisplayOptions;
+    private _tile: LinkTile;
 
     /**
      * Original definition of this industry location.
@@ -25,7 +22,7 @@ export class LinkLocation extends bge.Zone {
     }
 
     @bge.display()
-    tile?: LinkTile;
+    get tile() { return this._tile; }
 
     constructor(data: ILinkLocationData) {
         super(3, 1.6);
@@ -33,5 +30,22 @@ export class LinkLocation extends bge.Zone {
         this.data = data;
         this.hideIfEmpty = true;
         this.outlineStyle = bge.OutlineStyle.NONE;
+    }
+
+    async setTile(tile: LinkTile) {
+        if (this._tile != null) {
+            throw new Error("Can't build over existing tiles!");
+        }
+
+        if (tile.location != null) {
+            throw new Error("Tile already has a location!");
+        }
+
+        this._tile = tile;
+
+        tile.player.builtLinks.add(tile);
+        tile.location = this;
+
+        await tile.player.game.delay.beat();
     }
 }

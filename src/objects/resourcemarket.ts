@@ -5,6 +5,7 @@ import { GameBoard } from "./gameboard";
 import { ResourceToken, ResourceTokenSlot } from "./resourcetoken";
 
 import * as marketdata from "../data/resourcemarkets";
+import { IndustryTile } from "./industrytile";
 
 /**
  * Handles adding and removing iron or coal {@link ResourceToken}s from
@@ -198,18 +199,24 @@ export class ResourceMarket extends bge.Zone {
     }
 
     /**
-     * Fills up the next slots in the market with the given range of tokens,
-     * counting how many coins are earned in the process. The sold tokens are
-     * removed from {@link tokens}.
-     * @param tokens Array of tokens to sell to the market.
-     * @return The coins earned by selling.
+     * Fills up the next slots in the market with tokens taken from the given tile,
+     * giving money to the owning player and possibly flipping the tile.
+     * @param source Industry tile that has produced the sold tokens.
      */
-    sell(tokens: ResourceToken[]): number {
-        const toSell = Math.min(tokens.length, this.remainingSlots);
-        const saleValue = this.getSaleValue(toSell);
+    async sell(source: IndustryTile) {
+        const toSell = Math.min(source.resources.length, this.remainingSlots);
 
-        this.addRange(tokens.splice(tokens.length - toSell, toSell));
+        if (toSell <= 0) {
+            return;
+        }
 
-        return saleValue;
+        source.player.money += this.getSaleValue(toSell);
+        this.addRange(source.resources.splice(source.resources.length - toSell, toSell));
+
+        await source.player.game.delay.beat();
+
+        if (source.resources.length <= 0) {
+            await source.flip();
+        }
     }
 }

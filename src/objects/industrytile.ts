@@ -1,8 +1,10 @@
 import * as bge from "bge-core";
-import { LinearArrangement } from "bge-core";
+import { LinearArrangement, Rotation } from "bge-core";
 
 import { Player } from "../player";
 import { IIndustryLevelData, Industry } from "../types";
+import { IndustryLocation } from "./industrylocation";
+import { LinkLocation } from "./linklocation";
 import { ResourceToken } from "./resourcetoken";
 
 @bge.width(2.25)
@@ -20,6 +22,9 @@ export class IndustryTile extends bge.Card {
         })
     })
     readonly resources: ResourceToken[] = [];
+
+    location?: IndustryLocation;
+    hasFlipped: boolean = false;
 
     constructor(player: Player, industry: Industry, data: IIndustryLevelData) {
         super();
@@ -44,5 +49,35 @@ export class IndustryTile extends bge.Card {
 
         this.front.image = bge.Image.tile(frontUrl, 7, 9, row, col);
         this.back.image = bge.Image.tile(backUrl, 7, 9, row, col);
+    }
+
+    async consumeResource(destination: ResourceToken[]) {
+        if (this.resources.length === 0) {
+            throw new Error("This tile has no resources to consume");
+        }
+
+        destination.push(this.resources.pop());
+
+        await this.player.game.delay.beat();
+
+        if (this.resources.length === 0) {
+            await this.flip();
+        }
+    }
+
+    async flip() {
+        if (this.hasFlipped) {
+            throw new Error("This tile has already flipped");
+        }
+
+        this.hasFlipped = true;
+        this.location.children.getOptions("tile").rotation = Rotation.y(180);
+
+        await this.player.game.delay.beat();
+
+        if (this.data.saleReward.income > 0) {
+            this.player.increaseIncome(this.data.saleReward.income);
+            await this.player.game.delay.beat();
+        }
     }
 }

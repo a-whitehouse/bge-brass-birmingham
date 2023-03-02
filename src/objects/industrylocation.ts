@@ -4,11 +4,15 @@ import { IIndustryLocationData } from "../types";
 import { IndustryTile } from "./industrytile";
 
 import { City, Industry } from "../types";
+import { ResourceToken } from "./resourcetoken";
+import { LinearArrangement } from "bge-core";
 
 /**
  * A location that an industry can be built on by a player.
  */
 export class IndustryLocation extends bge.Zone {
+    private _tile: IndustryTile;
+
     /**
      * Original definition of this industry location.
      */
@@ -22,7 +26,14 @@ export class IndustryLocation extends bge.Zone {
     }
 
     @bge.display()
-    tile?: IndustryTile;
+    get tile() { return this._tile; }
+
+    @bge.display({
+        arrangement: new LinearArrangement({
+            axis: "z"
+        })
+    })
+    readonly spentResources: ResourceToken[] = [];
 
     constructor(data: IIndustryLocationData) {
         super(2.25, 2.25);
@@ -32,5 +43,24 @@ export class IndustryLocation extends bge.Zone {
         this.outlineStyle = bge.OutlineStyle.NONE;
 
         this.name = `${City[this.data.city]}: ${data.industries.map(x => Industry[x]).join(" or ")}`;
+    }
+
+    async setTile(tile: IndustryTile) {
+        
+        if (this._tile != null) {
+            this._tile.player.builtIndustries.delete(this._tile);
+            // TODO: animate removing tile?
+        }
+        
+        if (tile.location != null) {
+            throw new Error("Tile already has a location!");
+        }
+
+        this._tile = tile;
+        
+        tile.player.builtIndustries.add(tile);
+        tile.location = this;
+
+        await tile.player.game.delay.beat();
     }
 }

@@ -9,6 +9,7 @@ import { ScoreToken } from "./objects/scoring";
 import { IndustryLocation } from "./objects/industrylocation";
 import { ALL_INDUSTRIES, Industry, City } from "./types";
 import { PlayerToken } from "./objects/playertoken";
+import { LinkLocation } from "./objects/linklocation";
 
 /**
  * @summary Custom player class for your game.
@@ -39,6 +40,9 @@ export class Player extends bge.Player {
     playerToken: PlayerToken;
     victoryPointToken: ScoreToken;
     incomeToken: ScoreToken;
+
+    readonly builtIndustries: Set<IndustryTile> = new Set();
+    readonly builtLinks: Set<LinkTile> = new Set();
 
     money: number = 17;
     spent: number = 0;
@@ -97,10 +101,36 @@ export class Player extends bge.Player {
     }
 
     increaseVictoryPoints(delta: number): void {
-        this.incomeToken.increase(delta);
+        this.victoryPointToken.increase(delta);
     }
 
-    get hasBuiltAnything(): boolean {
+    get hasAnyBuiltTiles() {
+        return this.builtIndustries.size > 0 || this.builtLinks.size > 0;
+    }
+    
+    /**
+     * Checks if the given location is adjacent to a player placed tile.
+     * @param loc Location to check
+     * @param player Player's network to check
+     */
+    isInNetwork(loc: LinkLocation | IndustryLocation): boolean {
+
+        if (!this.hasAnyBuiltTiles) {
+            return true;
+        }
+
+        let cities = loc instanceof LinkLocation ? loc.data.cities : [loc.city];
+
+        for (let city of cities) {
+            if (this.game.board.getIndustryLocations(city).some(x => x.tile?.player === this)) {
+                return true;
+            }
+
+            if (this.game.board.getNeighbouringLinks(city).some(x => x.tile?.player === this)) {
+                return true;
+            }
+        }
+
         return false;
     }
 
@@ -134,7 +164,7 @@ export class Player extends bge.Player {
         const slots = this.playerBoard.industryLevels.get(industry);
 
         for (let slot of slots) {
-            if (slot.tiles.count > 0) {
+            if (slot.count > 0) {
                 return slot;
             }
         }
@@ -144,10 +174,14 @@ export class Player extends bge.Player {
 
     takeNextIndustryTile(industry: Industry): IndustryTile {
         const slot = this.getNextIndustryLevelSlot(industry);
-        return slot.tiles.draw();
+        return slot.draw();
     }
 
-    getMatchingCards(location: IndustryLocation, industry?: Industry): Card[] {
+    getMatchingCards(location: IndustryLocation, industry: Industry): Card[] {
+        if (!this.isInNetwork(location)) {
+            industry = Industry.None;
+        }
+
         return [...this.hand].filter(x => x.matchesIndustryLocation(location, industry));
     }
 
