@@ -133,7 +133,7 @@ export class Card extends bge.Card {
 		this.hidden.image = this.back.image;
 	}
 
-	matchesIndustryLocation(location: IndustryLocation, industry?: Industry): boolean { throw new Error("Not implemented"); }
+	matchesIndustryLocation(location: IndustryLocation, industry: Industry): boolean { throw new Error("Not implemented"); }
 	equals(card: Card): boolean { throw new Error("Not implemented"); }
 	get isWild(): boolean { throw new Error("Not implemented"); }
 }
@@ -156,12 +156,8 @@ export class IndustryCard extends Card {
 		this.industries = industries;
 	}
 
-	override matchesIndustryLocation(location: IndustryLocation, industry?: Industry): boolean {
-		if (industry != null) {
-			return this.industries.includes(industry);
-		} else {
-			return this.industries.some(x => location.data.industries.includes(x));
-		}
+	override matchesIndustryLocation(location: IndustryLocation, industry: Industry): boolean {
+		return this.industries.includes(industry);
 	}
 
 	override equals(card: Card): boolean {
@@ -187,7 +183,7 @@ export class CityCard extends Card {
 		this.city = city;
 	}
 
-	override matchesIndustryLocation(location: IndustryLocation, industry?: Industry): boolean {
+	override matchesIndustryLocation(location: IndustryLocation, industry: Industry): boolean {
 		return this.city === City.Any || this.city === location.city;
 	}
 

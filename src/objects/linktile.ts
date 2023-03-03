@@ -1,6 +1,7 @@
 import * as bge from "bge-core";
 
 import { Player } from "../player";
+import { LinkLocation } from "./linklocation";
 
 @bge.width(3)
 @bge.height(1.6)
@@ -8,6 +9,8 @@ import { Player } from "../player";
 @bge.cornerRadius(0.8)
 export class LinkTile extends bge.Card {
 	readonly player: Player;
+
+    location?: LinkLocation;
 
 	constructor(player: Player) {
 		super();

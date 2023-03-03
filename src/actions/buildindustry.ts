@@ -4,6 +4,8 @@ import { Game } from "../game";
 import { Card } from "../objects/card";
 import { IResourceSources } from "../objects/gameboard";
 import { IndustryLocation } from "../objects/industrylocation";
+import { IndustryTile } from "../objects/industrytile";
+import { ResourceMarket } from "../objects/resourcemarket";
 import { ResourceToken } from "../objects/resourcetoken";
 import { Player } from "../player";
 import { Industry, Resource, Era, City } from "../types";
@@ -59,28 +61,20 @@ export async function buildIndustry(game: Game, player: Player) {
 			break;
 	}
 
+	await player.discardAnyCard(player.getMatchingCards(loc, industry));
+
 	console.info(`We're building a ${Industry[industry]}!`);
 
-	loc.tile = player.takeNextIndustryTile(industry);
+	const slot = player.getNextIndustryLevelSlot(industry);
 
-	let coalCost = loc.tile.data.cost.coal;
-	let remainingCoalCost = coalCost;
+	await consumeResources(player, loc, slot.data.cost.coal, locationInfo.coalSources, game.board.coalMarket);
+	await consumeResources(player, loc, slot.data.cost.iron, locationInfo.ironSources, game.board.ironMarket);
 
-	const coalMarket = game.board.coalMarket;
-	const ironMarket = game.board.ironMarket;
+	player.spendMoney(slot.data.cost.coins);
 
-	for (let i = 0; i < coalCost && i < locationInfo.coalSources.count; ++i) {
-		locationInfo.coalSources.tiles[i].tile.resources.pop();
-		remainingCoalCost--;
-	}
+	await loc.setTile(player.takeNextIndustryTile(industry));
 
-	console.info(`Taking ${remainingCoalCost} from the coal market`);
-
-	coalMarket.takeRange(remainingCoalCost);
-	player.money -= coalMarket.getCost(remainingCoalCost);
-
-
-	await game.delay.beat();
+	loc.spentResources.splice(0, loc.spentResources.length);
 
 	let producedResourceType: Resource = undefined;
 	let producedAmount = loc.tile.data.productionCount ?? 0;
@@ -108,21 +102,17 @@ export async function buildIndustry(game: Game, player: Player) {
 
 	switch (producedResourceType) {
 		case Resource.Iron:
-			let value = game.ironMarket.sell(loc.tile.resources);
-			player.money += value;
+			await game.ironMarket.sell(loc.tile);
 			break;
 		case Resource.Coal:
 			let sources = game.board.getResourceSources(loc, Resource.Coal);
 			if (sources.connectedToMarket) {
-				let value = game.coalMarket.sell(loc.tile.resources);
-				player.money += value;
+				await game.coalMarket.sell(loc.tile);
 			}
 			break;
 		default:
 			break;
 	}
-
-	await player.discardAnyCard(player.getMatchingCards(loc, industry));
 }
 
 function getBuildableIndustriesAtLocation(location: IndustryLocation, player: Player,
@@ -156,6 +146,20 @@ function getBuildableIndustriesAtLocation(location: IndustryLocation, player: Pl
 			continue;
 		}
 
+		// We can't build industry A on a location allowing industries A and B, if
+		// there's a free spot in the same city allowing only industry A.
+		//
+		//   "If possible, place it on a space displaying only that industry's icon"
+		//
+
+		if (location.data.industries.length > 1
+			&& locations.some(x => x !== location
+				&& x.tile == null
+				&& x.data.industries.length === 1
+				&& x.data.industries[0] === industry)) {
+			continue;
+		}
+
 		const slot = player.getNextIndustryLevelSlot(industry);
 
 		const coalMarket = player.game.board.coalMarket;
@@ -166,8 +170,8 @@ function getBuildableIndustriesAtLocation(location: IndustryLocation, player: Pl
 		let costCoal = slot.data.cost.coal;
 		let costIron = slot.data.cost.iron;
 
-		let residualCoal = costCoal - coalSources.count;
-		let residualIron = costIron - ironSources.count;
+		let residualCoal = costCoal - coalSources.tiles.length;
+		let residualIron = costIron - ironSources.tiles.length;
 
 		totalCost += coalMarket.getCost(residualCoal);
 		totalCost += ironMarket.getCost(residualIron);
@@ -182,4 +186,38 @@ function getBuildableIndustriesAtLocation(location: IndustryLocation, player: Pl
 	}
 
 	return result;
+}
+
+async function consumeResources(player: Player, destination: IndustryLocation,
+	amount: number, sources: IResourceSources, market: ResourceMarket) {
+
+	while (sources.tiles.length > 0 && amount > 0) {
+		const distance = sources.tiles[0].distance;
+		const choices = new Set(sources.tiles.filter(x => x.distance === distance).map(x => x.tile));
+
+		let tile: IndustryTile;
+
+		if (choices.size === 1) {
+			tile = sources.tiles[0].tile;
+		} else {
+			tile = await player.prompt.clickAny(choices, {
+				message: `Select ${(market.resource === Resource.Iron ? "an" : "a")} ${Resource[market.resource]} to consume`
+			});
+		}
+
+		sources.tiles.splice(sources.tiles.findIndex(x => x.tile === tile), 1);
+
+		await tile.consumeResource(destination.spentResources);
+
+		--amount;
+
+		await player.game.delay.beat();
+	}
+
+	if (amount > 0) {	
+		destination.spentResources.push(...market.takeRange(amount));
+		player.spendMoney(market.getCost(amount));
+		
+		await player.game.delay.beat();
+	}
 }

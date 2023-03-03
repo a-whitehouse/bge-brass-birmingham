@@ -6,30 +6,25 @@ import INDUSTRIES from "../data/industrylevels";
 import { Player } from "../player";
 import { IndustryTile } from "./industrytile";
 import { IIndustryLevelData, Industry } from "../types";
-import { LinearArrangement, Vector3 } from "bge-core";
 
-export class IndustryLevelSlot extends bge.Zone {
+export class IndustryLevelSlot extends bge.Deck<IndustryTile> {
     readonly player: Player;
     readonly industry: Industry;
     readonly data: IIndustryLevelData;
 
-    @bge.display()
-    readonly tiles = new bge.Deck(IndustryTile);
-
     constructor(player: Player, industry: Industry, data: IIndustryLevelData) {
-        super(2.5, 2.5);
+        super(IndustryTile);
 
         this.player = player;
         this.industry = industry;
         this.data = data;
 
-        this.outlineStyle = bge.OutlineStyle.NONE;
-        this.hideIfEmpty = true;
+        this.emptyOutlineStyle = bge.OutlineStyle.NONE;
 
         const count = data.count ?? 1;
 
         for (let i = 0; i < count; ++i) {
-            this.tiles.add(new IndustryTile(player, industry, data));
+            this.add(new IndustryTile(player, industry, data));
         }
     }
 }

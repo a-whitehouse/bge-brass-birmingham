@@ -27,8 +27,9 @@ export async function buildLink(game: Game, player: Player) {
 
 	let loc = await player.prompt.clickAny(getBuildableLinks(game, player), { message: "Click on a link!" });
 
-	loc.tile = player.linkTiles.draw();
 	player.spendMoney(3);
+
+	await loc.setTile(player.linkTiles.draw());
 
 	// TODO: make nicer version for rail era.
 
@@ -37,16 +38,8 @@ export async function buildLink(game: Game, player: Player) {
 
 
 function getBuildableLinks(game: Game, player: Player): LinkLocation[] {
-	let buildableLinks = game.board.linkLocations.filter(x => x.tile == null &&
-		((x.data.canal && game.era == Era.Canal) || (x.data.rail && game.era == Era.Rail))
-	);
-
-	let builtIndustries = game.board.getBuiltIndustries(player);
-	let builtLinks = game.board.getBuiltLinks(player);
-
-	if (builtIndustries.length != 0 || builtLinks.length != 0) {
-		buildableLinks = buildableLinks.filter(x => game.board.isInPlayerNetwork(x, player));
-	}
-
-	return buildableLinks;
+	return game.board.linkLocations
+		.filter(x => x.tile == null)
+		.filter(x => x.data.canal && game.era == Era.Canal || x.data.rail && game.era == Era.Rail)
+		.filter(x => player.isInNetwork(x));
 }

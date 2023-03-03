@@ -27,6 +27,8 @@ export default async function main(game: Game) {
 
     let playerOrder: Player[] = [...game.players];
 
+    game.random.shuffle(playerOrder);
+
     while (true) {
 
         numActions = firstTurn ? 1 : 2;
@@ -34,9 +36,9 @@ export default async function main(game: Game) {
         console.info(`Round starts with ${numActions}`);
         console.info(`Player order: ${playerOrder.map(x => x.name).join(", ")}`);
 
-        playerOrder.forEach((player, index) => {
-            player.game.board.playerTokenSlots[index].playerToken = player.playerToken;
-        });
+        updatePlayerTokens(playerOrder);
+
+        await grantIncome(playerOrder);
 
         for (let player of playerOrder) {
             await playerTurn(game, player, numActions);
@@ -98,6 +100,16 @@ async function setup(game: Game) {
     await game.delay.beat();
 }
 
+async function grantIncome(players: Player[]) {
+    for (let player of players) {
+        player.money += player.income;
+    }
+
+    // TODO: if income is negative, and can't pay:
+    //  must sell off placed industry tile for half its cost
+    //  otherwise, lose 1VP per £1 short
+}
+
 function reorderPlayers(players: Player[]) {
     let tmp: Player;
 
@@ -117,8 +129,13 @@ function reorderPlayers(players: Player[]) {
                 ++successfulComparisons;
             }
         }
-
     }
+}
+
+function updatePlayerTokens(players: Player[]) {
+    players.forEach((player, index) => {
+        player.game.board.playerTokenSlots[index].playerToken = player.playerToken;
+    });
 }
 
 function resetSpentMoney(players: Player[]) {
