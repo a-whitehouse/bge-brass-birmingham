@@ -6,6 +6,7 @@ import { ResourceToken } from "../objects/resourcetoken";
 import { ScoreTokenKind } from "../objects/scoring";
 import { IndustryCard, CityCard } from "../objects/card";
 import { LinkTile } from "../objects/linktile";
+import { MerchantTile } from "../objects/merchanttile";
 
 import { Game } from "../game";
 import { Player } from "../player";
@@ -16,6 +17,7 @@ import { scout } from "./scout";
 import { buildLink } from "./buildlink";
 import { buildIndustry } from "./buildindustry";
 import { PlayerToken } from "../objects/playertoken";
+import { develop } from "./develop";
 
 const console = bge.Logger.get("player-turn");
 
@@ -64,7 +66,8 @@ async function playerTurn(game: Game, player: Player, actionCount: number) {
             buildIndustry(game, player),
             buildLink(game, player),
             takeLoan(game, player),
-            scout(game, player)
+            scout(game, player),
+            develop(game, player)
         ]);
     }
 }
@@ -78,6 +81,23 @@ async function setup(game: Game) {
 
         for (let i = 0; i < 15; ++i) {
             player.linkTiles.add(new LinkTile(player));
+        }
+    }
+
+    // Merchants
+    const merchantTiles = [...MerchantTile.generateDeck(game.players.length)];
+
+    game.random.shuffle(merchantTiles);
+
+    for (let merchantLocation of game.board.merchantLocations) {
+        if (merchantLocation.data.minPlayers > game.players.length) {
+            continue;
+        }
+
+        merchantLocation.tile = merchantTiles.pop();
+
+        if (merchantLocation.tile.industries.length > 0) {
+            merchantLocation.marketBeer = new ResourceToken(Resource.Beer);
         }
     }
 

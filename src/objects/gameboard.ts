@@ -3,6 +3,7 @@ import * as bge from "bge-core";
 import * as gameboard from "../data/gameboard";
 import INDUSTRY_LOCATIONS from "../data/buildinglocations";
 import LINK_LOCATIONS from "../data/linklocations";
+import MERCHANT_LOCATIONS from "../data/merchantlocations";
 
 import { ResourceMarket } from "./resourcemarket";
 
@@ -11,6 +12,7 @@ import { LinkLocation } from "./linklocation";
 import { IndustryTile } from "./industrytile";
 import { LinkTile } from "./linktile";
 import { PlayerTokenSlot } from "./playertoken";
+import { MerchantLocation } from "./merchantlocation";
 
 import { Player } from "../player";
 import { Game } from "../game";
@@ -34,6 +36,11 @@ export class GameBoard extends bge.Card {
      * Array of {@link LinkLocation}s that players can build on.
      */
     readonly linkLocations: readonly LinkLocation[];
+
+    /**
+     * Array of {@link MerchantLocation}s that players can sell to.
+     */
+    readonly merchantLocations: readonly MerchantLocation[];
 
     private readonly _cityIndustryLocations = new Map<City, IndustryLocation[]>();
     private readonly _cityLinkLocations = new Map<City, LinkLocation[]>();
@@ -89,6 +96,19 @@ export class GameBoard extends bge.Card {
             this.children.add(location, {
                 position: new bge.Vector3(data.posX, data.posY),
                 rotation: bge.Rotation.z(data.angle)
+            });
+
+            return location;
+        });
+
+        // Read market location definitions, create MarketLocation instances,
+        // then add them as children to be displayed.
+
+        this.merchantLocations = MERCHANT_LOCATIONS.map(data => {
+            const location = new MerchantLocation(data);
+
+            this.children.add(location, {
+                position: new bge.Vector3(data.posX, data.posY)
             });
 
             return location;
@@ -234,8 +254,8 @@ export class GameBoard extends bge.Card {
      * @param player Player that is requesting the resource (only needed for beer)
      */
     getResourceSources(
-        destination: LinkLocation | IndustryLocation | City,
         resource: Resource,
+        destination?: LinkLocation | IndustryLocation | City,
         player?: Player): IResourceSources {
 
         // TODO: market beer!

@@ -11,6 +11,12 @@ import { ALL_INDUSTRIES, Industry, City } from "./types";
 import { PlayerToken } from "./objects/playertoken";
 import { LinkLocation } from "./objects/linklocation";
 
+export interface IDiscardAnyCardOptions<TReturn = void> {
+    cards?: readonly Card[];
+    message?: string;
+    return?: TReturn
+}
+
 /**
  * @summary Custom player class for your game.
  * @description It can contain any objects the player owns, and properties like their score or health.
@@ -34,8 +40,11 @@ export class Player extends bge.Player {
     @bge.display({ position: { x: -12.2 } })
     readonly playerBoard = new PlayerBoard(this);
 
-    @bge.display({ position: { x: 15, y: 5 }, label: "Link Tiles" })
+    @bge.display({ position: { x: 15, y: 2 }, label: "Link Tiles" })
     readonly linkTiles = new bge.Deck(LinkTile, { orientation: bge.CardOrientation.FACE_UP })
+
+    @bge.display({ position: { x: 15, y: 8 }, label: "Discarded Tiles" })
+    readonly developedIndustries = new bge.Deck(IndustryTile, { orientation: bge.CardOrientation.FACE_UP })
 
     playerToken: PlayerToken;
     victoryPointToken: ScoreToken;
@@ -107,7 +116,7 @@ export class Player extends bge.Player {
     get hasAnyBuiltTiles() {
         return this.builtIndustries.size > 0 || this.builtLinks.size > 0;
     }
-    
+
     /**
      * Checks if the given location is adjacent to a player placed tile.
      * @param loc Location to check
@@ -185,9 +194,9 @@ export class Player extends bge.Player {
         return [...this.hand].filter(x => x.matchesIndustryLocation(location, industry));
     }
 
-    async discardAnyCard(cards?: readonly Card[]) {
+    async discardAnyCard<TReturn = void>(options?: IDiscardAnyCardOptions<TReturn>): Promise<TReturn> {
 
-        cards ??= [...this.hand];
+        const cards = options?.cards ?? [...this.hand];
 
         let discardedCard: Card;
 
@@ -212,9 +221,9 @@ export class Player extends bge.Player {
                 }
 
                 discardedCard = await this.prompt.clickAny(cards, {
-                    message: cards.length < this.hand.count
+                    message: options?.message ?? (cards.length < this.hand.count
                         ? "Discard a matching card"
-                        : "Discard any card"
+                        : "Discard any card")
                 });
 
                 this.hand.setSelected(false);
@@ -222,6 +231,8 @@ export class Player extends bge.Player {
         }
 
         await this.finishDiscardingCards([discardedCard]);
+
+        return options?.return;
     }
 
     async discardAnyCards(count: number) {

@@ -206,6 +206,28 @@ export interface IIndustryLevelData {
     railOnly?: true;
 }
 
+export enum MerchantBeerReward {
+    Develop,
+    TwoIncome,
+    FiveCoins,
+    ThreeVictoryPoints,
+    FourVictoryPoints
+}
+
+export interface IMerchantLocationData {
+    city: City;
+
+    minPlayers: number;
+
+    posX: number;
+    posY: number;
+
+    beerReward: MerchantBeerReward;
+
+    beerPosX: number;
+    beerPosY: number;
+}
+
 /**
  * Describes how the tokens in a resource market are positioned.
  */
