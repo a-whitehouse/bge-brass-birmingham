@@ -22,8 +22,8 @@ export async function buildIndustry(game: Game, player: Player) {
 
 	const buildableIndustries = new Map(game.board.industryLocations
 		.map(x => {
-			const coalSources = game.board.getResourceSources(x, Resource.Coal, player);
-			const ironSources = game.board.getResourceSources(x, Resource.Iron, player);
+			const coalSources = game.board.getResourceSources(Resource.Coal, x, player);
+			const ironSources = game.board.getResourceSources(Resource.Iron, x, player);
 
 			const buildableIndustries = getBuildableIndustriesAtLocation(x, player, coalSources, ironSources);
 
@@ -61,7 +61,9 @@ export async function buildIndustry(game: Game, player: Player) {
 			break;
 	}
 
-	await player.discardAnyCard(player.getMatchingCards(loc, industry));
+	await player.discardAnyCard({
+		cards: player.getMatchingCards(loc, industry)
+	});
 
 	console.info(`We're building a ${Industry[industry]}!`);
 
@@ -105,7 +107,7 @@ export async function buildIndustry(game: Game, player: Player) {
 			await game.ironMarket.sell(loc.tile);
 			break;
 		case Resource.Coal:
-			let sources = game.board.getResourceSources(loc, Resource.Coal);
+			let sources = game.board.getResourceSources(Resource.Coal, loc);
 			if (sources.connectedToMarket) {
 				await game.coalMarket.sell(loc.tile);
 			}
@@ -214,10 +216,10 @@ async function consumeResources(player: Player, destination: IndustryLocation,
 		await player.game.delay.beat();
 	}
 
-	if (amount > 0) {	
+	if (amount > 0) {
 		destination.spentResources.push(...market.takeRange(amount));
 		player.spendMoney(market.getCost(amount));
-		
+
 		await player.game.delay.beat();
 	}
 }
