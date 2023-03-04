@@ -21,6 +21,8 @@ import { PlayerToken } from "../objects/playertoken";
 import { develop } from "./develop";
 import { sell } from "./sell";
 import { endOfEraScoring } from "./scoring";
+import { IResourceSources } from "../objects/gameboard";
+import { LinkLocation } from "../objects/linklocation";
 
 const console = bge.Logger.get("player-turn");
 
@@ -234,4 +236,47 @@ async function drainMarket(game: Game, player: Player, market: ResourceMarket) {
     await player.prompt.click(new bge.Button(`Drain ${Resource[market.resource]} market`));
 
     market.takeRange(market.count);
+}
+
+/**
+ * Prompts the given player to select which resources to consume, up to the given amount.
+ */
+export async function consumeResources(player: Player, destination: IndustryLocation | LinkLocation,
+	resource: Resource, amount: number, sources: IResourceSources, market?: ResourceMarket) {
+
+	while (sources.tiles.length > 0 && amount > 0) {
+		const distance = sources.tiles[0].distance;
+		const choices = new Set(sources.tiles.filter(x => x.distance === distance).map(x => x.tile));
+
+		let tile = await player.prompt.clickAny(choices, {
+			message: `Select ${(resource === Resource.Iron ? "an" : "a")} ${Resource[resource]} to consume`,
+			autoResolveIfSingle: true
+		});
+
+		sources.tiles.splice(sources.tiles.findIndex(x => x.tile === tile), 1);
+
+		console.info(`Consuming ${Resource[resource]} from ${tile.name}`);
+
+		await tile.consumeResource(destination.spentResources);
+
+		--amount;
+
+		await player.game.delay.beat();
+	}
+
+	if (amount > 0) {
+		if (market == null) {
+			throw new Error("No market was given!");
+		}
+
+		const cost = market.getCost(amount);
+
+		destination.spentResources.push(...market.takeRange(amount));
+
+		console.info(`Spending £${cost} to buy ${amount} ${Resource[resource]} from the market`);
+
+		player.spendMoney(cost);
+
+		await player.game.delay.beat();
+	}
 }

@@ -1,11 +1,10 @@
 import * as bge from "bge-core";
 
-import { Era, Resource, City } from "../types";
+import { Era, Resource } from "../types";
 import { Game } from "../game";
 import { LinkLocation } from "../objects/linklocation";
-import { LinkTile } from "../objects/linktile";
 import { Player } from "../player";
-import { consumeResources } from "./buildindustry";
+import { consumeResources } from ".";
 
 const console = bge.Logger.get("link");
 

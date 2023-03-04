@@ -1,6 +1,7 @@
 import * as bge from "bge-core";
 
 import { Game } from "../game";
+import { maxBy, minBy } from "../helpers";
 import { City, Industry } from "../types";
 
 const console = bge.Logger.get("scoring");
@@ -59,44 +60,4 @@ async function scoreIndustries(game: Game) {
             tile.player.increaseVictoryPoints(victoryPoints);
         }
     }
-}
-
-/**
- * Gets the element from the given collection with the smallest value returned by {@link getValue}.
- * If the collection is empty, returns undefined.
- */
-function minBy<T>(collection: Iterable<T>, getValue: { (item: T): number }): T | undefined {
-    let bestValue = Number.MAX_VALUE;
-    let bestItem: T = undefined;
-
-    for (let item of collection) {
-        const value = getValue(item);
-
-        if (value < bestValue) {
-            bestValue = value;
-            bestItem = item;
-        }
-    }
-
-    return bestItem;
-}
-
-/**
- * Gets the element from the given collection with the largest value returned by {@link getValue}.
- * If the collection is empty, returns undefined.
- */
-function maxBy<T>(collection: Iterable<T>, getValue: { (item: T): number }): T | undefined {
-    let bestValue = -Number.MAX_VALUE;
-    let bestItem: T = undefined;
-
-    for (let item of collection) {
-        const value = getValue(item);
-
-        if (value > bestValue) {
-            bestValue = value;
-            bestItem = item;
-        }
-    }
-
-    return bestItem;
 }
