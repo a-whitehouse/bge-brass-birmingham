@@ -53,6 +53,10 @@ export class IndustryTile extends bge.Card {
         this.back.image = bge.Image.tile(backUrl, 7, 9, row, col);
     }
 
+    clearResources() {
+        this.resources.splice(0, this.resources.length);
+    }
+
     async consumeResource(destination?: ResourceToken[]) {
         if (this.resources.length === 0) {
             throw new Error("This tile has no resources to consume");

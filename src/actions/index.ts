@@ -7,6 +7,7 @@ import { ScoreTokenKind } from "../objects/scoring";
 import { IndustryCard, CityCard } from "../objects/card";
 import { LinkTile } from "../objects/linktile";
 import { MerchantTile } from "../objects/merchanttile";
+import { ResourceMarket } from "../objects/resourcemarket";
 
 import { Game } from "../game";
 import { Player } from "../player";
@@ -24,6 +25,7 @@ import { endOfEraScoring } from "./scoring";
 const console = bge.Logger.get("player-turn");
 
 const SKIP_CANAL_ERA = false;
+const ALLOW_DRAIN_MARKETS = true;
 
 export default async function main(game: Game) {
     await setup(game);
@@ -82,7 +84,9 @@ async function playerTurn(game: Game, player: Player, actionCount: number) {
             takeLoan(game, player),
             scout(game, player),
             develop(game, player),
-            sell(game, player)
+            sell(game, player),
+            drainMarket(game, player, game.board.coalMarket),
+            drainMarket(game, player, game.board.ironMarket)
         ]);
     }
 }
@@ -216,4 +220,18 @@ function resetSpentMoney(players: Player[]) {
     for (let player of players) {
         player.spent = 0;
     }
+}
+
+async function drainMarket(game: Game, player: Player, market: ResourceMarket) {
+    if (!ALLOW_DRAIN_MARKETS) {
+        await Promise.reject("Draining markets is disabled");
+    }
+
+    if (market.isEmpty) {
+        await Promise.reject("Market is empty");
+    }
+
+    await player.prompt.click(new bge.Button(`Drain ${Resource[market.resource]} market`));
+
+    market.takeRange(market.count);
 }

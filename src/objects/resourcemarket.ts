@@ -29,6 +29,9 @@ export class ResourceMarket extends bge.Zone {
 
     private readonly _slots: ResourceTokenSlot<{ cost: number }>[];
 
+    /**
+     * Maximum number of tokens this market can contain.
+     */
     get capacity() {
         return this._slots.length;
     }
@@ -52,6 +55,13 @@ export class ResourceMarket extends bge.Zone {
      */
     get isFull() {
         return this.remainingSlots <= 0;
+    }
+
+    /**
+     * If true, every slot in the market is empty.
+     */
+    get isEmpty() {
+        return this._count === 0;
     }
 
     /**

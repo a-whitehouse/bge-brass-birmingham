@@ -54,6 +54,10 @@ export class LinkLocation extends bge.Zone {
         this.outlineStyle = bge.OutlineStyle.NONE;
     }
 
+    clearSpentResources() {
+        this.spentResources.splice(0, this.spentResources.length);
+    }
+
     async setTile(tile?: LinkTile) {
         if (this._tile === tile) {
             return;

@@ -7,6 +7,8 @@ import { City, Industry } from "../types";
 import { ResourceToken } from "./resourcetoken";
 import { LinearArrangement } from "bge-core";
 
+const console = bge.Logger.get("industry-location");
+
 /**
  * A location that an industry can be built on by a player.
  */
@@ -45,6 +47,10 @@ export class IndustryLocation extends bge.Zone {
         this.name = `${City[this.data.city]}: ${data.industries.map(x => Industry[x]).join(" or ")}`;
     }
 
+    clearSpentResources() {
+        this.spentResources.splice(0, this.spentResources.length);
+    }
+
     async setTile(tile?: IndustryTile) {
         if (this._tile === tile) {
             return;
@@ -55,7 +61,13 @@ export class IndustryLocation extends bge.Zone {
         }
 
         if (this._tile != null) {
+            if (tile != null) {
+                console.info(`Overbuilding ${this._tile.name} in ${this.name} with ${tile.name}`);
+            }
+
             const game = this._tile.player.game;
+
+            this._tile.clearResources();
 
             this._tile.player.removeBuiltIndustry(this._tile);
             this._tile.player.developedIndustries.add(this._tile);
@@ -65,6 +77,7 @@ export class IndustryLocation extends bge.Zone {
             await game.delay.beat();
         }
 
+        this.children.getOptions("tile").rotation = bge.Rotation.IDENTITY;
         this._tile = tile;
 
         if (tile != null) {

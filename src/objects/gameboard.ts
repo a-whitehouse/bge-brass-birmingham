@@ -355,6 +355,29 @@ export class GameBoard extends bge.Card {
             .filter(x => x.tile != null && x.tile.hasFlipped)
             .reduce((s, x) => s + x.tile.data.saleReward.linkPoints, 0);
     }
+
+    /**
+     * Returns true if any built industry tiles have a token of the given resource type.
+     */
+    areAnyTokensAvailable(resource: Resource): boolean {
+        let market: ResourceMarket;
+
+        switch (resource) {
+            case Resource.Coal:
+                market = this.coalMarket;
+                break;
+
+            case Resource.Iron:
+                market = this.ironMarket;
+                break;
+        }
+
+        if (market != null && !market.isEmpty) {
+            return true;
+        }
+
+        return this.industryLocations.some(x => x.tile != null && x.tile.resources.some(y => y.resource === resource));
+    }
 }
 
 /**

@@ -85,7 +85,7 @@ async function sellOnce(game: Game, player: Player, sellOptions: ISellOption[], 
         await brewery.consumeResource();
     }
 
-    tile.resources.splice(0, tile.resources.length);
+    tile.clearResources();
     await tile.flip();
 
     return true;

@@ -105,6 +105,11 @@ export const ALL_INDUSTRIES = [
     Industry.Brewery
 ]
 
+export const OVERBUILDABLE_INDUSTRIES = [
+    Industry.Coal,
+    Industry.Iron
+]
+
 export const SELLABLE_INDUSTRIES = [
     Industry.Goods,
     Industry.Cotton,

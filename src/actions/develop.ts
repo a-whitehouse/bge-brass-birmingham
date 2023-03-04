@@ -36,7 +36,7 @@ export async function developOnce(game: Game, player: Player): Promise<true> {
     if (ironSources.tiles.length === 0 && marketCost > player.money) {
         await Promise.reject("Must have access to iron or enough money to buy from market.")
     }
-    
+
     const developableIndustries = ALL_INDUSTRIES.map(x => {
         let slot = player.getNextIndustryLevelSlot(x);
         if (slot.data.canDevelop ?? true) {
@@ -65,7 +65,7 @@ export async function developOnce(game: Game, player: Player): Promise<true> {
         await game.delay.beat();
     }
 
-    slot.top.resources.splice(0, slot.top.resources.length);
+    slot.top.clearResources();
     player.developedIndustries.add(player.takeNextIndustryTile(slot.industry));
 
     await game.delay.beat();

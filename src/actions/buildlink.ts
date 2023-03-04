@@ -63,7 +63,7 @@ async function buildSingleLink(game: Game, player: Player, linkCost: number, coa
 
 	await loc.setTile(player.linkTiles.draw());
 
-	loc.spentResources.splice(0, loc.spentResources.length);
+	loc.clearSpentResources();
 
 	return true;
 }

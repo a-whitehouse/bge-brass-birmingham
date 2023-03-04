@@ -9,7 +9,7 @@ import { ResourceMarket } from "../objects/resourcemarket";
 import { ResourceToken } from "../objects/resourcetoken";
 import { LinkLocation } from "../objects/linklocation";
 import { Player } from "../player";
-import { Industry, Resource, Era, City } from "../types";
+import { Industry, Resource, Era, City, OVERBUILDABLE_INDUSTRIES } from "../types";
 
 const console = bge.Logger.get("build-industry");
 
@@ -21,12 +21,15 @@ interface IBuildableAtLocationInfo {
 
 export async function buildIndustry(game: Game, player: Player) {
 
+	let coalAvailable = game.board.areAnyTokensAvailable(Resource.Coal);
+	let ironAvailable = game.board.areAnyTokensAvailable(Resource.Iron);
+
 	const buildableIndustries = new Map(game.board.industryLocations
 		.map(x => {
 			const coalSources = game.board.getResourceSources(Resource.Coal, x, player);
 			const ironSources = game.board.getResourceSources(Resource.Iron, x, player);
 
-			const buildableIndustries = getBuildableIndustriesAtLocation(x, player, coalSources, ironSources);
+			const buildableIndustries = getBuildableIndustriesAtLocation(x, player, coalSources, ironSources, coalAvailable, ironAvailable);
 
 			return [x, { industries: buildableIndustries, coalSources: coalSources, ironSources: ironSources }];
 		})
@@ -65,7 +68,7 @@ export async function buildIndustry(game: Game, player: Player) {
 
 	await loc.setTile(player.takeNextIndustryTile(industry));
 
-	loc.spentResources.splice(0, loc.spentResources.length);
+	loc.clearSpentResources();
 
 	let producedResourceType: Resource = undefined;
 	let producedAmount = loc.tile.data.productionCount ?? 0;
@@ -107,22 +110,19 @@ export async function buildIndustry(game: Game, player: Player) {
 }
 
 function getBuildableIndustriesAtLocation(location: IndustryLocation, player: Player,
-	coalSources: IResourceSources, ironSources: IResourceSources): Industry[] {
-
-	if (location.tile != null) {
-		// TODO: overbuilding
-		return [];
-	}
+	coalSources: IResourceSources, ironSources: IResourceSources, coalAvailable: boolean,
+	ironAvailable: boolean): Industry[] {
 
 	const availableIndustries = player.availableIndustries;
 
 	const result: Industry[] = [];
 
+	// Industry locations in the same city as the one we want to build on
 	let locations = player.game.board.getIndustryLocations(location.city);
 
 	if (player.game.era == Era.Canal) {
 		for (let loc of locations) {
-			if (loc.tile?.player == player) {
+			if (loc !== location && loc.tile?.player == player) {
 				return [];
 			}
 		}
@@ -171,6 +171,25 @@ function getBuildableIndustriesAtLocation(location: IndustryLocation, player: Pl
 			continue;
 		} else if (player.money < totalCost) {
 			continue;
+		}
+
+		if (location.tile != null && location.tile.player != player) {
+			if (!OVERBUILDABLE_INDUSTRIES.includes(location.tile.industry)) {
+				continue;
+			}
+
+			switch (location.tile.industry) {
+				case (Industry.Coal):
+					if (coalAvailable) {
+						continue;
+					}
+				case (Industry.Iron):
+					if (ironAvailable) {
+						continue;
+					}
+				default:
+					throw Error("Only coal or iron industries of another player can be overbuilt.")
+			}
 		}
 
 		result.push(industry);
