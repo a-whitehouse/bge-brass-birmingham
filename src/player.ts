@@ -101,6 +101,10 @@ export class Player extends bge.Player {
         this._builtLinks.add(tile);
     }
 
+    removeBuiltLink(tile: LinkTile) {
+        this._builtLinks.delete(tile);
+    }
+
     createZone(): bge.Zone {
         const zone = new bge.Zone(57, this.playerBoard.height + 4);
 

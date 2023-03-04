@@ -91,7 +91,7 @@ export class GameBoard extends bge.Card {
         // then add them as children to be displayed.
 
         this.linkLocations = LINK_LOCATIONS.map(data => {
-            const location = new LinkLocation(data);
+            const location = new LinkLocation(this, data);
 
             this.children.add(location, {
                 position: new bge.Vector3(data.posX, data.posY),
@@ -334,6 +334,26 @@ export class GameBoard extends bge.Card {
         result.tiles.sort((a, b) => a.distance - b.distance);
 
         return result;
+    }
+
+    /**
+     * Gets the number of link points provided by industries at this city.
+     * For market cities, always returns 2.
+     */
+    getLinkPoints(city: City): number {
+        const locations = this._cityIndustryLocations.get(city);
+
+        if (locations == null) {
+            if (!MARKET_CITIES.includes(city)) {
+                throw new Error("Expected cities without industry locations to be market cities");
+            }
+
+            return 2;
+        }
+
+        return locations
+            .filter(x => x.tile != null && x.tile.hasFlipped)
+            .reduce((s, x) => s + x.tile.data.saleReward.linkPoints, 0);
     }
 }
 
