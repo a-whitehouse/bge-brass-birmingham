@@ -21,7 +21,7 @@ export async function scout(game: Game, player: Player) {
 		throw new Error("All cards were scouted, but we should have rejected already.");
 	}
 
-	await player.prompt.click(new bge.Button("Scout"), {});
+	await player.prompt.click(new bge.Button("Scout"));
 
 	await player.discardAnyCards(3);
 

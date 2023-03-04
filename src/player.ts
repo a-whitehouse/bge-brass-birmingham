@@ -11,6 +11,8 @@ import { ALL_INDUSTRIES, Industry, City } from "./types";
 import { PlayerToken } from "./objects/playertoken";
 import { LinkLocation } from "./objects/linklocation";
 
+const console = bge.Logger.get("player");
+
 export interface IDiscardAnyCardOptions<TReturn = void> {
     cards?: readonly Card[];
     message?: string;
@@ -43,7 +45,7 @@ export class Player extends bge.Player {
     @bge.display({ position: { x: 15, y: 2 }, label: "Link Tiles" })
     readonly linkTiles = new bge.Deck(LinkTile, { orientation: bge.CardOrientation.FACE_UP })
 
-    @bge.display({ position: { x: 15, y: 8 }, label: "Discarded Tiles" })
+    @bge.display({ position: { x: 15, y: 8 }, label: "Discarded\nTiles" })
     readonly developedIndustries = new bge.Deck(IndustryTile, { orientation: bge.CardOrientation.FACE_UP })
 
     playerToken: PlayerToken;
@@ -97,6 +99,10 @@ export class Player extends bge.Player {
 
     addBuiltLink(tile: LinkTile) {
         this._builtLinks.add(tile);
+    }
+
+    removeBuiltLink(tile: LinkTile) {
+        this._builtLinks.delete(tile);
     }
 
     createZone(): bge.Zone {

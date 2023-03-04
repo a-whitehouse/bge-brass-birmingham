@@ -46,21 +46,31 @@ export class IndustryLocation extends bge.Zone {
     }
 
     async setTile(tile: IndustryTile) {
-
-        if (this._tile != null) {
-            this._tile.player.removeBuiltIndustry(this._tile);
-            // TODO: animate removing tile?
+        if (this._tile === tile) {
+            return;
         }
 
-        if (tile.location != null) {
+        if (tile?.location != null) {
             throw new Error("Tile already has a location!");
+        }
+
+        if (this._tile != null) {
+            const game = this._tile.player.game;
+
+            this._tile.player.removeBuiltIndustry(this._tile);
+            this._tile.player.developedIndustries.add(this._tile);
+            this._tile = null;
+
+            await game.delay.beat();
         }
 
         this._tile = tile;
 
-        tile.player.addBuiltIndustry(tile);
-        tile.location = this;
-
-        await tile.player.game.delay.beat();
+        if (tile != null) {
+            tile.player.addBuiltIndustry(tile);
+            tile.location = this;
+    
+            await tile.player.game.delay.beat();
+        }
     }
 }

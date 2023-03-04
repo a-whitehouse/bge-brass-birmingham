@@ -10,7 +10,7 @@ import { MerchantTile } from "../objects/merchanttile";
 
 import { Game } from "../game";
 import { Player } from "../player";
-import { City, Industry, Resource, ALL_INDUSTRIES } from "../types";
+import { City, Industry, Resource, ALL_INDUSTRIES, Era } from "../types";
 
 import { takeLoan } from "./takeloan";
 import { scout } from "./scout";
@@ -19,6 +19,7 @@ import { buildIndustry } from "./buildindustry";
 import { PlayerToken } from "../objects/playertoken";
 import { develop } from "./develop";
 import { sell } from "./sell";
+import { endOfEraScoring } from "./scoring";
 
 const console = bge.Logger.get("player-turn");
 
@@ -52,6 +53,16 @@ export default async function main(game: Game) {
 
         reorderPlayers(playerOrder);
         resetSpentMoney(playerOrder);
+
+        if (playerOrder[0].hand.count === 0) {
+            await endOfEraScoring(game);
+
+            if (game.era === Era.Canal) {
+                await startRailEra(game);
+            } else {
+                return;
+            }
+        }
 
         firstTurn = false;
     }
@@ -104,7 +115,7 @@ async function setup(game: Game) {
     }
 
     // Deal cards etc
-    game.drawPile.addRange(Card.generateDeck(game.players.length));
+    game.drawPile.addRange([...Card.generateDeck(game.players.length)].slice(0, 16));
     game.drawPile.shuffle(game.random);
 
     for (let i = 0; i < game.players.length; ++i) {
@@ -113,11 +124,28 @@ async function setup(game: Game) {
     }
 
     game.drawPile.deal(game.players.map(x => x.discardPile));
+    game.drawPile.deal(game.players.map(x => x.hand), 8);
 
-    for (let i = 0; i < 8; ++i) {
-        game.drawPile.deal(game.players.map(x => x.hand));
-        // await game.delay.beat();
+    await game.delay.beat();
+}
+
+async function startRailEra(game: Game) {
+    game.era = Era.Rail;
+
+    for (let player of game.players) {
+        player.linkTiles.setOrientation(bge.CardOrientation.FACE_DOWN);
+
+        for (let industry of player.builtIndustries.filter(x => x.data.level === 1)) {
+            await industry.location.setTile(null);
+        }
+
+        game.drawPile.addRange(player.hand.removeAll());
+
+        await game.delay.beat();
     }
+
+    game.drawPile.shuffle(game.random);
+    game.drawPile.deal(game.players.map(x => x.hand), 8);
 
     await game.delay.beat();
 }

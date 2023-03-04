@@ -43,23 +43,11 @@ export async function buildIndustry(game: Game, player: Player) {
 
 	console.info(`Valid industries: ${validIndustriesAtLocation.map(x => Industry[x])}`);
 
-	let industry: Industry;
-
-	switch (validIndustriesAtLocation.length) {
-		case 0:
-			throw new Error("An industry location should always have at least one industry.");
-
-		case 1:
-			industry = validIndustriesAtLocation[0];
-			break;
-
-		default:
-			let selectableIndustries = validIndustriesAtLocation.map(x => player.getNextIndustryLevelSlot(x));
-			industry = (await player.prompt.clickAny(selectableIndustries, {
-				"message": "Click the industry tile on your player board to build."
-			})).industry;
-			break;
-	}
+	let selectableIndustries = validIndustriesAtLocation.map(x => player.getNextIndustryLevelSlot(x));
+	let industry = (await player.prompt.clickAny(selectableIndustries, {
+		message: "Click the industry tile on your player board to build.",
+		autoResolveIfSingle: true
+	})).industry;
 
 	await player.discardAnyCard({
 		cards: player.getMatchingCards(loc, industry)
@@ -197,15 +185,10 @@ async function consumeResources(player: Player, destination: IndustryLocation,
 		const distance = sources.tiles[0].distance;
 		const choices = new Set(sources.tiles.filter(x => x.distance === distance).map(x => x.tile));
 
-		let tile: IndustryTile;
-
-		if (choices.size === 1) {
-			tile = sources.tiles[0].tile;
-		} else {
-			tile = await player.prompt.clickAny(choices, {
-				message: `Select ${(market.resource === Resource.Iron ? "an" : "a")} ${Resource[market.resource]} to consume`
-			});
-		}
+		let tile = await player.prompt.clickAny(choices, {
+			message: `Select ${(market.resource === Resource.Iron ? "an" : "a")} ${Resource[market.resource]} to consume`,
+			autoResolveIfSingle: true
+		});
 
 		sources.tiles.splice(sources.tiles.findIndex(x => x.tile === tile), 1);
 
