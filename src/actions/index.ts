@@ -18,6 +18,7 @@ import { buildLink } from "./buildlink";
 import { buildIndustry } from "./buildindustry";
 import { PlayerToken } from "../objects/playertoken";
 import { develop } from "./develop";
+import { sell } from "./sell";
 
 const console = bge.Logger.get("player-turn");
 
@@ -67,7 +68,8 @@ async function playerTurn(game: Game, player: Player, actionCount: number) {
             buildLink(game, player),
             takeLoan(game, player),
             scout(game, player),
-            develop(game, player)
+            develop(game, player),
+            sell(game, player)
         ]);
     }
 }

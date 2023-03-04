@@ -50,8 +50,16 @@ export class Player extends bge.Player {
     victoryPointToken: ScoreToken;
     incomeToken: ScoreToken;
 
-    readonly builtIndustries: Set<IndustryTile> = new Set();
-    readonly builtLinks: Set<LinkTile> = new Set();
+    private readonly _builtIndustries: Set<IndustryTile> = new Set();
+    private readonly _builtLinks: Set<LinkTile> = new Set();
+
+    get builtIndustries(): readonly IndustryTile[] {
+        return [...this._builtIndustries];
+    }
+
+    get builtLinks(): readonly LinkTile[] {
+        return [...this._builtLinks];
+    }
 
     money: number = 17;
     spent: number = 0;
@@ -77,6 +85,18 @@ export class Player extends bge.Player {
 
     override get color(): bge.Color {
         return Player.DEFAULT_COLORS[this.index];
+    }
+
+    addBuiltIndustry(tile: IndustryTile) {
+        this._builtIndustries.add(tile);
+    }
+
+    removeBuiltIndustry(tile: IndustryTile) {
+        this._builtIndustries.delete(tile);
+    }
+
+    addBuiltLink(tile: LinkTile) {
+        this._builtLinks.add(tile);
     }
 
     createZone(): bge.Zone {
@@ -114,7 +134,7 @@ export class Player extends bge.Player {
     }
 
     get hasAnyBuiltTiles() {
-        return this.builtIndustries.size > 0 || this.builtLinks.size > 0;
+        return this._builtIndustries.size > 0 || this._builtLinks.size > 0;
     }
 
     /**

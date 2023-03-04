@@ -46,19 +46,19 @@ export class IndustryLocation extends bge.Zone {
     }
 
     async setTile(tile: IndustryTile) {
-        
+
         if (this._tile != null) {
-            this._tile.player.builtIndustries.delete(this._tile);
+            this._tile.player.removeBuiltIndustry(this._tile);
             // TODO: animate removing tile?
         }
-        
+
         if (tile.location != null) {
             throw new Error("Tile already has a location!");
         }
 
         this._tile = tile;
-        
-        tile.player.builtIndustries.add(tile);
+
+        tile.player.addBuiltIndustry(tile);
         tile.location = this;
 
         await tile.player.game.delay.beat();

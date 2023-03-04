@@ -100,6 +100,12 @@ export const ALL_INDUSTRIES = [
     Industry.Brewery
 ]
 
+export const SELLABLE_INDUSTRIES = [
+    Industry.Goods,
+    Industry.Cotton,
+    Industry.Pottery,
+]
+
 export enum Era {
     Canal,
     Rail

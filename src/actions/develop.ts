@@ -60,7 +60,7 @@ async function developOnce(game: Game, player: Player): Promise<true> {
         })
         source.resources.pop();
     } else if (ironTiles.size == 1) {
-        ironSources.tiles[0].tile.consumeResource();
+        await ironSources.tiles[0].tile.consumeResource();
     } else {
         game.board.ironMarket.take();
         player.spendMoney(marketCost);

@@ -1,0 +1,131 @@
+import * as bge from "bge-core";
+
+import { Game } from "../game";
+import { IndustryTile } from "../objects/industrytile";
+import { MerchantLocation } from "../objects/merchantlocation";
+import { MerchantTile } from "../objects/merchanttile";
+import { ResourceToken } from "../objects/resourcetoken";
+import { Player } from "../player";
+import { ALL_INDUSTRIES, MARKET_CITIES, SELLABLE_INDUSTRIES, City, Industry, Resource } from "../types";
+
+const console = bge.Logger.get("sell");
+
+export async function sell(game: Game, player: Player) {
+    let sellOptions = getSellOptions(game, player);
+
+    if (sellOptions.length == 0) {
+        await Promise.reject("Must have at least one sellable tile.");
+    }
+
+    await player.prompt.click(new bge.Button("Sell"), {});
+
+    await sellOnce(game, player, sellOptions);
+
+    while (true) {
+        sellOptions = getSellOptions(game, player);
+
+        const soldAgain = await game.anyExclusive(() => [
+            sellOnce(game, player, sellOptions),
+            player.discardAnyCard({
+                message: "Discard any card to finish selling",
+                return: false
+            })
+        ]);
+
+        if (!soldAgain) {
+            break;
+        }
+    }
+}
+
+async function sellOnce(game: Game, player: Player, sellOptions: ISellOption[]): Promise<true> {
+    const tile = await player.prompt.clickAny(sellOptions.map(x => x.tile), { message: "Click on a tile to sell." });
+    const optionsForTile = sellOptions.filter(x => x.tile === tile);
+
+    const merchantLocation = await player.prompt.clickAny(optionsForTile.map(x => x.merchant), {
+        message: "Click on a merchant to sell to."
+    });
+
+    console.log(`${player.name} click on ${Industry[tile.industry]}, ${City[merchantLocation.data.city]}`);
+
+    let beerRemaining = tile.data.saleBeerCost!;
+
+    while (beerRemaining > 0) {
+        const beerSources = new Set<ResourceToken | IndustryTile>(
+            game.board.getResourceSources(Resource.Beer, tile.location, player).tiles.map(x => x.tile));
+
+        if (merchantLocation.marketBeer != null) {
+            beerSources.add(merchantLocation.marketBeer);
+        }
+
+        const beerSource = await player.prompt.clickAny(beerSources, {
+            message: `Select a beer token to sell with`
+        });
+
+        --beerRemaining;
+
+        if (beerSource === merchantLocation.marketBeer) {
+            console.log(`Using merchant beer`);
+
+            merchantLocation.marketBeer = null;
+            await game.delay.beat();
+            continue;
+        }
+
+        // Otherwise, clicked on a brewery
+
+        const brewery = beerSource as IndustryTile;
+
+        await brewery.consumeResource();
+    }
+
+    await tile.flip();
+
+    return true;
+}
+
+interface ISellOption {
+    tile: IndustryTile;
+    merchant: MerchantLocation;
+}
+
+function getSellOptions(game: Game, player: Player): ISellOption[] {
+    const sellableTiles = player.builtIndustries.filter(x => !x.hasFlipped && SELLABLE_INDUSTRIES.includes(x.industry));
+
+    const sellOptions = sellableTiles.flatMap(x => {
+        const beerSources = game.board.getResourceSources(Resource.Beer, x.location, player);
+
+        let connectedMarkets = game.board.merchantLocations.filter(
+            y => {
+                if (y.tile == null) {
+                    return false;
+                }
+
+                if (!y.tile.industries.includes(x.industry)) {
+                    return false;
+                }
+
+                if (!game.board.isLinked(x.location, y.data.city)) {
+                    return false;
+                }
+
+                const beerCost = x.data.saleBeerCost;
+
+                if (beerCost == null) {
+                    throw new Error("Missing sale cost!");
+                }
+
+                const availableBeer = beerSources.tiles.length + (y.marketBeer != null ? 1 : 0);
+
+                return availableBeer >= beerCost;
+            });
+
+        return connectedMarkets.map(y => ({ tile: x, merchant: y }));
+    }) as ISellOption[];
+
+    for (let option of sellOptions) {
+        console.log(`${Industry[option.tile.industry]} can be sold to ${City[option.merchant.data.city]}`);
+    }
+
+    return sellOptions;
+}
