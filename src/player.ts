@@ -11,6 +11,8 @@ import { ALL_INDUSTRIES, Industry, City } from "./types";
 import { PlayerToken } from "./objects/playertoken";
 import { LinkLocation } from "./objects/linklocation";
 
+const console = bge.Logger.get("player");
+
 export interface IDiscardAnyCardOptions<TReturn = void> {
     cards?: readonly Card[];
     message?: string;

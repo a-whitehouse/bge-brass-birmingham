@@ -27,11 +27,8 @@ export class PlayerTokenSlot extends bge.Zone {
     @bge.display()
     playerToken: PlayerToken;
 
-    /*
-    TODO: when we have text scaling
-    @bge.display({ position: { x: 5 } })
-    get moneySpent() { return `£${this.playerToken?.player.spent}`; }
-    */
+    @bge.display({ position: { x: 4.5, y: -0.5 }, fontScale: 0.5 })
+    get moneySpent() { return this.playerToken == null ? undefined : `£${this.playerToken.player.spent}`; }
 
     constructor() {
         super(4, 4);
