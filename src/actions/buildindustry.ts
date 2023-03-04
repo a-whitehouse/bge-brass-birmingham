@@ -129,6 +129,10 @@ function getBuildableIndustriesAtLocation(location: IndustryLocation, player: Pl
 	}
 
 	for (let industry of location.data.industries) {
+		if (location.tile != null && location.tile.industry != industry) {
+			continue;
+		}
+
 		if (!availableIndustries.includes(industry)) {
 			continue;
 		}

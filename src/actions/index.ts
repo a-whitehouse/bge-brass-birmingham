@@ -25,7 +25,7 @@ import { endOfEraScoring } from "./scoring";
 const console = bge.Logger.get("player-turn");
 
 const SKIP_CANAL_ERA = false;
-const ALLOW_DRAIN_MARKETS = true;
+const ALLOW_DRAIN_MARKETS = false;
 
 export default async function main(game: Game) {
     await setup(game);
