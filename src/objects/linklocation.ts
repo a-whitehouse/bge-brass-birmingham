@@ -45,7 +45,7 @@ export class LinkLocation extends bge.Zone {
         this.outlineStyle = bge.OutlineStyle.NONE;
     }
 
-    async setTile(tile: LinkTile) {
+    async setTile(tile?: LinkTile) {
         if (this._tile === tile) {
             return;
         }
@@ -55,11 +55,14 @@ export class LinkLocation extends bge.Zone {
         }
 
         if (this._tile != null) {
+            const game = this._tile.player.game;
+
             this._tile.player.removeBuiltLink(this._tile);
             this._tile.player.linkTiles.add(this._tile);
+            this._tile.location = null;
             this._tile = null;
 
-            await tile.player.game.delay.beat();
+            await game.delay.long();
         }
 
         this._tile = tile;
@@ -67,11 +70,11 @@ export class LinkLocation extends bge.Zone {
         if (tile != null) {
             tile.player.addBuiltLink(tile);
             tile.location = this;
-    
+
             this.children.getOptions("tile").rotation = tile.player.game.era === Era.Rail
                 ? bge.Rotation.y(180)
                 : undefined;
-    
+
             await tile.player.game.delay.beat();
         }
     }

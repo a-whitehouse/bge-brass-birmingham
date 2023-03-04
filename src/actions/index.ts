@@ -85,6 +85,15 @@ async function playerTurn(game: Game, player: Player, actionCount: number) {
     }
 }
 
+async function wrapPlayerAction(action: Promise<void>): Promise<void> {
+    try {
+        await action;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}
+
 async function setup(game: Game) {
     for (let player of game.players) {
         player.victoryPointToken = game.scoreTrack.createScoreToken(player, ScoreTokenKind.VICTORY_POINTS);
@@ -133,16 +142,25 @@ async function startRailEra(game: Game) {
     game.era = Era.Rail;
 
     for (let player of game.players) {
+
+        // Flip links to be on the rail side
+
         player.linkTiles.setOrientation(bge.CardOrientation.FACE_DOWN);
+
+        // Remove level 1 industries
 
         for (let industry of player.builtIndustries.filter(x => x.data.level === 1)) {
             await industry.location.setTile(null);
         }
 
+        // Return discarded cards to draw pile
+
         game.drawPile.addRange(player.hand.removeAll());
 
         await game.delay.beat();
     }
+
+    // Shuffle and deal starting hands
 
     game.drawPile.shuffle(game.random);
     game.drawPile.deal(game.players.map(x => x.hand), 8);

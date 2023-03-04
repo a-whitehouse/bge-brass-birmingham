@@ -45,7 +45,7 @@ export class IndustryLocation extends bge.Zone {
         this.name = `${City[this.data.city]}: ${data.industries.map(x => Industry[x]).join(" or ")}`;
     }
 
-    async setTile(tile: IndustryTile) {
+    async setTile(tile?: IndustryTile) {
         if (this._tile === tile) {
             return;
         }
@@ -59,6 +59,7 @@ export class IndustryLocation extends bge.Zone {
 
             this._tile.player.removeBuiltIndustry(this._tile);
             this._tile.player.developedIndustries.add(this._tile);
+            this._tile.location = null;
             this._tile = null;
 
             await game.delay.beat();
@@ -69,7 +70,7 @@ export class IndustryLocation extends bge.Zone {
         if (tile != null) {
             tile.player.addBuiltIndustry(tile);
             tile.location = this;
-    
+
             await tile.player.game.delay.beat();
         }
     }
