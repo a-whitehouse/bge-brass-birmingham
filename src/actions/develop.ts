@@ -28,7 +28,7 @@ export async function develop(game: Game, player: Player) {
     }
 }
 
-async function developOnce(game: Game, player: Player): Promise<true> {
+export async function developOnce(game: Game, player: Player): Promise<true> {
     let ironSources = game.board.getResourceSources(Resource.Iron);
 
     let marketCost = game.board.ironMarket.getCost(1);
@@ -47,7 +47,7 @@ async function developOnce(game: Game, player: Player): Promise<true> {
                     return slot;
                 }
             }),
-        { "message": "Click the industry tile on your player board to develop" }
+        { message: "Click the industry tile on your player board to develop" }
     );
 
     player.takeNextIndustryTile(tile.industry);

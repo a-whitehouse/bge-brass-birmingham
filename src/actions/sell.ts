@@ -67,8 +67,7 @@ async function sellOnce(game: Game, player: Player, sellOptions: ISellOption[]):
         if (beerSource === merchantLocation.marketBeer) {
             console.log(`Using merchant beer`);
 
-            merchantLocation.marketBeer = null;
-            await game.delay.beat();
+            await merchantLocation.consumeBeer(player);
             continue;
         }
 
