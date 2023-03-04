@@ -1,7 +1,7 @@
 import * as bge from "bge-core";
 
 import { IndustryLocation } from "./industrylocation";
-import { City, Industry, ALL_INDUSTRIES } from "../types";
+import { City, Industry, ALL_INDUSTRIES, FARM_CITIES } from "../types";
 
 import { areArrayContentsMatching } from "../helpers";
 
@@ -184,7 +184,7 @@ export class CityCard extends Card {
 	}
 
 	override matchesIndustryLocation(location: IndustryLocation, industry: Industry): boolean {
-		return this.city === City.Any || this.city === location.city;
+		return this.city === City.Any && !FARM_CITIES.includes(location.city) || this.city === location.city;
 	}
 
 	override equals(card: Card): boolean {

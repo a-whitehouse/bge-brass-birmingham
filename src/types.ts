@@ -77,6 +77,11 @@ export const MARKET_CITIES = [
     City.Oxford
 ];
 
+export const FARM_CITIES = [
+    City.Farm1,
+    City.Farm2
+];
+
 /**
  * Types of industry that players can build.
  */
