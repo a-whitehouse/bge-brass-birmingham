@@ -23,6 +23,8 @@ import { endOfEraScoring } from "./scoring";
 
 const console = bge.Logger.get("player-turn");
 
+const SKIP_CANAL_ERA = false;
+
 export default async function main(game: Game) {
     await setup(game);
 
@@ -124,7 +126,7 @@ async function setup(game: Game) {
     }
 
     // Deal cards etc
-    game.drawPile.addRange([...Card.generateDeck(game.players.length)].slice(0, 16));
+    game.drawPile.addRange(Card.generateDeck(game.players.length));
     game.drawPile.shuffle(game.random);
 
     for (let i = 0; i < game.players.length; ++i) {
@@ -132,10 +134,14 @@ async function setup(game: Game) {
         game.wildLocationPile.add(new CityCard(City.Any, 1));
     }
 
-    game.drawPile.deal(game.players.map(x => x.discardPile));
-    game.drawPile.deal(game.players.map(x => x.hand), 8);
+    if (SKIP_CANAL_ERA) {
+        await startRailEra(game);
+    } else {
+        game.drawPile.deal(game.players.map(x => x.discardPile));
+        game.drawPile.deal(game.players.map(x => x.hand), 8);
 
-    await game.delay.beat();
+        await game.delay.beat();
+    }
 }
 
 async function startRailEra(game: Game) {

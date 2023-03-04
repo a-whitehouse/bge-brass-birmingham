@@ -7,6 +7,7 @@ import { IndustryLocation } from "../objects/industrylocation";
 import { IndustryTile } from "../objects/industrytile";
 import { ResourceMarket } from "../objects/resourcemarket";
 import { ResourceToken } from "../objects/resourcetoken";
+import { LinkLocation } from "../objects/linklocation";
 import { Player } from "../player";
 import { Industry, Resource, Era, City } from "../types";
 
@@ -57,8 +58,8 @@ export async function buildIndustry(game: Game, player: Player) {
 
 	const slot = player.getNextIndustryLevelSlot(industry);
 
-	await consumeResources(player, loc, slot.data.cost.coal, locationInfo.coalSources, game.board.coalMarket);
-	await consumeResources(player, loc, slot.data.cost.iron, locationInfo.ironSources, game.board.ironMarket);
+	await consumeResources(player, loc, Resource.Coal, slot.data.cost.coal, locationInfo.coalSources, game.board.coalMarket);
+	await consumeResources(player, loc, Resource.Iron, slot.data.cost.iron, locationInfo.ironSources, game.board.ironMarket);
 
 	player.spendMoney(slot.data.cost.coins);
 
@@ -178,19 +179,24 @@ function getBuildableIndustriesAtLocation(location: IndustryLocation, player: Pl
 	return result;
 }
 
-async function consumeResources(player: Player, destination: IndustryLocation,
-	amount: number, sources: IResourceSources, market: ResourceMarket) {
+/**
+ * Prompts the given player to select which resources to consume, up to the given amount.
+ */
+export async function consumeResources(player: Player, destination: IndustryLocation | LinkLocation,
+	resource: Resource, amount: number, sources: IResourceSources, market?: ResourceMarket) {
 
 	while (sources.tiles.length > 0 && amount > 0) {
 		const distance = sources.tiles[0].distance;
 		const choices = new Set(sources.tiles.filter(x => x.distance === distance).map(x => x.tile));
 
 		let tile = await player.prompt.clickAny(choices, {
-			message: `Select ${(market.resource === Resource.Iron ? "an" : "a")} ${Resource[market.resource]} to consume`,
+			message: `Select ${(resource === Resource.Iron ? "an" : "a")} ${Resource[resource]} to consume`,
 			autoResolveIfSingle: true
 		});
 
 		sources.tiles.splice(sources.tiles.findIndex(x => x.tile === tile), 1);
+
+		console.info(`Consuming ${Resource[resource]} from ${tile.name}`);
 
 		await tile.consumeResource(destination.spentResources);
 
@@ -200,8 +206,17 @@ async function consumeResources(player: Player, destination: IndustryLocation,
 	}
 
 	if (amount > 0) {
+		if (market == null) {
+			throw new Error("No market was given!");
+		}
+
+		const cost = market.getCost(amount);
+
 		destination.spentResources.push(...market.takeRange(amount));
-		player.spendMoney(market.getCost(amount));
+
+		console.info(`Spending £${cost} to buy ${amount} ${Resource[resource]} from the market`);
+
+		player.spendMoney(cost);
 
 		await player.game.delay.beat();
 	}

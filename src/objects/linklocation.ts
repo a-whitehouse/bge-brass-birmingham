@@ -1,8 +1,10 @@
 import * as bge from "bge-core";
+import { LinearArrangement } from "bge-core";
 
 import { City, Era, ILinkLocationData } from "../types";
 import { GameBoard } from "./gameboard";
 import { LinkTile } from "./linktile";
+import { ResourceToken } from "./resourcetoken";
 
 /**
  * A location that a link can be built on by a player.
@@ -30,6 +32,13 @@ export class LinkLocation extends bge.Zone {
      * Set during scoring at the end of an era. The sum of link points in connected cities.
      */
     scoredLinkPoints?: number;
+
+    @bge.display({
+        arrangement: new LinearArrangement({
+            axis: "z"
+        })
+    })
+    readonly spentResources: ResourceToken[] = [];
 
     get victoryPoints() {
         return this.data.cities.reduce((s, x) => s + this._board.getLinkPoints(x), 0);

@@ -255,7 +255,7 @@ export class GameBoard extends bge.Card {
      */
     getResourceSources(
         resource: Resource,
-        destination?: LinkLocation | IndustryLocation | City,
+        destination?: LinkLocation | IndustryLocation | City | City[],
         player?: Player): IResourceSources {
 
         // TODO: market beer!
@@ -266,7 +266,7 @@ export class GameBoard extends bge.Card {
         };
 
         if (destination instanceof LinkLocation) {
-            throw new Error("Very not implemented!");
+            destination = [...destination.cities];
         }
 
         if (destination instanceof IndustryLocation) {

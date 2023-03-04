@@ -33,13 +33,15 @@ export class IndustryTile extends bge.Card {
         this.industry = industry;
         this.data = data;
 
+        this.name = `${player.name} ${Industry[industry]} lvl ${data.level}`;
+
         const frontUrl = player.index < 2
             ? "https://iili.io/HMC2BJs.jpg"
             : "https://iili.io/HMC2C5G.jpg";
 
         const backUrl = player.index < 2
-            ? "https://iili.io/HMC2nef.jpg"
-            : "https://iili.io/HMC2fgn.jpg";
+            ? "https://iili.io/HWYOKtp.jpg"
+            : "https://iili.io/HWYOFNR.jpg";
 
         const indexOffset = (player.index % 2) * 31;
         const index = indexOffset + data.tileIndex;
