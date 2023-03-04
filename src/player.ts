@@ -45,7 +45,7 @@ export class Player extends bge.Player {
     @bge.display({ position: { x: 15, y: 2 }, label: "Link Tiles" })
     readonly linkTiles = new bge.Deck(LinkTile, { orientation: bge.CardOrientation.FACE_UP })
 
-    @bge.display({ position: { x: 15, y: 8 }, label: "Discarded Tiles" })
+    @bge.display({ position: { x: 15, y: 8 }, label: "Discarded\nTiles" })
     readonly developedIndustries = new bge.Deck(IndustryTile, { orientation: bge.CardOrientation.FACE_UP })
 
     playerToken: PlayerToken;

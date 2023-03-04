@@ -17,15 +17,15 @@ export async function sell(game: Game, player: Player) {
         await Promise.reject("Must have at least one sellable tile.");
     }
 
-    await player.prompt.click(new bge.Button("Sell"), {});
+    await player.prompt.click(new bge.Button("Sell"));
 
-    await sellOnce(game, player, sellOptions);
+    await sellOnce(game, player, sellOptions, true);
 
     while (true) {
         sellOptions = getSellOptions(game, player);
 
         const soldAgain = await game.anyExclusive(() => [
-            sellOnce(game, player, sellOptions),
+            sellOnce(game, player, sellOptions, false),
             player.discardAnyCard({
                 message: "Discard any card to finish selling",
                 return: false
@@ -38,15 +38,19 @@ export async function sell(game: Game, player: Player) {
     }
 }
 
-async function sellOnce(game: Game, player: Player, sellOptions: ISellOption[]): Promise<true> {
-    const tile = await player.prompt.clickAny(sellOptions.map(x => x.tile), { message: "Click on a tile to sell." });
+async function sellOnce(game: Game, player: Player, sellOptions: ISellOption[], firstSale: boolean): Promise<true> {
+    const tile = await player.prompt.clickAny(sellOptions.map(x => x.tile), {
+        message: "Click on a tile to sell.",
+        autoResolveIfSingle: firstSale
+    });
     const optionsForTile = sellOptions.filter(x => x.tile === tile);
 
     const merchantLocation = await player.prompt.clickAny(optionsForTile.map(x => x.merchant), {
-        message: "Click on a merchant to sell to."
+        message: "Click on a merchant to sell to.",
+        autoResolveIfSingle: true
     });
 
-    console.log(`${player.name} click on ${Industry[tile.industry]}, ${City[merchantLocation.data.city]}`);
+    console.info(`${player.name} click on ${Industry[tile.industry]}, ${City[merchantLocation.data.city]}`);
 
     let beerRemaining = tile.data.saleBeerCost!;
 
@@ -58,16 +62,19 @@ async function sellOnce(game: Game, player: Player, sellOptions: ISellOption[]):
             beerSources.add(merchantLocation.marketBeer);
         }
 
+        console.info(`Beer sources: ${[...beerSources].map(x => x instanceof ResourceToken ? "Market Beer" : x.location.name).join(", ")}`);
+
         const beerSource = await player.prompt.clickAny(beerSources, {
-            message: `Select a beer token to sell with`
+            message: `Select a beer token to sell with`,
+            autoResolveIfSingle: true
         });
 
         --beerRemaining;
 
         if (beerSource === merchantLocation.marketBeer) {
-            console.log(`Using merchant beer`);
+            console.info(`Using merchant beer`);
 
-            await merchantLocation.consumeBeer(player);
+            await merchantLocation.consumeBeer(tile);
             continue;
         }
 
@@ -78,6 +85,7 @@ async function sellOnce(game: Game, player: Player, sellOptions: ISellOption[]):
         await brewery.consumeResource();
     }
 
+    tile.resources.splice(0, tile.resources.length);
     await tile.flip();
 
     return true;
@@ -123,7 +131,7 @@ function getSellOptions(game: Game, player: Player): ISellOption[] {
     }) as ISellOption[];
 
     for (let option of sellOptions) {
-        console.log(`${Industry[option.tile.industry]} can be sold to ${City[option.merchant.data.city]}`);
+        console.info(`${Industry[option.tile.industry]} can be sold to ${City[option.merchant.data.city]}`);
     }
 
     return sellOptions;
