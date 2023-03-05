@@ -127,6 +127,12 @@ export enum Resource {
     Beer = 2
 }
 
+export interface ICardData {
+    city?: City;
+    industries?: Industry[];
+    count: [two: number, three: number, four: number];
+}
+
 /**
  * Definition of a location on the board that a player can build an industry on.
  */

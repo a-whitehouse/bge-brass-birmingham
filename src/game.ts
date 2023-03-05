@@ -5,17 +5,25 @@ import { GameBoard } from "./objects/gameboard";
 import { ResourceMarket } from "./objects/resourcemarket";
 import { Resource, Era } from "./types";
 
-import main from "./actions";
+import { grantIncome, playerAction, reorderPlayers, resetSpentMoney, startRailEra } from "./actions";
 import { Card } from "./objects/card";
 import { ScoreTrack } from "./objects/scoring";
+import { IGameState } from "./state";
+import { setup } from "./actions/setup";
+import { endOfEraScoring } from "./actions/scoring";
 
 /**
  * @summary This class contains the meat of your game.
  * @details In this example game, players take turns discarding cards, and then either drawing from a Deck or a Hand.
  */
-export class Game extends bge.Game<Player> {
+export class Game extends bge.StateMachineGame<Player> {
 
     era: Era = Era.Canal;
+    
+    firstRound = true;
+    turnOrder?: Player[];
+    turn = 0;
+    action = 0;
 
     @bge.display()
     readonly board = new GameBoard(this);
@@ -36,6 +44,14 @@ export class Game extends bge.Game<Player> {
 
     readonly scoreTrack: ScoreTrack;
 
+    get currentPlayer(): Player {
+        return this.turnOrder[this.turn];
+    }
+
+    get actionsPerTurn(): number {
+        return this.firstRound ? 1 : 2;
+    }
+
     /**
      * Game runners expect games to have a public parameterless constructor, like this.
      */
@@ -49,14 +65,95 @@ export class Game extends bge.Game<Player> {
         this.scoreTrack = new ScoreTrack();
     }
 
-    protected async onRun(): Promise<bge.IGameResult> {
+    serialize(): IGameState {
+        return {
 
+        } as any;
+    }
+
+    protected override onInitialize(): void {
         this.playerZones.push(...this.players.map(x => x.createZone()));
+    }
 
-        // Entry point for gameplay logic
-        await main(this);
+    override get initialState(): bge.GameStateFunction {
+        return this.setup;
+    }
 
-        // Return final scores
+    async setup(): bge.GameState {
+        await setup(this);
+        
+        this.firstRound = true;
+        this.turnOrder = [...this.players];
+
+        this.random.shuffle(this.turnOrder);
+
+        return this.roundStart;
+    }
+
+    async roundStart(): bge.GameState {
+        this.turn = 0;
+        
+        await grantIncome(this.turnOrder);
+
+        return this.playerTurnStart;
+    }
+
+    async playerTurnStart(): bge.GameState {
+        this.action = 0;
+
+        return this.playerAction;
+    }
+
+    async playerAction(): bge.GameState {
+        if (!await playerAction(this, this.currentPlayer)) {
+            // Player restarted action / turn
+            return this.playerAction;
+        }
+
+        this.action++;
+
+        return this.action < this.actionsPerTurn
+            ? this.playerAction
+            : this.playerTurnEnd;
+    }
+
+    async playerTurnEnd(): bge.GameState {
+        this.drawPile.dealTotal([this.currentPlayer.hand], 2, 8);
+
+        this.turn++;
+
+        return this.turn < this.players.length
+            ? this.playerTurnStart
+            : this.roundEnd;
+    }
+
+    async roundEnd(): bge.GameState {
+        this.firstRound = false;
+        
+        await reorderPlayers(this);
+        await resetSpentMoney(this);
+
+        if (this.players.every(x => x.hand.count > 0)) {
+            return this.roundStart;
+        }
+
+        return this.eraEnd;
+    }
+
+    async eraEnd(): bge.GameState {
+        await endOfEraScoring(this);
+
+        return this.era === Era.Canal
+            ? this.railEraStart
+            : this.endGame;
+    }
+
+    async railEraStart(): bge.GameState {
+        await startRailEra(this);
+        return this.roundStart;
+    }
+
+    async endGame(): bge.GameState {
         return {
             scores: this.players.map(x => x.victoryPoints)
         };

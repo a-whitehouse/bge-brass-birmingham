@@ -68,7 +68,7 @@ export class GameBoard extends bge.Card {
         this.front.image = bge.Image.simple("https://iili.io/HGzqKkx.jpg");
 
         for (let i = 0; i < 4; ++i) {
-            this.playerTokenSlots[i] = new PlayerTokenSlot();
+            this.playerTokenSlots[i] = new PlayerTokenSlot(game, i);
             this.children.add(this.playerTokenSlots[i], {
                 position: { x: -22.65, y: -9.8 - i * 4.62 }
             });

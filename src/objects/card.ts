@@ -3,6 +3,8 @@ import * as bge from "bge-core";
 import { IndustryLocation } from "./industrylocation";
 import { City, Industry, ALL_INDUSTRIES, FARM_CITIES } from "../types";
 
+import CARDS from "../data/cards";
+
 import { areArrayContentsMatching } from "../helpers";
 
 @bge.width(Card.WIDTH)
@@ -12,101 +14,26 @@ export class Card extends bge.Card {
 	static readonly HEIGHT = 8.5;
 
 	static *generateDeck(playerCount: number): Iterable<Card> {
-		switch (playerCount) {
-			case 2:
-				{
-					// industries
-					for (let i = 0; i < 2; i++)
-						yield new IndustryCard([Industry.Coal], 18);
-					for (let i = 0; i < 2; i++)
-						yield new IndustryCard([Industry.Pottery], 6);
-					break;
-				}
-			case 3:
-				{
-					// dark blue
-					for (let i = 0; i < 2; i++)
-						yield new CityCard(City.Leek, 27);
-					for (let i = 0; i < 3; i++)
-						yield new CityCard(City.StokeOnTrent, 16);
-					for (let i = 0; i < 2; i++)
-						yield new CityCard(City.Stone, 7);
-					for (let i = 0; i < 1; i++)
-						yield new CityCard(City.Uttoxeter, 23);
-					// industries
-					for (let i = 0; i < 2; i++)
-						yield new IndustryCard([Industry.Coal], 18);
-					for (let i = 0; i < 6; i++)
-						yield new IndustryCard([Industry.Goods, Industry.Cotton], 5);
-					for (let i = 0; i < 2; i++)
-						yield new IndustryCard([Industry.Pottery], 6);
-					break;
-				}
-			case 4:
-				{
-					// cyan
-					for (let i = 0; i < 2; i++)
-						yield new CityCard(City.Belper, 28);
-					for (let i = 0; i < 3; i++)
-						yield new CityCard(City.Derby, 0);
-					// dark blue
-					for (let i = 0; i < 2; i++)
-						yield new CityCard(City.Leek, 27);
-					for (let i = 0; i < 3; i++)
-						yield new CityCard(City.StokeOnTrent, 16);
-					for (let i = 0; i < 2; i++)
-						yield new CityCard(City.Stone, 7);
-					for (let i = 0; i < 2; i++)
-						yield new CityCard(City.Uttoxeter, 23);
-					// industries
-					for (let i = 0; i < 3; i++)
-						yield new IndustryCard([Industry.Coal], 18);
-					for (let i = 0; i < 8; i++)
-						yield new IndustryCard([Industry.Goods, Industry.Cotton], 5);
-					for (let i = 0; i < 3; i++)
-						yield new IndustryCard([Industry.Pottery], 6);
-					break;
-				}
+		for (let index = 0; index < CARDS.length; ++index) {
+			const data = CARDS[index];
+			for (let i = 0; i < data.count[playerCount - 2]; ++i) {
+				yield this.create(index);
+			}
+		}
+	}
+
+	static create(index: number): Card {
+		const data = CARDS[index];
+
+		if (data.city !== undefined) {
+			return new CityCard(data.city, index);
 		}
 
-		// red
-		for (let i = 0; i < 2; i++)
-			yield new CityCard(City.Stafford, 13);
-		for (let i = 0; i < 2; i++)
-			yield new CityCard(City.BurtonOnTrent, 9);
-		for (let i = 0; i < 2; i++)
-			yield new CityCard(City.Cannock, 14);
-		for (let i = 0; i < 1; i++)
-			yield new CityCard(City.Tamworth, 15);
-		for (let i = 0; i < 1; i++)
-			yield new CityCard(City.Walsall, 8);
+		if (data.industries !== undefined) {
+			return new IndustryCard(data.industries, index);
+		}
 
-		// yellow
-		for (let i = 0; i < 3; i++)
-			yield new CityCard(City.Coalbrookdale, 24);
-		for (let i = 0; i < 2; i++)
-			yield new CityCard(City.Dudley, 19);
-		for (let i = 0; i < 2; i++)
-			yield new CityCard(City.Kidderminster, 25);
-		for (let i = 0; i < 2; i++)
-			yield new CityCard(City.Wolverhampton, 10);
-		for (let i = 0; i < 2; i++)
-			yield new CityCard(City.Worcester, 26);
-
-		// purple
-		for (let i = 0; i < 3; i++)
-			yield new CityCard(City.Birmingham, 4);
-		for (let i = 0; i < 3; i++)
-			yield new CityCard(City.Coventry, 17);
-		for (let i = 0; i < 1; i++)
-			yield new CityCard(City.Nuneaton, 32);
-		for (let i = 0; i < 1; i++)
-			yield new CityCard(City.Redditch, 31);
-		// industries
-		for (let i = 0; i < 4; i++)
-			yield new IndustryCard([Industry.Iron], 11);
-		for (let i = 0; i < 5; i++)
-			yield new IndustryCard([Industry.Brewery], 12);
+		throw new Error("Invalid card data");
 	}
 
 	static compare(a: Card, b: Card): number {

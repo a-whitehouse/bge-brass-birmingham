@@ -1,17 +1,11 @@
 import * as bge from "bge-core";
 
-import { Card } from "../objects/card";
 import { IndustryLocation } from "../objects/industrylocation";
-import { ResourceToken } from "../objects/resourcetoken";
-import { ScoreTokenKind } from "../objects/scoring";
-import { IndustryCard, CityCard } from "../objects/card";
-import { LinkTile } from "../objects/linktile";
-import { MerchantTile } from "../objects/merchanttile";
 import { ResourceMarket } from "../objects/resourcemarket";
 
 import { Game } from "../game";
 import { Player } from "../player";
-import { City, Industry, Resource, ALL_INDUSTRIES, Era } from "../types";
+import { Resource, Era } from "../types";
 
 import { takeLoan } from "./takeloan";
 import { scout } from "./scout";
@@ -26,131 +20,27 @@ import { LinkLocation } from "../objects/linklocation";
 
 const console = bge.Logger.get("player-turn");
 
-const SKIP_CANAL_ERA = false;
 const ALLOW_DRAIN_MARKETS = false;
 
-export default async function main(game: Game) {
-    await setup(game);
-
-    let firstTurn = true;
-    let numActions;
-
-    let playerOrder: Player[] = [...game.players];
-
-    game.random.shuffle(playerOrder);
-
-    while (true) {
-
-        numActions = firstTurn ? 1 : 2;
-
-        console.info(`Round starts with ${numActions}`);
-        console.info(`Player order: ${playerOrder.map(x => x.name).join(", ")}`);
-
-        updatePlayerTokens(playerOrder);
-
-        await grantIncome(playerOrder);
-
-        for (let player of playerOrder) {
-            await playerTurn(game, player, numActions);
-            player.hand.addRange(game.drawPile.drawRange(numActions));
-        }
-
-        console.info("About to reorder players");
-
-        reorderPlayers(playerOrder);
-        resetSpentMoney(playerOrder);
-
-        if (playerOrder[0].hand.count === 0) {
-            await endOfEraScoring(game);
-
-            if (game.era === Era.Canal) {
-                await startRailEra(game);
-            } else {
-                return;
-            }
-        }
-
-        firstTurn = false;
-    }
-}
-
-async function playerTurn(game: Game, player: Player, actionCount: number) {
+export async function playerAction(game: Game, player: Player): Promise<boolean> {
     game.message.clear();
+    game.message.set(player, "It's your turn, action {0} of {1}", game.action + 1, game.actionsPerTurn);
 
-    for (let i = 0; i < actionCount; ++i) {
-        game.message.set(player, "It's your turn, action {0} of {1}", i + 1, actionCount);
+    await game.anyExclusive(() => [
+        buildIndustry(game, player),
+        buildLink(game, player),
+        takeLoan(game, player),
+        scout(game, player),
+        develop(game, player),
+        sell(game, player),
+        drainMarket(game, player, game.board.coalMarket),
+        drainMarket(game, player, game.board.ironMarket)
+    ]);
 
-        await game.anyExclusive(() => [
-            buildIndustry(game, player),
-            buildLink(game, player),
-            takeLoan(game, player),
-            scout(game, player),
-            develop(game, player),
-            sell(game, player),
-            drainMarket(game, player, game.board.coalMarket),
-            drainMarket(game, player, game.board.ironMarket)
-        ]);
-    }
+    return true;
 }
 
-async function wrapPlayerAction(action: Promise<void>): Promise<void> {
-    try {
-        await action;
-    } catch (e) {
-        console.error(e);
-        throw e;
-    }
-}
-
-async function setup(game: Game) {
-    for (let player of game.players) {
-        player.victoryPointToken = game.scoreTrack.createScoreToken(player, ScoreTokenKind.VICTORY_POINTS);
-        player.incomeToken = game.scoreTrack.createScoreToken(player, ScoreTokenKind.INCOME);
-
-        player.playerToken = new PlayerToken(player);
-
-        for (let i = 0; i < 15; ++i) {
-            player.linkTiles.add(new LinkTile(player));
-        }
-    }
-
-    // Merchants
-    const merchantTiles = [...MerchantTile.generateDeck(game.players.length)];
-
-    game.random.shuffle(merchantTiles);
-
-    for (let merchantLocation of game.board.merchantLocations) {
-        if (merchantLocation.data.minPlayers > game.players.length) {
-            continue;
-        }
-
-        merchantLocation.tile = merchantTiles.pop();
-
-        if (merchantLocation.tile.industries.length > 0) {
-            merchantLocation.marketBeer = new ResourceToken(Resource.Beer);
-        }
-    }
-
-    // Deal cards etc
-    game.drawPile.addRange(Card.generateDeck(game.players.length));
-    game.drawPile.shuffle(game.random);
-
-    for (let i = 0; i < game.players.length; ++i) {
-        game.wildIndustryPile.add(new IndustryCard(ALL_INDUSTRIES, 2));
-        game.wildLocationPile.add(new CityCard(City.Any, 1));
-    }
-
-    if (SKIP_CANAL_ERA) {
-        await startRailEra(game);
-    } else {
-        game.drawPile.deal(game.players.map(x => x.discardPile));
-        game.drawPile.deal(game.players.map(x => x.hand), 8);
-
-        await game.delay.beat();
-    }
-}
-
-async function startRailEra(game: Game) {
+export async function startRailEra(game: Game) {
     game.era = Era.Rail;
 
     for (let player of game.players) {
@@ -180,7 +70,7 @@ async function startRailEra(game: Game) {
     await game.delay.beat();
 }
 
-async function grantIncome(players: Player[]) {
+export async function grantIncome(players: Player[]) {
     for (let player of players) {
         player.money += player.income;
     }
@@ -190,10 +80,12 @@ async function grantIncome(players: Player[]) {
     //  otherwise, lose 1VP per £1 short
 }
 
-function reorderPlayers(players: Player[]) {
+export async function reorderPlayers(game: Game) {
     let tmp: Player;
 
     let successfulComparisons = 0;
+
+    const players = game.turnOrder;
 
     while (successfulComparisons < players.length - 1) {
         successfulComparisons = 0;
@@ -210,18 +102,16 @@ function reorderPlayers(players: Player[]) {
             }
         }
     }
+    
+    await game.delay.beat();
 }
 
-function updatePlayerTokens(players: Player[]) {
-    players.forEach((player, index) => {
-        player.game.board.playerTokenSlots[index].playerToken = player.playerToken;
-    });
-}
-
-function resetSpentMoney(players: Player[]) {
-    for (let player of players) {
+export async function resetSpentMoney(game: Game) {
+    for (let player of game.turnOrder) {
         player.spent = 0;
     }
+
+    await game.delay.beat();
 }
 
 async function drainMarket(game: Game, player: Player, market: ResourceMarket) {
