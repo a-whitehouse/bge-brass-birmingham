@@ -1,6 +1,15 @@
 import * as bge from "bge-core";
+import { IMerchantState } from "../state";
 
-import { Industry } from "../types";
+import { Industry, SELLABLE_INDUSTRIES } from "../types";
+
+export enum MerchantTileValue {
+    Blank,
+    Goods,
+    Cotton,
+    Pottery,
+    Wild
+}
 
 @bge.width(2.25)
 @bge.height(2.25)
@@ -8,33 +17,69 @@ import { Industry } from "../types";
 @bge.cornerRadius(0.1)
 export class MerchantTile extends bge.Card {
     static *generateDeck(playerCount: number): Iterable<MerchantTile> {
-        yield new MerchantTile(0, 0, [Industry.Goods, Industry.Cotton, Industry.Pottery]);
-        yield new MerchantTile(1, 1, [Industry.Goods]);
-        yield new MerchantTile(1, 2, [Industry.Cotton]);
-        yield new MerchantTile(0, 1, []);
-        yield new MerchantTile(0, 1, []);
+        yield new MerchantTile(MerchantTileValue.Wild);
+        yield new MerchantTile(MerchantTileValue.Goods);
+        yield new MerchantTile(MerchantTileValue.Cotton);
+        yield new MerchantTile(MerchantTileValue.Blank);
+        yield new MerchantTile(MerchantTileValue.Blank);
 
         if (playerCount < 3) {
             return;
         }
 
-        yield new MerchantTile(1, 0, [Industry.Pottery]);
-        yield new MerchantTile(0, 1, []);
+        yield new MerchantTile(MerchantTileValue.Pottery);
+        yield new MerchantTile(MerchantTileValue.Blank);
 
         if (playerCount < 4) {
             return;
         }
 
-        yield new MerchantTile(1, 1, [Industry.Goods]);
-        yield new MerchantTile(1, 2, [Industry.Cotton]);
+        yield new MerchantTile(MerchantTileValue.Goods);
+        yield new MerchantTile(MerchantTileValue.Cotton);
     }
 
     readonly industries: readonly Industry[];
+    readonly value: MerchantTileValue;
 
-    constructor(row: number, col: number, industries: Industry[]) {
+    constructor(value: MerchantTileValue) {
         super();
 
-        this.industries = industries;
+        this.value = value;
+
+        let row: number;
+        let col: number;
+
+        switch (value) {
+            case MerchantTileValue.Blank:
+                row = 0;
+                col = 1;
+                this.industries = [];
+                break;
+
+            case MerchantTileValue.Goods:
+                row = 1;
+                col = 1;
+                this.industries = [Industry.Goods];
+                break;
+
+            case MerchantTileValue.Cotton:
+                row = 1;
+                col = 2;
+                this.industries = [Industry.Cotton];
+                break;
+
+            case MerchantTileValue.Pottery:
+                row = 1;
+                col = 0;
+                this.industries = [Industry.Pottery];
+                break;
+
+            case MerchantTileValue.Wild:
+                row = 0;
+                col = 0;
+                this.industries = SELLABLE_INDUSTRIES;
+                break;
+        }
 
         this.back.image = this.hidden.image = bge.Image.simple("https://iili.io/HWnsNnt.jpg");
         this.front.image = bge.Image.tile("https://iili.io/HWnsOMX.jpg", 2, 3, row, col);

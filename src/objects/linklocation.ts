@@ -1,5 +1,6 @@
 import * as bge from "bge-core";
 import { LinearArrangement } from "bge-core";
+import { PlayerIndex } from "../state";
 
 import { City, Era, ILinkLocationData } from "../types";
 import { GameBoard } from "./gameboard";
@@ -66,10 +67,10 @@ export class LinkLocation extends bge.Zone {
         if (tile?.location != null) {
             throw new Error("Tile already has a location!");
         }
+        
+        const game = this._board.game;
 
         if (this._tile != null) {
-            const game = this._tile.player.game;
-
             this._tile.player.removeBuiltLink(this._tile);
             this._tile.player.linkTiles.add(this._tile);
             this._tile.location = null;
@@ -84,11 +85,33 @@ export class LinkLocation extends bge.Zone {
             tile.player.addBuiltLink(tile);
             tile.location = this;
 
-            this.children.getOptions("tile").rotation = tile.player.game.era === Era.Rail
+            this.children.getOptions("tile").rotation = game.era === Era.Rail
                 ? bge.Rotation.y(180)
                 : undefined;
 
-            await tile.player.game.delay.beat();
+            await game.delay.beat();
         }
+    }
+
+    serialize(): PlayerIndex | null {
+        return this._tile?.player.index;
+    }
+
+    deserialize(state: PlayerIndex | null): void {
+        this._tile = null;
+        this.clearSpentResources();
+
+        if (state == null) {
+            return;
+        }
+        
+        const game = this._board.game;
+
+        this._tile = new LinkTile(this._board.game.players[state]);
+        this._tile.location = this;
+        
+        this.children.getOptions("tile").rotation = game.era === Era.Rail
+            ? bge.Rotation.y(180)
+            : undefined;
     }
 }

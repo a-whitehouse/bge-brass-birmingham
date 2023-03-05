@@ -5,13 +5,13 @@ import { City, Industry, ALL_INDUSTRIES, FARM_CITIES } from "../types";
 
 import CARDS from "../data/cards";
 
-import { areArrayContentsMatching } from "../helpers";
-
 @bge.width(Card.WIDTH)
 @bge.height(Card.HEIGHT)
 export class Card extends bge.Card {
 	static readonly WIDTH = 6.3;
 	static readonly HEIGHT = 8.5;
+
+	readonly index: number;
 
 	static *generateDeck(playerCount: number): Iterable<Card> {
 		for (let index = 0; index < CARDS.length; ++index) {
@@ -36,6 +36,16 @@ export class Card extends bge.Card {
 		throw new Error("Invalid card data");
 	}
 
+	static createRange(index: number, count: number): Card[];
+	static createRange(indices: number[]): Card[];
+	static createRange(indices: number[] | number, count?: number) {
+		if (Array.isArray(indices)) {
+			return indices.map(x => this.create(x));
+		} else {
+			return Array.from(new Array(count)).map(x => this.create(indices));
+		}
+	}
+
 	static compare(a: Card, b: Card): number {
 
 		if (a instanceof CityCard && b instanceof CityCard) {
@@ -52,6 +62,8 @@ export class Card extends bge.Card {
 	constructor(index: number) {
 		super();
 
+		this.index = index;
+
 		let x = index % 7;
 		let y = 4 - Math.floor(index / 7);
 
@@ -61,8 +73,11 @@ export class Card extends bge.Card {
 	}
 
 	matchesIndustryLocation(location: IndustryLocation, industry: Industry): boolean { throw new Error("Not implemented"); }
-	equals(card: Card): boolean { throw new Error("Not implemented"); }
 	get isWild(): boolean { throw new Error("Not implemented"); }
+	
+	equals(card: Card): boolean {
+		return this.index === card.index;
+	}
 }
 
 export class IndustryCard extends Card {
@@ -87,10 +102,6 @@ export class IndustryCard extends Card {
 		return this.industries.includes(industry);
 	}
 
-	override equals(card: Card): boolean {
-		return card instanceof IndustryCard && areArrayContentsMatching(this.industries, card.industries);
-	}
-
 	override get isWild(): boolean {
 		return this.industries.length === ALL_INDUSTRIES.length;
 	}
@@ -112,10 +123,6 @@ export class CityCard extends Card {
 
 	override matchesIndustryLocation(location: IndustryLocation, industry: Industry): boolean {
 		return this.city === City.Any && !FARM_CITIES.includes(location.city) || this.city === location.city;
-	}
-
-	override equals(card: Card): boolean {
-		return card instanceof CityCard && this.city === card.city;
 	}
 
 	override get isWild(): boolean {

@@ -50,10 +50,6 @@ export async function buildIndustry(game: Game, player: Player) {
 		autoResolveIfSingle: true
 	})).industry;
 
-	await player.discardAnyCard({
-		cards: player.getMatchingCards(loc, industry)
-	});
-
 	console.info(`We're building a ${Industry[industry]}!`);
 
 	const slot = player.getNextIndustryLevelSlot(industry);
@@ -104,6 +100,10 @@ export async function buildIndustry(game: Game, player: Player) {
 		default:
 			break;
 	}
+
+	await player.discardAnyCard({
+		cards: player.getMatchingCards(loc, industry)
+	});
 }
 
 function getBuildableIndustriesAtLocation(location: IndustryLocation, player: Player,

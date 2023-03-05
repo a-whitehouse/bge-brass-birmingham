@@ -19,29 +19,20 @@ export async function buildLink(game: Game, player: Player) {
 
 	await buildSingleLink(game, player, linkCost, coalCost, 0);
 
-
 	if (game.era == Era.Rail) {
-		let hasBuiltAgain = await game.anyExclusive(() => [
+		if (!await game.anyExclusive(() => [
 			buildSingleLink(game, player, 10, coalCost, 1),
 			player.discardAnyCard({
-				message: "Discard any card to finish building links",
-				return: false
-			})
-
-		])
-
-		if (hasBuiltAgain) {
-			await player.discardAnyCard({
 				message: "Discard any card to finish building links"
 			})
+		])) {
+			return;
 		}
-
-	} else {
-		await player.discardAnyCard({
-			message: "Discard any card to finish building links"
-		})
-
 	}
+	
+	return await player.discardAnyCard({
+		message: "Discard any card to finish building links"
+	});
 }
 
 async function buildSingleLink(game: Game, player: Player, linkCost: number, coalCost: number, beerCost: number): Promise<true> {

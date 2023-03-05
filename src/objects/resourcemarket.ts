@@ -208,6 +208,10 @@ export class ResourceMarket extends bge.Zone {
         return Array.from(new Array(count)).map(_ => this.take());
     }
 
+    clear(): void {
+        this.takeRange(this.count);
+    }
+
     /**
      * Fills up the next slots in the market with tokens taken from the given tile,
      * giving money to the owning player and possibly flipping the tile.

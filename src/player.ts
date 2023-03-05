@@ -10,13 +10,15 @@ import { IndustryLocation } from "./objects/industrylocation";
 import { ALL_INDUSTRIES, Industry, City } from "./types";
 import { PlayerToken } from "./objects/playertoken";
 import { LinkLocation } from "./objects/linklocation";
+import { IPlayerState } from "./state";
 
 const console = bge.Logger.get("player");
 
 export interface IDiscardAnyCardOptions<TReturn = void> {
     cards?: readonly Card[];
     message?: string;
-    return?: TReturn
+    return?: TReturn;
+    canAutoResolve?: boolean;
 }
 
 /**
@@ -220,42 +222,41 @@ export class Player extends bge.Player {
         return [...this.hand].filter(x => x.matchesIndustryLocation(location, industry));
     }
 
+    /*
+    async discardAnyCardOrUndo(options?: IDiscardAnyCardOptions<false>): Promise<boolean> {
+        return await this.game.anyExclusive(() => [
+            this.discardAnyCard({ ...options, canAutoResolve: false, return: true }),
+            this.undo()
+        ]);
+    }
+    */
+
     async discardAnyCard<TReturn = void>(options?: IDiscardAnyCardOptions<TReturn>): Promise<TReturn> {
 
         const cards = options?.cards ?? [...this.hand];
+        const canAutoResolve = options?.canAutoResolve ?? false;
 
         let discardedCard: Card;
 
-        switch (cards.length) {
-            case 0:
-                throw new Error("There should be at least one matching card after building.");
-
-            case 1:
-                discardedCard = cards[0];
-                break;
-
-            default:
-                if (cards.every(x => x.equals(cards[0]))) {
-                    discardedCard = cards[0];
-                    break;
+        if (canAutoResolve && cards.length > 1 && cards.every(x => x.equals(cards[0]))) {
+            discardedCard = cards[0];
+        } else {
+            if (cards.length < this.hand.count) {
+                for (let card of cards) {
+                    this.hand.setSelected(card, true);
                 }
-
-                if (cards.length < this.hand.count) {
-                    for (let card of cards) {
-                        this.hand.setSelected(card, true);
-                    }
-                }
-
-                discardedCard = await this.prompt.clickAny(cards, {
-                    message: options?.message ?? (cards.length < this.hand.count
-                        ? "Discard a matching card"
-                        : "Discard any card")
-                });
-
-                this.hand.setSelected(false);
-                break;
+            }
+    
+            discardedCard = await this.prompt.clickAny(cards, {
+                message: options?.message ?? (cards.length < this.hand.count
+                    ? "Discard a matching card"
+                    : "Discard any card"),
+                autoResolveIfSingle: canAutoResolve
+            });
         }
 
+        this.hand.setSelected(false);
+        
         await this.finishDiscardingCards([discardedCard]);
 
         return options?.return;
@@ -293,5 +294,96 @@ export class Player extends bge.Player {
         this.game.wildLocationPile.addRange(cards.filter(x => x.isWild && x instanceof CityCard));
 
         await this.game.delay.beat();
+    }
+    
+    async confirm(): Promise<true> {
+        await this.prompt.click(new bge.Button("Confirm"));
+        return true;
+    }
+
+    /*
+    async confirmOrUndo(): Promise<boolean> {
+        return await this.game.anyExclusive(() => [
+            this.confirm(),
+            this.undo()
+        ]);
+    }
+
+    async undo(): Promise<false> {
+        await this.prompt.click(new bge.Button("Undo"));
+        return false;
+    }
+
+    async skip(): Promise<false> {
+        await this.prompt.click(new bge.Button("Skip"));
+        return false;
+    }
+    */
+    
+    serialize(): IPlayerState {
+        return {
+            money: this.money,
+            spent: this.spent,
+            income: this.incomeToken.value,
+            victoryPoints: this.victoryPoints,
+            links: this.linkTiles.count,
+
+            hand: [...this.hand].map(x => x.index),
+            discardPile: [...this.discardPile].map(x => x.index),
+            developedIndustries: [...this.developedIndustries].map(x => ({
+                industry: x.industry,
+                level: x.data.level
+            })),
+
+            industries: this.playerBoard.serialize()
+        };
+    }
+
+    deserialize(state: IPlayerState): void {
+        this.hand.removeAll();
+        this.discardPile.removeAll();
+        this.linkTiles.removeAll();
+        this.developedIndustries.removeAll();
+
+        console.log(`Income: ${state.income}`);
+
+        this.money = state.money;
+        this.spent = state.spent;
+        this.incomeToken.moveTo(state.income);
+        this.victoryPointToken.moveTo(state.victoryPoints);
+
+        this.hand.addRange(Card.createRange(state.hand));
+        this.discardPile.addRange(Card.createRange(state.discardPile));
+        
+        for (let i = 0; i < state.links; ++i) {
+            this.linkTiles.add(new LinkTile(this));
+        }
+
+        for (let tileState of state.developedIndustries) {
+            this.developedIndustries.add(new IndustryTile(this, tileState.industry, tileState.level));
+        }
+
+        this.playerBoard.deserialize(state.industries);
+    }
+
+    updateBuiltTiles(): void {
+        this._builtIndustries.clear();
+        this._builtLinks.clear();
+
+        for (let loc of this.game.board.industryLocations) {
+            if (loc.tile == null || loc.tile.player != this) {
+                continue;
+            }
+
+            this._builtIndustries.add(loc.tile);
+        }
+        
+        for (let loc of this.game.board.linkLocations) {
+            if (loc.tile == null || loc.tile.player != this) {
+                continue;
+            }
+
+            this._builtLinks.add(loc.tile);
+        }
     }
 }

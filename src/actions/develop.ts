@@ -16,19 +16,18 @@ export async function develop(game: Game, player: Player) {
     let hasDevelopedAgain = await game.anyExclusive(() => [
         developOnce(game, player),
         player.discardAnyCard({
-            message: "Discard any card to finish developing",
-            return: false
+            message: "Discard any card to finish developing"
         })
     ]);
 
     if (hasDevelopedAgain) {
         await player.discardAnyCard({
             message: "Discard any card to finish developing"
-        })
+        });
     }
 }
 
-export async function developOnce(game: Game, player: Player): Promise<true> {
+export async function developOnce(game: Game, player: Player): Promise<boolean> {
     let ironSources = game.board.getResourceSources(Resource.Iron);
 
     let marketCost = game.board.ironMarket.getCost(1);

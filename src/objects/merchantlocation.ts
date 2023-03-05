@@ -2,14 +2,16 @@
 import * as bge from "bge-core";
 
 import { ResourceToken } from "./resourcetoken";
-import { MerchantTile } from "./merchanttile";
+import { MerchantTile, MerchantTileValue } from "./merchanttile";
 
 import { IMerchantLocationData, MerchantBeerReward, Resource } from "../types";
-import { Player } from "../player";
 import { developOnce } from "../actions/develop";
 import { IndustryTile } from "./industrytile";
+import { IMerchantState } from "../state";
+import { GameBoard } from "./gameboard";
 
 export class MerchantLocation extends bge.Zone {
+    private readonly _board: GameBoard;
     readonly data: IMerchantLocationData;
 
     @bge.display()
@@ -18,9 +20,10 @@ export class MerchantLocation extends bge.Zone {
     @bge.display()
     tile: MerchantTile;
 
-    constructor(data: IMerchantLocationData) {
+    constructor(board: GameBoard, data: IMerchantLocationData) {
         super(2.25, 2.25);
 
+        this._board = board;
         this.data = data;
 
         this.outlineStyle = bge.OutlineStyle.NONE;
@@ -75,5 +78,27 @@ export class MerchantLocation extends bge.Zone {
                 await game.delay.beat();
                 break;
         }
+    }
+
+    serialize(): IMerchantState | null {
+        if (this.tile == null) {
+            return null;
+        }
+
+        return {
+            value: this.tile.value,
+            hasBeer: this.marketBeer != null
+        };
+    }
+
+    deserialize(state: IMerchantState | null): void {
+        if (state == null) {
+            this.tile = null;
+            this.marketBeer = null;
+            return;
+        }
+
+        this.tile = new MerchantTile(state.value);
+        this.marketBeer = state.hasBeer ? new ResourceToken(Resource.Beer) : null;
     }
 }

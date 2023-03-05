@@ -11,10 +11,8 @@ import { takeLoan } from "./takeloan";
 import { scout } from "./scout";
 import { buildLink } from "./buildlink";
 import { buildIndustry } from "./buildindustry";
-import { PlayerToken } from "../objects/playertoken";
 import { develop } from "./develop";
 import { sell } from "./sell";
-import { endOfEraScoring } from "./scoring";
 import { IResourceSources } from "../objects/gameboard";
 import { LinkLocation } from "../objects/linklocation";
 
@@ -26,18 +24,34 @@ export async function playerAction(game: Game, player: Player): Promise<boolean>
     game.message.clear();
     game.message.set(player, "It's your turn, action {0} of {1}", game.action + 1, game.actionsPerTurn);
 
-    await game.anyExclusive(() => [
-        buildIndustry(game, player),
-        buildLink(game, player),
-        takeLoan(game, player),
-        scout(game, player),
-        develop(game, player),
-        sell(game, player),
-        drainMarket(game, player, game.board.coalMarket),
-        drainMarket(game, player, game.board.ironMarket)
-    ]);
+    try {
+        await game.anyExclusive(() => {
+            // Show an undo button after the player has clicked on anything
+            game.promiseGroup.catch(async reason => {
+                await player.prompt.click(new bge.Button("Undo"), {
+                    order: 1000
+                });
 
-    return true;
+                game.cancelAllPromises("Action undone");
+            });
+
+            return [
+                buildIndustry(game, player),
+                buildLink(game, player),
+                takeLoan(game, player),
+                scout(game, player),
+                develop(game, player),
+                sell(game, player),
+                drainMarket(game, player, game.board.coalMarket),
+                drainMarket(game, player, game.board.ironMarket)
+            ];
+        });
+
+        return true;
+    } catch (e) {
+        console.error(e);
+        return false;
+    }
 }
 
 export async function startRailEra(game: Game) {

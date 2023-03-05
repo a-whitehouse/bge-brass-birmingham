@@ -65,12 +65,6 @@ export class Game extends bge.StateMachineGame<Player> {
         this.scoreTrack = new ScoreTrack();
     }
 
-    serialize(): IGameState {
-        return {
-
-        } as any;
-    }
-
     protected override onInitialize(): void {
         this.playerZones.push(...this.players.map(x => x.createZone()));
     }
@@ -105,8 +99,10 @@ export class Game extends bge.StateMachineGame<Player> {
     }
 
     async playerAction(): bge.GameState {
+        const state = this.serialize();
+
         if (!await playerAction(this, this.currentPlayer)) {
-            // Player restarted action / turn
+            this.deserialize(state);
             return this.playerAction;
         }
 
@@ -157,5 +153,30 @@ export class Game extends bge.StateMachineGame<Player> {
         return {
             scores: this.players.map(x => x.victoryPoints)
         };
+    }
+
+    serialize(): IGameState {
+        return {
+            era: this.era,
+            turnOrder: this.turnOrder?.map(x => x.index),
+            turn: this.turn,
+            action: this.action,
+
+            board: this.board.serialize(),
+            players: this.players.map(x => x.serialize())
+        } as any;
+    }
+
+    deserialize(state: IGameState): void {
+        this.era = state.era;
+        this.turnOrder = state.turnOrder?.map(x => this.players[x]);
+        this.turn = state.turn;
+        this.action = state.action;
+
+        this.board.deserialize(state.board);
+        this.players.forEach((x, i) => {
+            x.deserialize(state.players[i]);
+            x.updateBuiltTiles();
+        });
     }
 }

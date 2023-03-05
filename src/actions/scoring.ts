@@ -1,7 +1,6 @@
 import * as bge from "bge-core";
 
 import { Game } from "../game";
-import { maxBy, minBy } from "../helpers";
 import { City, Industry } from "../types";
 
 const console = bge.Logger.get("scoring");
@@ -29,11 +28,11 @@ async function scoreLinks(game: Game) {
 
         // Keep scoring the last-place player
 
-        const player = minBy(playersWithLinks, x => x.victoryPoints);
+        const player = bge.Helpers.minBy(playersWithLinks, x => x.victoryPoints);
 
         // Score their most valuable link first
 
-        const link = maxBy(player.builtLinks, x => x.location.scoredLinkPoints);
+        const link = bge.Helpers.maxBy(player.builtLinks, x => x.location.scoredLinkPoints);
         const linkPoints = link.location.scoredLinkPoints;
 
         await link.location.setTile(null);

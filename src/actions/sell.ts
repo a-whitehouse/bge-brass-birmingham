@@ -3,10 +3,9 @@ import * as bge from "bge-core";
 import { Game } from "../game";
 import { IndustryTile } from "../objects/industrytile";
 import { MerchantLocation } from "../objects/merchantlocation";
-import { MerchantTile } from "../objects/merchanttile";
 import { ResourceToken } from "../objects/resourcetoken";
 import { Player } from "../player";
-import { ALL_INDUSTRIES, MARKET_CITIES, SELLABLE_INDUSTRIES, City, Industry, Resource } from "../types";
+import { SELLABLE_INDUSTRIES, City, Industry, Resource } from "../types";
 
 const console = bge.Logger.get("sell");
 

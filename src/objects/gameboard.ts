@@ -17,6 +17,8 @@ import { MerchantLocation } from "./merchantlocation";
 import { Player } from "../player";
 import { Game } from "../game";
 import { City, Resource, MARKET_CITIES, BUILDABLE_CITIES } from "../types";
+import { IBoardState } from "../state";
+import { Card } from "./card";
 
 /**
  * The main board in the middle of the table.
@@ -25,7 +27,7 @@ import { City, Resource, MARKET_CITIES, BUILDABLE_CITIES } from "../types";
 @bge.height(gameboard.HEIGHT)
 @bge.thickness(0.5)
 export class GameBoard extends bge.Card {
-    private readonly _game: Game;
+    readonly game: Game;
 
     /**
      * Array of {@link IndustryLocation}s that players can build on.
@@ -46,24 +48,24 @@ export class GameBoard extends bge.Card {
     private readonly _cityLinkLocations = new Map<City, LinkLocation[]>();
 
     @bge.display({ rotation: 90, position: { x: -20.6, y: 19.7 } })
-    get drawPile() { return this._game.drawPile; }
+    get drawPile() { return this.game.drawPile; }
 
     @bge.display({ rotation: 90, position: { x: -20.6, y: 12 } })
-    get wildLocationPile() { return this._game.wildLocationPile; }
+    get wildLocationPile() { return this.game.wildLocationPile; }
 
     @bge.display({ rotation: 90, position: { x: -20.6, y: 4.4 } })
-    get wildIndustryPile() { return this._game.wildIndustryPile; }
+    get wildIndustryPile() { return this.game.wildIndustryPile; }
 
-    @bge.display() get coalMarket() { return this._game.coalMarket; }
-    @bge.display() get ironMarket() { return this._game.ironMarket; }
-    @bge.display() get scoreTrack() { return this._game.scoreTrack; }
+    @bge.display() get coalMarket() { return this.game.coalMarket; }
+    @bge.display() get ironMarket() { return this.game.ironMarket; }
+    @bge.display() get scoreTrack() { return this.game.scoreTrack; }
 
     readonly playerTokenSlots: PlayerTokenSlot[] = [];
 
     constructor(game: Game) {
         super();
 
-        this._game = game;
+        this.game = game;
 
         this.front.image = bge.Image.simple("https://iili.io/HGzqKkx.jpg");
 
@@ -78,7 +80,7 @@ export class GameBoard extends bge.Card {
         // then add them as children to be displayed.
 
         this.industryLocations = INDUSTRY_LOCATIONS.map(data => {
-            const location = new IndustryLocation(data);
+            const location = new IndustryLocation(this, data);
 
             this.children.add(location, {
                 position: new bge.Vector3(data.posX, data.posY)
@@ -105,7 +107,7 @@ export class GameBoard extends bge.Card {
         // then add them as children to be displayed.
 
         this.merchantLocations = MERCHANT_LOCATIONS.map(data => {
-            const location = new MerchantLocation(data);
+            const location = new MerchantLocation(this, data);
 
             this.children.add(location, {
                 position: new bge.Vector3(data.posX, data.posY)
@@ -377,6 +379,41 @@ export class GameBoard extends bge.Card {
         }
 
         return this.industryLocations.some(x => x.tile != null && x.tile.resources.some(y => y.resource === resource));
+    }
+
+    serialize(): IBoardState {
+        return {
+            drawPile: [...this.drawPile].map(x => x.index),
+            wildIndustries: this.wildIndustryPile.count,
+            wildLocations: this.wildLocationPile.count,
+
+            industryLocations: this.industryLocations.map(x => x.serialize()),
+            linkLocations: this.linkLocations.map(x => x.serialize()),
+            merchants: this.merchantLocations.map(x => x.serialize()),
+
+            coalMarketTokens: this.coalMarket.count,
+            ironMarketTokens: this.ironMarket.count
+        };
+    }
+
+    deserialize(state: IBoardState): void {
+        this.drawPile.removeAll();
+        this.wildIndustryPile.removeAll();
+        this.wildLocationPile.removeAll();
+
+        this.coalMarket.clear();
+        this.ironMarket.clear();
+
+        this.drawPile.addRange(Card.createRange(state.drawPile));
+        this.wildIndustryPile.addRange(Card.createRange(2, state.wildIndustries));
+        this.wildLocationPile.addRange(Card.createRange(1, state.wildLocations));
+        
+        this.industryLocations.forEach((x, i) => x.deserialize(state.industryLocations[i]));
+        this.linkLocations.forEach((x, i) => x.deserialize(state.linkLocations[i]));
+        this.merchantLocations.forEach((x, i) => x.deserialize(state.merchants[i]));
+
+        this.coalMarket.fill(state.coalMarketTokens);
+        this.ironMarket.fill(state.ironMarketTokens);
     }
 }
 
