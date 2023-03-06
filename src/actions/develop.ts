@@ -15,15 +15,11 @@ export async function develop(game: Game, player: Player) {
 
     let hasDevelopedAgain = await game.anyExclusive(() => [
         developOnce(game, player),
-        player.discardAnyCard({
-            message: "Discard any card to finish developing"
-        })
+        player.discardAnyCard()
     ]);
 
     if (hasDevelopedAgain) {
-        await player.discardAnyCard({
-            message: "Discard any card to finish developing"
-        });
+        await player.discardAnyCard();
     }
 }
 

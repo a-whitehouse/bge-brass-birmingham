@@ -246,11 +246,14 @@ export class Player extends bge.Player {
                     this.hand.setSelected(card, true);
                 }
             }
+
+            const lastAction = this.game.action === this.game.actionsPerTurn - 1;
+            const messagePostfix = lastAction ? " to end your turn" : "";
     
             discardedCard = await this.prompt.clickAny(cards, {
                 message: options?.message ?? (cards.length < this.hand.count
-                    ? "Discard a matching card"
-                    : "Discard any card"),
+                    ? `Discard a matching card${messagePostfix}`
+                    : `Discard any card${messagePostfix}`),
                 autoResolveIfSingle: canAutoResolve
             });
         }
@@ -340,27 +343,22 @@ export class Player extends bge.Player {
     }
 
     deserialize(state: IPlayerState): void {
-        this.hand.removeAll();
-        this.discardPile.removeAll();
-        this.linkTiles.removeAll();
-        this.developedIndustries.removeAll();
-
-        console.log(`Income: ${state.income}`);
-
         this.money = state.money;
         this.spent = state.spent;
         this.incomeToken.moveTo(state.income);
         this.victoryPointToken.moveTo(state.victoryPoints);
 
-        this.hand.addRange(Card.createRange(state.hand));
-        this.discardPile.addRange(Card.createRange(state.discardPile));
-        
-        for (let i = 0; i < state.links; ++i) {
-            this.linkTiles.add(new LinkTile(this));
-        }
+        Card.deserializeTo(this.hand, state.hand);
+        Card.deserializeTo(this.discardPile, state.discardPile);
 
-        for (let tileState of state.developedIndustries) {
-            this.developedIndustries.add(new IndustryTile(this, tileState.industry, tileState.level));
+        this.hand.setSelected(false);
+
+        this.linkTiles.setCount(state.links, () => new LinkTile(this));
+
+        if (this.developedIndustries.count > state.developedIndustries.length) {
+            this.developedIndustries.drawRange(state.developedIndustries.length - this.developedIndustries.count);
+        } else {
+            this.developedIndustries.addRange(state.developedIndustries.slice(this.developedIndustries.count).map(x => new IndustryTile(this, x.industry, x.level)))
         }
 
         this.playerBoard.deserialize(state.industries);

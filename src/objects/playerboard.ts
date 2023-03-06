@@ -64,22 +64,19 @@ export class PlayerBoard extends bge.Card {
     }
 
     deserialize(state: IPlayerIndustryState[]): void {
-        [...this.industryLevels.values()]
-            .flat()
-            .forEach(x => x.removeAll());
-
         for (let industryState of state) {
             const slots = this.industryLevels.get(industryState.industry);
 
             let remaining = industryState.tiles;
 
-            for (let i = slots.length - 1; i >= 0 && remaining > 0; --i) {
+            for (let i = slots.length - 1; i >= 0; --i) {
                 const slot = slots[i];
                 const slotCount = slot.data.count;
 
-                for (let j = 0; j < slotCount && remaining > 0; ++j, --remaining) {
-                    slot.add(new IndustryTile(slot.player, slot.industry, i + 1));
-                }
+                slot.setCount(Math.max(0, Math.min(remaining, slotCount)),
+                    () => new IndustryTile(slot.player, slot.industry, i + 1));
+
+                remaining -= slotCount;
             }
         }
     }

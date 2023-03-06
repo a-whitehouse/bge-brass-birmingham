@@ -110,19 +110,32 @@ export class IndustryLocation extends bge.Zone {
     }
 
     deserialize(state: IIndustryTileState | null): void {
-        this._tile = null;
         this.clearSpentResources();
 
         if (state == null) {
+            this._tile = null;
             return;
         }
         
         const game = this._board.game;
 
-        this._tile = new IndustryTile(game.players[state.player], state.industry, state.level);
-        this._tile.hasFlipped = state.flipped;
-        this._tile.location = this;
-        this._tile.resources.push(...state.resources.map(x => new ResourceToken(x)));
+        if (this._tile?.player.index !== state.player || this._tile?.industry !== state.industry || this._tile?.data.level !== state.level) {
+            this._tile = new IndustryTile(game.players[state.player], state.industry, state.level);
+            this._tile.hasFlipped = state.flipped;
+            this._tile.location = this;
+        }
+
+        if (this._tile.resources.length > state.resources.length) {
+            this._tile.resources.splice(state.resources.length, this._tile.resources.length - state.resources.length);
+        } else {
+            this._tile.resources.push(...state.resources.slice(this._tile.resources.length).map(x => new ResourceToken(x)));
+        }
+
+        state.resources.forEach((x, i) => {
+            if (this._tile.resources[i].resource !== x) {
+                this._tile.resources[i] = new ResourceToken(x);
+            }
+        })
 
         this.children.getOptions("tile").rotation = state.flipped
             ? bge.Rotation.y(180)

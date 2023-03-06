@@ -26,7 +26,6 @@ export async function sell(game: Game, player: Player) {
         const soldAgain = await game.anyExclusive(() => [
             sellOnce(game, player, sellOptions, false),
             player.discardAnyCard({
-                message: "Discard any card to finish selling",
                 return: false
             })
         ]);

@@ -98,8 +98,13 @@ export class LinkLocation extends bge.Zone {
     }
 
     deserialize(state: PlayerIndex | null): void {
-        this._tile = null;
         this.clearSpentResources();
+        
+        if (this._tile?.player.index === state) {
+            return;
+        }
+
+        this._tile = null;
 
         if (state == null) {
             return;

@@ -98,7 +98,7 @@ export class MerchantLocation extends bge.Zone {
             return;
         }
 
-        this.tile = new MerchantTile(state.value);
-        this.marketBeer = state.hasBeer ? new ResourceToken(Resource.Beer) : null;
+        this.tile = this.tile?.value === state.value ? this.tile : new MerchantTile(state.value);
+        this.marketBeer = state.hasBeer ? this.marketBeer ?? new ResourceToken(Resource.Beer) : null;
     }
 }

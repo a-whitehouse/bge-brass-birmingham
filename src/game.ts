@@ -5,7 +5,7 @@ import { GameBoard } from "./objects/gameboard";
 import { ResourceMarket } from "./objects/resourcemarket";
 import { Resource, Era } from "./types";
 
-import { grantIncome, playerAction, reorderPlayers, resetSpentMoney, startRailEra } from "./actions";
+import { grantIncome, playerAction, PlayerActionResult, reorderPlayers, resetSpentMoney, startRailEra } from "./actions";
 import { Card } from "./objects/card";
 import { ScoreTrack } from "./objects/scoring";
 import { IGameState } from "./state";
@@ -43,6 +43,9 @@ export class Game extends bge.StateMachineGame<Player> {
     readonly ironMarket: ResourceMarket;
 
     readonly scoreTrack: ScoreTrack;
+
+    turnStartState?: IGameState;
+    actionStartState?: IGameState;
 
     get currentPlayer(): Player {
         return this.turnOrder[this.turn];
@@ -94,16 +97,28 @@ export class Game extends bge.StateMachineGame<Player> {
 
     async playerTurnStart(): bge.GameState {
         this.action = 0;
+        
+        this.turnStartState = this.serialize();
 
         return this.playerAction;
     }
 
     async playerAction(): bge.GameState {
-        const state = this.serialize();
+        this.actionStartState = this.serialize();
 
-        if (!await playerAction(this, this.currentPlayer)) {
-            this.deserialize(state);
-            return this.playerAction;
+        const result = await playerAction(this, this.currentPlayer);
+
+        switch (result) {
+            case PlayerActionResult.RESOLVED:
+                break;
+
+            case PlayerActionResult.RESTART_ACTION:
+                this.deserialize(this.actionStartState);
+                return this.playerAction;
+
+            case PlayerActionResult.RESTART_TURN:
+                this.deserialize(this.turnStartState);
+                return this.playerAction;
         }
 
         this.action++;

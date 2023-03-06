@@ -4,6 +4,7 @@ import { IndustryLocation } from "./industrylocation";
 import { City, Industry, ALL_INDUSTRIES, FARM_CITIES } from "../types";
 
 import CARDS from "../data/cards";
+import { LinearCardContainer } from "bge-core";
 
 @bge.width(Card.WIDTH)
 @bge.height(Card.HEIGHT)
@@ -36,14 +37,33 @@ export class Card extends bge.Card {
 		throw new Error("Invalid card data");
 	}
 
-	static createRange(index: number, count: number): Card[];
-	static createRange(indices: number[]): Card[];
-	static createRange(indices: number[] | number, count?: number) {
-		if (Array.isArray(indices)) {
-			return indices.map(x => this.create(x));
-		} else {
-			return Array.from(new Array(count)).map(x => this.create(indices));
+	static deserializeTo(container: LinearCardContainer<Card>, indices: number[]): void {		
+		if (indices.length === container.count) {
+			if ([...container].every((x, i) => x.index === indices[i])) {
+				return;
+			}
 		}
+
+		const available = [...container];
+		const result: Card[] = [];
+
+		for (let i = 0; i < indices.length; ++i) {
+			const index = indices[i];
+			const match = available.findIndex(x => x.index == index);
+
+			if (match !== -1) {
+				result.push(available.splice(match, 1)[0]);
+			} else {
+				result.push(Card.create(index));
+			}
+		}
+
+		container.removeAll();
+		container.addRange(result);
+	}
+
+	static createRange(indices: number[]): Card[] {
+		return indices.map(x => this.create(x));
 	}
 
 	static compare(a: Card, b: Card): number {

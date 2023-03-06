@@ -15,23 +15,42 @@ import { develop } from "./develop";
 import { sell } from "./sell";
 import { IResourceSources } from "../objects/gameboard";
 import { LinkLocation } from "../objects/linklocation";
+import { ResourceToken } from "../objects/resourcetoken";
 
 const console = bge.Logger.get("player-turn");
 
 const ALLOW_DRAIN_MARKETS = false;
 
-export async function playerAction(game: Game, player: Player): Promise<boolean> {
+export enum PlayerActionResult {
+    RESOLVED,
+    RESTART_ACTION,
+    RESTART_TURN
+}
+
+export async function playerAction(game: Game, player: Player): Promise<PlayerActionResult> {
     game.message.clear();
     game.message.set(player, "It's your turn, action {0} of {1}", game.action + 1, game.actionsPerTurn);
+
+    let result: PlayerActionResult;
+
+    if (game.action > 0) {
+        player.prompt.click(new bge.Button("Restart Turn"), {
+            order: 1001
+        }).then(() => {
+            result = PlayerActionResult.RESTART_TURN;
+            game.cancelAllPromises("Action undone");
+        });
+    }
 
     try {
         await game.anyExclusive(() => {
             // Show an undo button after the player has clicked on anything
             game.promiseGroup.catch(async reason => {
-                await player.prompt.click(new bge.Button("Undo"), {
+                await player.prompt.click(new bge.Button("Restart Action"), {
                     order: 1000
                 });
 
+                result = PlayerActionResult.RESTART_ACTION;
                 game.cancelAllPromises("Action undone");
             });
 
@@ -47,10 +66,13 @@ export async function playerAction(game: Game, player: Player): Promise<boolean>
             ];
         });
 
-        return true;
+        return PlayerActionResult.RESOLVED;
     } catch (e) {
-        console.error(e);
-        return false;
+        if (result !== undefined) {
+            return result;
+        }
+
+        throw e;
     }
 }
 

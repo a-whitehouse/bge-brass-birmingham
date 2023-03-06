@@ -397,23 +397,16 @@ export class GameBoard extends bge.Card {
     }
 
     deserialize(state: IBoardState): void {
-        this.drawPile.removeAll();
-        this.wildIndustryPile.removeAll();
-        this.wildLocationPile.removeAll();
-
-        this.coalMarket.clear();
-        this.ironMarket.clear();
-
-        this.drawPile.addRange(Card.createRange(state.drawPile));
-        this.wildIndustryPile.addRange(Card.createRange(2, state.wildIndustries));
-        this.wildLocationPile.addRange(Card.createRange(1, state.wildLocations));
+        Card.deserializeTo(this.drawPile, state.drawPile);
+        this.wildIndustryPile.setCount(state.wildIndustries, () => Card.create(2));
+        this.wildLocationPile.setCount(state.wildLocations, () => Card.create(1));
         
         this.industryLocations.forEach((x, i) => x.deserialize(state.industryLocations[i]));
         this.linkLocations.forEach((x, i) => x.deserialize(state.linkLocations[i]));
         this.merchantLocations.forEach((x, i) => x.deserialize(state.merchants[i]));
 
-        this.coalMarket.fill(state.coalMarketTokens);
-        this.ironMarket.fill(state.ironMarketTokens);
+        this.coalMarket.setCount(state.coalMarketTokens);
+        this.ironMarket.setCount(state.ironMarketTokens);
     }
 }
 

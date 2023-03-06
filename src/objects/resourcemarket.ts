@@ -101,7 +101,7 @@ export class ResourceMarket extends bge.Zone {
 
         this.defaultCost = data.rows.length + 1;
 
-        this.fill(data.initialCount);
+        this.setCount(data.initialCount);
     }
 
     /**
@@ -149,7 +149,11 @@ export class ResourceMarket extends bge.Zone {
      * Fill this market up to the given token count.
      * @param count Total number of tokens the market should contain.
      */
-    fill(count: number): void {
+    setCount(count: number): void {
+        if (this.count > count) {
+            this.takeRange(this.count - count);
+        }
+
         while (this.count < count) {
             this.add(new ResourceToken(this.resource));
         }
