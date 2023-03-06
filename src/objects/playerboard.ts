@@ -25,7 +25,7 @@ export class IndustryLevelSlot extends bge.Deck<IndustryTile> {
         const count = data.count ?? 1;
 
         for (let i = 0; i < count; ++i) {
-            this.add(new IndustryTile(player, industry, i + 1));
+            this.add(new IndustryTile(player, industry, data.level));
         }
     }
 }
@@ -74,7 +74,7 @@ export class PlayerBoard extends bge.Card {
                 const slotCount = slot.data.count;
 
                 slot.setCount(Math.max(0, Math.min(remaining, slotCount)),
-                    () => new IndustryTile(slot.player, slot.industry, i + 1));
+                    () => new IndustryTile(slot.player, slot.industry, slot.data.level));
 
                 remaining -= slotCount;
             }
