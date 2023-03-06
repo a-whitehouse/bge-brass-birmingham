@@ -266,14 +266,20 @@ export class Player extends bge.Player {
     }
 
     async discardAnyCards(count: number) {
+        const lastAction = this.game.action === this.game.actionsPerTurn - 1;
+        const messagePostfix = lastAction ? " and End Turn" : "";
+
         while (true) {
+            const remaining = count - this.hand.selected.length;
             const clicked = await this.game.anyExclusive(() => [
                 this.prompt.clickAny([...this.hand].filter(x => this.hand.selected.length < count || this.hand.getSelected(x)), {
-                    message: "Discard any three cards"
+                    message: remaining === 0
+                        ? "Change your selection"
+                        : `Select ${remaining}${remaining === count ? "" : " more"} card${remaining === 1 ? "" : "s"}`
                 }),
-                this.prompt.click(new bge.Button("Discard"), {
+                this.prompt.click(new bge.Button(`Discard${messagePostfix}`), {
                     return: null,
-                    if: this.hand.selected.length === count
+                    if: remaining === 0
                 })
             ]);
 
