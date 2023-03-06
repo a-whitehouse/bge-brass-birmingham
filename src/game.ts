@@ -28,11 +28,7 @@ export class Game extends bge.StateMachineGame<Player> {
     @bge.display()
     readonly board = new GameBoard(this);
 
-    @bge.display({
-        arrangement: new bge.RectangularArrangement({
-            size: new bge.Vector3(60, 60)
-        })
-    })
+    @bge.display()
     readonly playerZones: bge.Zone[] = [];
 
     readonly drawPile = new bge.Deck(Card, { orientation: bge.CardOrientation.FACE_DOWN });
@@ -70,6 +66,19 @@ export class Game extends bge.StateMachineGame<Player> {
 
     protected override onInitialize(): void {
         this.playerZones.push(...this.players.map(x => x.createZone()));
+
+        const playerZonesOptions = this.children.getOptions("playerZones");
+
+        if (this.players.length === 2) {
+            playerZonesOptions.position = { y: -46 };
+            playerZonesOptions.arrangement = new bge.LinearArrangement({
+                axis: "x"
+            });
+        } else {
+            playerZonesOptions.arrangement = new bge.RectangularArrangement({
+                size: new bge.Vector3(60, 60)
+            });
+        }
     }
 
     override get initialState(): bge.GameStateFunction {
