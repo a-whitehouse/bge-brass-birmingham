@@ -362,7 +362,7 @@ export class Player extends bge.Player {
         this.linkTiles.setCount(state.links, () => new LinkTile(this));
 
         if (this.developedIndustries.count > state.developedIndustries.length) {
-            this.developedIndustries.drawRange(state.developedIndustries.length - this.developedIndustries.count);
+            this.developedIndustries.drawRange(this.developedIndustries.count - state.developedIndustries.length);
         } else {
             this.developedIndustries.addRange(state.developedIndustries.slice(this.developedIndustries.count).map(x => new IndustryTile(this, x.industry, x.level)))
         }
