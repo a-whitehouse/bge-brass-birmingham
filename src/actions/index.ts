@@ -98,6 +98,14 @@ export async function startRailEra(game: Game) {
         await game.delay.beat();
     }
 
+    // Refill market beer
+
+    for (let merchant of game.board.merchantLocations) {
+        if (merchant.tile != null && merchant.marketBeer == null) {
+            merchant.marketBeer = new ResourceToken(Resource.Beer);
+        }
+    }
+
     // Shuffle and deal starting hands
 
     game.drawPile.shuffle(game.random);
