@@ -121,9 +121,10 @@ export class IndustryLocation extends bge.Zone {
 
         if (this._tile?.player.index !== state.player || this._tile?.industry !== state.industry || this._tile?.data.level !== state.level) {
             this._tile = new IndustryTile(game.players[state.player], state.industry, state.level);
-            this._tile.hasFlipped = state.flipped;
             this._tile.location = this;
         }
+
+        this._tile.hasFlipped = state.flipped;
 
         if (this._tile.resources.length > state.resources.length) {
             this._tile.resources.splice(state.resources.length, this._tile.resources.length - state.resources.length);
