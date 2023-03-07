@@ -110,7 +110,7 @@ export async function startRailEra(game: Game) {
     // Refill market beer
 
     for (let merchant of game.board.merchantLocations) {
-        if (merchant.tile != null && merchant.marketBeer == null) {
+        if (merchant.tile != null && merchant.tile.industries.length > 0 && merchant.marketBeer == null) {
             merchant.marketBeer = new ResourceToken(Resource.Beer);
         }
     }
