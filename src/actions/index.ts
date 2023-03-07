@@ -102,7 +102,7 @@ export async function startRailEra(game: Game) {
 
         // Return discarded cards to draw pile
 
-        game.drawPile.addRange(player.hand.removeAll());
+        game.drawPile.addRange(player.discardPile.removeAll());
 
         await game.delay.beat();
     }
