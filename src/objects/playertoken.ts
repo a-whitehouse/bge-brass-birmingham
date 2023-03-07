@@ -35,7 +35,7 @@ export class PlayerTokenSlot extends bge.Zone {
     }
 
     @bge.display({ position: { x: 4.5, y: -0.5 }, fontScale: 0.5 })
-    get moneySpent() { return this.playerToken == null ? undefined : `£${this.playerToken.player.spent}`; }
+    get moneySpent() { return this.playerToken == null || this._game.turnOrder.indexOf(this.playerToken.player) > this._game.turn ? undefined : `£${this.playerToken.player.spent}`; }
 
     constructor(game: Game, index: number) {
         super(4, 4);
