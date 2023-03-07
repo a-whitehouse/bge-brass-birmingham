@@ -7,7 +7,7 @@ import { LinkTile } from "./objects/linktile"
 import { IndustryLevelSlot, PlayerBoard } from "./objects/playerboard";
 import { ScoreToken } from "./objects/scoring";
 import { IndustryLocation } from "./objects/industrylocation";
-import { ALL_INDUSTRIES, Industry, City } from "./types";
+import { ALL_INDUSTRIES, Industry, City, Era } from "./types";
 import { PlayerToken } from "./objects/playertoken";
 import { LinkLocation } from "./objects/linklocation";
 import { IPlayerState } from "./state";
@@ -190,6 +190,14 @@ export class Player extends bge.Player {
             const slot = this.getNextIndustryLevelSlot(industry);
 
             if (slot == null) {
+                return false;
+            }
+
+            if ((slot.data.canalOnly ?? false) && this.game.era !== Era.Canal) {
+                return false;
+            }
+            
+            if ((slot.data.railOnly ?? false) && this.game.era !== Era.Rail) {
                 return false;
             }
 
