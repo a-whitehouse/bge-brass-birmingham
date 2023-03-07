@@ -35,12 +35,18 @@ async function scoreLinks(game: Game) {
         const link = bge.Helpers.maxBy(player.builtLinks, x => x.location.scoredLinkPoints);
         const linkPoints = link.location.scoredLinkPoints;
 
-        await link.location.setTile(null);
-
         if (linkPoints > 0) {
-            link.player.increaseVictoryPoints(linkPoints);
+            game.message.set("{0} scores {1} points for their {2} between {3}!", player, linkPoints, link, link.location.cities.map(x => City[x]));
+            link.location.children.getOptions("tile").position = new bge.Vector3(0, 0, 2);
             await game.delay.beat();
+            
+            link.player.increaseVictoryPoints(linkPoints);
+            await game.delay.short();
+            
+            link.location.children.getOptions("tile").position = undefined;
         }
+
+        await link.location.setTile(null);
     }
 }
 
@@ -54,9 +60,16 @@ async function scoreIndustries(game: Game) {
     for (let tile of unscoredTiles) {
         if (tile.hasFlipped) {
             let victoryPoints = tile.data.saleReward.victoryPoints;
+            
+            game.message.set("{0} scores {1} points for their {2} in {3}!", tile.player, victoryPoints, tile, City[tile.location.city]);
 
-            console.log(`${tile.player.name} scored ${victoryPoints} points from ${Industry[tile.industry]} in ${City[tile.location.city]}`)
+            tile.location.children.getOptions("tile").position = new bge.Vector3(0, 0, 2);
+            await game.delay.beat();
+            
             tile.player.increaseVictoryPoints(victoryPoints);
+            await game.delay.short();
+            
+            tile.location.children.getOptions("tile").position = undefined;
         }
     }
 }

@@ -86,6 +86,8 @@ export async function playerAction(game: Game, player: Player): Promise<PlayerAc
 }
 
 export async function startRailEra(game: Game) {
+    game.message.set("The {0} era begins!", Era[Era.Rail]);
+
     game.era = Era.Rail;
 
     for (let player of game.players) {

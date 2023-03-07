@@ -76,7 +76,7 @@ export class LinkLocation extends bge.Zone {
             this._tile.location = null;
             this._tile = null;
 
-            await game.delay.long();
+            await game.delay.beat();
         }
 
         this._tile = tile;
