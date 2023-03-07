@@ -59,6 +59,8 @@ export async function buildIndustry(game: Game, player: Player) {
 
 	player.spendMoney(slot.data.cost.coins);
 
+	const validCards = player.getMatchingCards(loc, industry);
+
 	await loc.setTile(player.takeNextIndustryTile(industry));
 
 	loc.clearSpentResources();
@@ -102,7 +104,7 @@ export async function buildIndustry(game: Game, player: Player) {
 	}
 
 	await player.discardAnyCard({
-		cards: player.getMatchingCards(loc, industry)
+		cards: validCards
 	});
 }
 
