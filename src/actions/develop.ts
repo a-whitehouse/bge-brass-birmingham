@@ -25,7 +25,7 @@ export async function develop(game: Game, player: Player) {
     }
 }
 
-export async function developOnce(game: Game, player: Player, messageRow: bge.MessageRow): Promise<boolean> {
+export async function developOnce(game: Game, player: Player, messageRow?: bge.MessageRow): Promise<boolean> {
     let ironSources = game.board.getResourceSources(Resource.Iron);
 
     let marketCost = game.board.ironMarket.getCost(1);
@@ -48,7 +48,7 @@ export async function developOnce(game: Game, player: Player, messageRow: bge.Me
         autoResolveIfSingle: true
     });
 
-    messageRow.update("{0} is developing {1}", player, slot.top);
+    messageRow?.update("{0} is developing {1}", player, slot.top);
 
     let ironTiles = new Set(ironSources.tiles.map(x => x.tile));
 
