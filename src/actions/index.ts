@@ -34,11 +34,15 @@ export async function playerAction(game: Game, player: Player): Promise<PlayerAc
     let result: PlayerActionResult;
 
     if (game.action > 0) {
-        player.prompt.click(new bge.Button("Restart Turn"), {
+        const restartTurnPromise = player.prompt.click(new bge.Button("Restart Turn"), {
             order: 1001
-        }).then(() => {
+        });
+
+        restartTurnPromise.then(() => {
             result = PlayerActionResult.RESTART_TURN;
             game.cancelAllPromises("Action undone");
+        }).catch(() => {
+            // Handled
         });
     }
 
@@ -46,9 +50,14 @@ export async function playerAction(game: Game, player: Player): Promise<PlayerAc
         await game.anyExclusive(() => {
             // Show an undo button after the player has clicked on anything
             game.promiseGroup.catch(async reason => {
-                await player.prompt.click(new bge.Button("Restart Action"), {
-                    order: 1000
-                });
+                try {
+                    await player.prompt.click(new bge.Button("Restart Action"), {
+                        order: 1000
+                    });
+                } catch {
+                    // Handled
+                    return;
+                }                
 
                 result = PlayerActionResult.RESTART_ACTION;
                 game.cancelAllPromises("Action undone");
