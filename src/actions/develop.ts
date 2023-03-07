@@ -10,11 +10,13 @@ const console = bge.Logger.get("develop");
 export async function develop(game: Game, player: Player) {
     await player.prompt.click(new bge.Button("Develop"));
 
-    await developOnce(game, player);
+    const messageRow = game.message.add("{0} is developing", player);
+
+    await developOnce(game, player, messageRow);
     console.log(`${player.name} developed once`);
 
     let hasDevelopedAgain = await game.anyExclusive(() => [
-        developOnce(game, player),
+        developOnce(game, player, messageRow),
         player.discardAnyCard()
     ]);
 
@@ -23,7 +25,7 @@ export async function develop(game: Game, player: Player) {
     }
 }
 
-export async function developOnce(game: Game, player: Player): Promise<boolean> {
+export async function developOnce(game: Game, player: Player, messageRow: bge.MessageRow): Promise<boolean> {
     let ironSources = game.board.getResourceSources(Resource.Iron);
 
     let marketCost = game.board.ironMarket.getCost(1);
@@ -45,6 +47,8 @@ export async function developOnce(game: Game, player: Player): Promise<boolean> 
         message: "Click the industry tile on your player board to develop",
         autoResolveIfSingle: true
     });
+
+    messageRow.update("{0} is developing {1}", player, slot.top);
 
     let ironTiles = new Set(ironSources.tiles.map(x => x.tile));
 

@@ -9,6 +9,8 @@ export async function takeLoan(game: Game, player: Player) {
 	
 	await player.prompt.click(new bge.Button("Take a loan"));
 
+	game.message.add("{0} is taking a loan", player);
+
 	player.money += 30;
 	player.decreaseIncome(3);
 

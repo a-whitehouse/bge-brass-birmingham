@@ -1,6 +1,6 @@
 import * as bge from "bge-core";
 
-import { Era, Resource } from "../types";
+import { City, Era, Resource } from "../types";
 import { Game } from "../game";
 import { LinkLocation } from "../objects/linklocation";
 import { Player } from "../player";
@@ -36,6 +36,8 @@ async function buildSingleLink(game: Game, player: Player, linkCost: number, coa
 	let marketCoalPrice = coalMarket.getCost(1);
 
 	let loc = await player.prompt.clickAny(getBuildableLinks(game, player, linkCost, coalCost, beerCost, marketCoalPrice), { message: "Click on a link!" });
+
+	game.message.add("{0} is building a {1} between {2}", player, player.linkTiles.top, loc.cities.map(x => City[x]));
 
 	player.spendMoney(linkCost);
 	const coalSources = game.board.getResourceSources(Resource.Coal, loc);

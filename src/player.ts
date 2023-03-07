@@ -269,6 +269,8 @@ export class Player extends bge.Player {
         }
 
         this.hand.setSelected(false);
+
+        this.game.message.add("{0} discards {1}", this, discardedCard);
         
         await this.finishDiscardingCards([discardedCard]);
 
@@ -300,6 +302,8 @@ export class Player extends bge.Player {
 
             break;
         }
+        
+        this.game.message.add("{0} discards {1}", this, this.hand.selected);
 
         await this.finishDiscardingCards(this.hand.selected);
     }

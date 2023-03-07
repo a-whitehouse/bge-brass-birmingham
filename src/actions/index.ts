@@ -29,7 +29,7 @@ export enum PlayerActionResult {
 
 export async function playerAction(game: Game, player: Player): Promise<PlayerActionResult> {
     game.message.clear();
-    game.message.set(player, "It's your turn, action {0} of {1}", game.action + 1, game.actionsPerTurn);
+    game.message.set("It's {0}'s turn, action {1} of {2}", player, game.action + 1, game.actionsPerTurn);
 
     let result: PlayerActionResult;
 

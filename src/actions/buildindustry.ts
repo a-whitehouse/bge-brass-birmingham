@@ -5,7 +5,7 @@ import { IResourceSources } from "../objects/gameboard";
 import { IndustryLocation } from "../objects/industrylocation";
 import { ResourceToken } from "../objects/resourcetoken";
 import { Player } from "../player";
-import { Industry, Resource, Era, OVERBUILDABLE_INDUSTRIES } from "../types";
+import { Industry, Resource, Era, OVERBUILDABLE_INDUSTRIES, City } from "../types";
 import { consumeResources } from ".";
 
 const console = bge.Logger.get("build-industry");
@@ -37,6 +37,8 @@ export async function buildIndustry(game: Game, player: Player) {
 		message: "Click on a location!"
 	});
 
+	const messageRow = game.message.add("{0} is building an industry in {1}", player, City[loc.city]);
+
 	console.info(`${player.name} clicked on ${loc.name}`);
 
 	const locationInfo = buildableIndustries.get(loc);
@@ -53,6 +55,8 @@ export async function buildIndustry(game: Game, player: Player) {
 	console.info(`We're building a ${Industry[industry]}!`);
 
 	const slot = player.getNextIndustryLevelSlot(industry);
+
+	messageRow.update("{0} is building a {1} in {2}", player, slot.top, City[loc.city]);
 
 	await consumeResources(player, loc, Resource.Coal, slot.data.cost.coal, locationInfo.coalSources, game.board.coalMarket);
 	await consumeResources(player, loc, Resource.Iron, slot.data.cost.iron, locationInfo.ironSources, game.board.ironMarket);
