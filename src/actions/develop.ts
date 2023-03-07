@@ -36,7 +36,7 @@ export async function developOnce(game: Game, player: Player, messageRow?: bge.M
 
     const developableIndustries = ALL_INDUSTRIES.map(x => {
         let slot = player.getNextIndustryLevelSlot(x);
-        if (slot.data.canDevelop ?? true) {
+        if (slot != null && (slot.data.canDevelop ?? true)) {
             return slot;
         } else {
             return null;
