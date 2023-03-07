@@ -65,7 +65,7 @@ export class Game extends bge.StateMachineGame<Player> {
     }
 
     protected override onInitialize(): void {
-        this.playerZones.push(...this.players.map(x => x.createZone()));
+        this.playerZones.push(...this.players.map(x => x.zone));
 
         const playerZonesOptions = this.children.getOptions("playerZones");
 

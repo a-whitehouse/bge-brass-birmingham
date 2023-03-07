@@ -54,6 +54,8 @@ export class Player extends bge.Player {
     victoryPointToken: ScoreToken;
     incomeToken: ScoreToken;
 
+    private _zone: bge.Zone;
+
     private readonly _builtIndustries: Set<IndustryTile> = new Set();
     private readonly _builtLinks: Set<LinkTile> = new Set();
 
@@ -107,17 +109,25 @@ export class Player extends bge.Player {
         this._builtLinks.delete(tile);
     }
 
-    createZone(): bge.Zone {
-        const zone = new bge.Zone(57, this.playerBoard.height + 4);
+    get zone(): bge.Zone {
+        if (this._zone != null) {
+            return this._zone;
+        }
 
-        zone.label = this.name;
-        zone.outlineColor = this.color;
+        this._zone = new bge.Zone(57, this.playerBoard.height + 4);
 
-        zone.children.addProperties(this);
-        zone.children.getOptions("hand").revealedFor = [this];
-        zone.children.getOptions("discardPile").revealedFor = [this];
+        this._zone.label = this.name;
+        this._zone.outlineColor = this.color;
 
-        return zone;
+        this._zone.children.addProperties(this);
+        this._zone.children.getOptions("hand").revealedFor = [this];
+        this._zone.children.getOptions("discardPile").revealedFor = [this];
+
+        return this._zone;
+    }
+
+    revealDiscardPile(): void {
+        this.zone.children.getOptions("discardPile").revealedFor = undefined;
     }
 
     spendMoney(amount: number): void {
@@ -303,6 +313,10 @@ export class Player extends bge.Player {
         this.game.wildLocationPile.addRange(cards.filter(x => x.isWild && x instanceof CityCard));
 
         await this.game.delay.beat();
+
+        if (this.discardPile.count > 1) {
+            this.revealDiscardPile();
+        }
     }
     
     async confirm(): Promise<true> {
