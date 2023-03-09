@@ -3,10 +3,9 @@ import * as bge from "bge-core";
 import { Game } from "../game";
 import { IndustryTile } from "../objects/industrytile";
 import { MerchantLocation } from "../objects/merchantlocation";
-import { MerchantTile } from "../objects/merchanttile";
 import { ResourceToken } from "../objects/resourcetoken";
 import { Player } from "../player";
-import { ALL_INDUSTRIES, MARKET_CITIES, SELLABLE_INDUSTRIES, City, Industry, Resource } from "../types";
+import { SELLABLE_INDUSTRIES, City, Industry, Resource } from "../types";
 
 const console = bge.Logger.get("sell");
 
@@ -19,15 +18,16 @@ export async function sell(game: Game, player: Player) {
 
     await player.prompt.click(new bge.Button("Sell"));
 
-    await sellOnce(game, player, sellOptions, true);
+    const messageRow = game.message.add("{0} is selling", player);
+
+    await sellOnce(game, player, sellOptions, true, messageRow);
 
     while (true) {
         sellOptions = getSellOptions(game, player);
 
         const soldAgain = await game.anyExclusive(() => [
-            sellOnce(game, player, sellOptions, false),
+            sellOnce(game, player, sellOptions, false, messageRow),
             player.discardAnyCard({
-                message: "Discard any card to finish selling",
                 return: false
             })
         ]);
@@ -38,17 +38,21 @@ export async function sell(game: Game, player: Player) {
     }
 }
 
-async function sellOnce(game: Game, player: Player, sellOptions: ISellOption[], firstSale: boolean): Promise<true> {
+async function sellOnce(game: Game, player: Player, sellOptions: ISellOption[], firstSale: boolean, messageRow: bge.MessageRow): Promise<true> {
     const tile = await player.prompt.clickAny(sellOptions.map(x => x.tile), {
         message: "Click on a tile to sell.",
         autoResolveIfSingle: firstSale
     });
     const optionsForTile = sellOptions.filter(x => x.tile === tile);
 
+    messageRow.update("{0} is selling their {1}", player, tile);
+
     const merchantLocation = await player.prompt.clickAny(optionsForTile.map(x => x.merchant), {
         message: "Click on a merchant to sell to.",
         autoResolveIfSingle: true
     });
+    
+    messageRow.update("{0} is selling their {1} to {2}", player, tile, City[merchantLocation.data.city]);
 
     console.info(`${player.name} click on ${Industry[tile.industry]}, ${City[merchantLocation.data.city]}`);
 

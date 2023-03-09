@@ -1,11 +1,10 @@
 import * as bge from "bge-core";
 
-import { Era, Resource, City } from "../types";
+import { City, Era, Resource } from "../types";
 import { Game } from "../game";
 import { LinkLocation } from "../objects/linklocation";
-import { LinkTile } from "../objects/linktile";
 import { Player } from "../player";
-import { consumeResources } from "./buildindustry";
+import { consumeResources } from ".";
 
 const console = bge.Logger.get("link");
 
@@ -20,29 +19,16 @@ export async function buildLink(game: Game, player: Player) {
 
 	await buildSingleLink(game, player, linkCost, coalCost, 0);
 
-
 	if (game.era == Era.Rail) {
-		let hasBuiltAgain = await game.anyExclusive(() => [
+		if (!await game.anyExclusive(() => [
 			buildSingleLink(game, player, 10, coalCost, 1),
-			player.discardAnyCard({
-				message: "Discard any card to finish building links",
-				return: false
-			})
-
-		])
-
-		if (hasBuiltAgain) {
-			await player.discardAnyCard({
-				message: "Discard any card to finish building links"
-			})
+			player.discardAnyCard()
+		])) {
+			return;
 		}
-
-	} else {
-		await player.discardAnyCard({
-			message: "Discard any card to finish building links"
-		})
-
 	}
+	
+	return await player.discardAnyCard();
 }
 
 async function buildSingleLink(game: Game, player: Player, linkCost: number, coalCost: number, beerCost: number): Promise<true> {
@@ -50,6 +36,8 @@ async function buildSingleLink(game: Game, player: Player, linkCost: number, coa
 	let marketCoalPrice = coalMarket.getCost(1);
 
 	let loc = await player.prompt.clickAny(getBuildableLinks(game, player, linkCost, coalCost, beerCost, marketCoalPrice), { message: "Click on a link!" });
+
+	game.message.add("{0} is building a {1} between {2}", player, player.linkTiles.top, loc.cities.map(x => City[x]));
 
 	player.spendMoney(linkCost);
 	const coalSources = game.board.getResourceSources(Resource.Coal, loc);

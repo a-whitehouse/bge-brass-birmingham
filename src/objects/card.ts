@@ -3,7 +3,8 @@ import * as bge from "bge-core";
 import { IndustryLocation } from "./industrylocation";
 import { City, Industry, ALL_INDUSTRIES, FARM_CITIES } from "../types";
 
-import { areArrayContentsMatching } from "../helpers";
+import CARDS from "../data/cards";
+import { LinearCardContainer } from "bge-core";
 
 @bge.width(Card.WIDTH)
 @bge.height(Card.HEIGHT)
@@ -11,102 +12,58 @@ export class Card extends bge.Card {
 	static readonly WIDTH = 6.3;
 	static readonly HEIGHT = 8.5;
 
+	readonly index: number;
+
 	static *generateDeck(playerCount: number): Iterable<Card> {
-		switch (playerCount) {
-			case 2:
-				{
-					// industries
-					for (let i = 0; i < 2; i++)
-						yield new IndustryCard([Industry.Coal], 18);
-					for (let i = 0; i < 2; i++)
-						yield new IndustryCard([Industry.Pottery], 6);
-					break;
-				}
-			case 3:
-				{
-					// dark blue
-					for (let i = 0; i < 2; i++)
-						yield new CityCard(City.Leek, 27);
-					for (let i = 0; i < 3; i++)
-						yield new CityCard(City.StokeOnTrent, 16);
-					for (let i = 0; i < 2; i++)
-						yield new CityCard(City.Stone, 7);
-					for (let i = 0; i < 1; i++)
-						yield new CityCard(City.Uttoxeter, 23);
-					// industries
-					for (let i = 0; i < 2; i++)
-						yield new IndustryCard([Industry.Coal], 18);
-					for (let i = 0; i < 6; i++)
-						yield new IndustryCard([Industry.Goods, Industry.Cotton], 5);
-					for (let i = 0; i < 2; i++)
-						yield new IndustryCard([Industry.Pottery], 6);
-					break;
-				}
-			case 4:
-				{
-					// cyan
-					for (let i = 0; i < 2; i++)
-						yield new CityCard(City.Belper, 28);
-					for (let i = 0; i < 3; i++)
-						yield new CityCard(City.Derby, 0);
-					// dark blue
-					for (let i = 0; i < 2; i++)
-						yield new CityCard(City.Leek, 27);
-					for (let i = 0; i < 3; i++)
-						yield new CityCard(City.StokeOnTrent, 16);
-					for (let i = 0; i < 2; i++)
-						yield new CityCard(City.Stone, 7);
-					for (let i = 0; i < 2; i++)
-						yield new CityCard(City.Uttoxeter, 23);
-					// industries
-					for (let i = 0; i < 3; i++)
-						yield new IndustryCard([Industry.Coal], 18);
-					for (let i = 0; i < 8; i++)
-						yield new IndustryCard([Industry.Goods, Industry.Cotton], 5);
-					for (let i = 0; i < 3; i++)
-						yield new IndustryCard([Industry.Pottery], 6);
-					break;
-				}
+		for (let index = 0; index < CARDS.length; ++index) {
+			const data = CARDS[index];
+			for (let i = 0; i < data.count[playerCount - 2]; ++i) {
+				yield this.create(index);
+			}
+		}
+	}
+
+	static create(index: number): Card {
+		const data = CARDS[index];
+
+		if (data.city !== undefined) {
+			return new CityCard(data.city, index);
 		}
 
-		// red
-		for (let i = 0; i < 2; i++)
-			yield new CityCard(City.Stafford, 13);
-		for (let i = 0; i < 2; i++)
-			yield new CityCard(City.BurtonOnTrent, 9);
-		for (let i = 0; i < 2; i++)
-			yield new CityCard(City.Cannock, 14);
-		for (let i = 0; i < 1; i++)
-			yield new CityCard(City.Tamworth, 15);
-		for (let i = 0; i < 1; i++)
-			yield new CityCard(City.Walsall, 8);
+		if (data.industries !== undefined) {
+			return new IndustryCard(data.industries, index);
+		}
 
-		// yellow
-		for (let i = 0; i < 3; i++)
-			yield new CityCard(City.Coalbrookdale, 24);
-		for (let i = 0; i < 2; i++)
-			yield new CityCard(City.Dudley, 19);
-		for (let i = 0; i < 2; i++)
-			yield new CityCard(City.Kidderminster, 25);
-		for (let i = 0; i < 2; i++)
-			yield new CityCard(City.Wolverhampton, 10);
-		for (let i = 0; i < 2; i++)
-			yield new CityCard(City.Worcester, 26);
+		throw new Error("Invalid card data");
+	}
 
-		// purple
-		for (let i = 0; i < 3; i++)
-			yield new CityCard(City.Birmingham, 4);
-		for (let i = 0; i < 3; i++)
-			yield new CityCard(City.Coventry, 17);
-		for (let i = 0; i < 1; i++)
-			yield new CityCard(City.Nuneaton, 32);
-		for (let i = 0; i < 1; i++)
-			yield new CityCard(City.Redditch, 31);
-		// industries
-		for (let i = 0; i < 4; i++)
-			yield new IndustryCard([Industry.Iron], 11);
-		for (let i = 0; i < 5; i++)
-			yield new IndustryCard([Industry.Brewery], 12);
+	static deserializeTo(container: LinearCardContainer<Card>, indices: number[]): void {		
+		if (indices.length === container.count) {
+			if ([...container].every((x, i) => x.index === indices[i])) {
+				return;
+			}
+		}
+
+		const available = [...container];
+		const result: Card[] = [];
+
+		for (let i = 0; i < indices.length; ++i) {
+			const index = indices[i];
+			const match = available.findIndex(x => x.index == index);
+
+			if (match !== -1) {
+				result.push(available.splice(match, 1)[0]);
+			} else {
+				result.push(Card.create(index));
+			}
+		}
+
+		container.removeAll();
+		container.addRange(result);
+	}
+
+	static createRange(indices: number[]): Card[] {
+		return indices.map(x => this.create(x));
 	}
 
 	static compare(a: Card, b: Card): number {
@@ -125,6 +82,8 @@ export class Card extends bge.Card {
 	constructor(index: number) {
 		super();
 
+		this.index = index;
+
 		let x = index % 7;
 		let y = 4 - Math.floor(index / 7);
 
@@ -134,8 +93,11 @@ export class Card extends bge.Card {
 	}
 
 	matchesIndustryLocation(location: IndustryLocation, industry: Industry): boolean { throw new Error("Not implemented"); }
-	equals(card: Card): boolean { throw new Error("Not implemented"); }
 	get isWild(): boolean { throw new Error("Not implemented"); }
+	
+	equals(card: Card): boolean {
+		return this.index === card.index;
+	}
 }
 
 export class IndustryCard extends Card {
@@ -160,10 +122,6 @@ export class IndustryCard extends Card {
 		return this.industries.includes(industry);
 	}
 
-	override equals(card: Card): boolean {
-		return card instanceof IndustryCard && areArrayContentsMatching(this.industries, card.industries);
-	}
-
 	override get isWild(): boolean {
 		return this.industries.length === ALL_INDUSTRIES.length;
 	}
@@ -185,10 +143,6 @@ export class CityCard extends Card {
 
 	override matchesIndustryLocation(location: IndustryLocation, industry: Industry): boolean {
 		return this.city === City.Any && !FARM_CITIES.includes(location.city) || this.city === location.city;
-	}
-
-	override equals(card: Card): boolean {
-		return card instanceof CityCard && this.city === card.city;
 	}
 
 	override get isWild(): boolean {

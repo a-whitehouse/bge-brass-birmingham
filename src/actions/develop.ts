@@ -10,25 +10,22 @@ const console = bge.Logger.get("develop");
 export async function develop(game: Game, player: Player) {
     await player.prompt.click(new bge.Button("Develop"));
 
-    await developOnce(game, player);
+    const messageRow = game.message.add("{0} is developing", player);
+
+    await developOnce(game, player, messageRow);
     console.log(`${player.name} developed once`);
 
     let hasDevelopedAgain = await game.anyExclusive(() => [
-        developOnce(game, player),
-        player.discardAnyCard({
-            message: "Discard any card to finish developing",
-            return: false
-        })
+        developOnce(game, player, messageRow),
+        player.discardAnyCard()
     ]);
 
     if (hasDevelopedAgain) {
-        await player.discardAnyCard({
-            message: "Discard any card to finish developing"
-        })
+        await player.discardAnyCard();
     }
 }
 
-export async function developOnce(game: Game, player: Player): Promise<true> {
+export async function developOnce(game: Game, player: Player, messageRow?: bge.MessageRow): Promise<boolean> {
     let ironSources = game.board.getResourceSources(Resource.Iron);
 
     let marketCost = game.board.ironMarket.getCost(1);
@@ -39,7 +36,7 @@ export async function developOnce(game: Game, player: Player): Promise<true> {
 
     const developableIndustries = ALL_INDUSTRIES.map(x => {
         let slot = player.getNextIndustryLevelSlot(x);
-        if (slot.data.canDevelop ?? true) {
+        if (slot != null && (slot.data.canDevelop ?? true)) {
             return slot;
         } else {
             return null;
@@ -50,6 +47,8 @@ export async function developOnce(game: Game, player: Player): Promise<true> {
         message: "Click the industry tile on your player board to develop",
         autoResolveIfSingle: true
     });
+
+    messageRow?.update("{0} is developing {1}", player, slot.top);
 
     let ironTiles = new Set(ironSources.tiles.map(x => x.tile));
 

@@ -1,15 +1,12 @@
 import * as bge from "bge-core";
 
 import { Game } from "../game";
-import { Card } from "../objects/card";
 import { IResourceSources } from "../objects/gameboard";
 import { IndustryLocation } from "../objects/industrylocation";
-import { IndustryTile } from "../objects/industrytile";
-import { ResourceMarket } from "../objects/resourcemarket";
 import { ResourceToken } from "../objects/resourcetoken";
-import { LinkLocation } from "../objects/linklocation";
 import { Player } from "../player";
-import { Industry, Resource, Era, City, OVERBUILDABLE_INDUSTRIES } from "../types";
+import { Industry, Resource, Era, OVERBUILDABLE_INDUSTRIES, City } from "../types";
+import { consumeResources } from ".";
 
 const console = bge.Logger.get("build-industry");
 
@@ -40,6 +37,8 @@ export async function buildIndustry(game: Game, player: Player) {
 		message: "Click on a location!"
 	});
 
+	const messageRow = game.message.add("{0} is building an industry in {1}", player, City[loc.city]);
+
 	console.info(`${player.name} clicked on ${loc.name}`);
 
 	const locationInfo = buildableIndustries.get(loc);
@@ -53,18 +52,18 @@ export async function buildIndustry(game: Game, player: Player) {
 		autoResolveIfSingle: true
 	})).industry;
 
-	await player.discardAnyCard({
-		cards: player.getMatchingCards(loc, industry)
-	});
-
 	console.info(`We're building a ${Industry[industry]}!`);
 
 	const slot = player.getNextIndustryLevelSlot(industry);
+
+	messageRow.update("{0} is building a {1} in {2}", player, slot.top, City[loc.city]);
 
 	await consumeResources(player, loc, Resource.Coal, slot.data.cost.coal, locationInfo.coalSources, game.board.coalMarket);
 	await consumeResources(player, loc, Resource.Iron, slot.data.cost.iron, locationInfo.ironSources, game.board.ironMarket);
 
 	player.spendMoney(slot.data.cost.coins);
+
+	const validCards = player.getMatchingCards(loc, industry);
 
 	await loc.setTile(player.takeNextIndustryTile(industry));
 
@@ -107,6 +106,10 @@ export async function buildIndustry(game: Game, player: Player) {
 		default:
 			break;
 	}
+
+	await player.discardAnyCard({
+		cards: validCards
+	});
 }
 
 function getBuildableIndustriesAtLocation(location: IndustryLocation, player: Player,
@@ -200,47 +203,4 @@ function getBuildableIndustriesAtLocation(location: IndustryLocation, player: Pl
 	}
 
 	return result;
-}
-
-/**
- * Prompts the given player to select which resources to consume, up to the given amount.
- */
-export async function consumeResources(player: Player, destination: IndustryLocation | LinkLocation,
-	resource: Resource, amount: number, sources: IResourceSources, market?: ResourceMarket) {
-
-	while (sources.tiles.length > 0 && amount > 0) {
-		const distance = sources.tiles[0].distance;
-		const choices = new Set(sources.tiles.filter(x => x.distance === distance).map(x => x.tile));
-
-		let tile = await player.prompt.clickAny(choices, {
-			message: `Select ${(resource === Resource.Iron ? "an" : "a")} ${Resource[resource]} to consume`,
-			autoResolveIfSingle: true
-		});
-
-		sources.tiles.splice(sources.tiles.findIndex(x => x.tile === tile), 1);
-
-		console.info(`Consuming ${Resource[resource]} from ${tile.name}`);
-
-		await tile.consumeResource(destination.spentResources);
-
-		--amount;
-
-		await player.game.delay.beat();
-	}
-
-	if (amount > 0) {
-		if (market == null) {
-			throw new Error("No market was given!");
-		}
-
-		const cost = market.getCost(amount);
-
-		destination.spentResources.push(...market.takeRange(amount));
-
-		console.info(`Spending £${cost} to buy ${amount} ${Resource[resource]} from the market`);
-
-		player.spendMoney(cost);
-
-		await player.game.delay.beat();
-	}
 }

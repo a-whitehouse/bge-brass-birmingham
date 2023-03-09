@@ -23,6 +23,8 @@ export async function scout(game: Game, player: Player) {
 
 	await player.prompt.click(new bge.Button("Scout"));
 
+	game.message.add("{0} is scouting", player);
+
 	await player.discardAnyCards(3);
 
 	player.hand.add(game.wildIndustryPile.draw());

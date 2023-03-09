@@ -1,10 +1,12 @@
 import * as bge from "bge-core";
 import { LinearArrangement, Rotation } from "bge-core";
 
+import INDUSTRIES from "../data/industrylevels";
+
 import { Player } from "../player";
+import { IIndustryTileState } from "../state";
 import { IIndustryLevelData, Industry } from "../types";
 import { IndustryLocation } from "./industrylocation";
-import { LinkLocation } from "./linklocation";
 import { ResourceToken } from "./resourcetoken";
 
 @bge.width(2.25)
@@ -26,14 +28,14 @@ export class IndustryTile extends bge.Card {
     location?: IndustryLocation;
     hasFlipped: boolean = false;
 
-    constructor(player: Player, industry: Industry, data: IIndustryLevelData) {
+    constructor(player: Player, industry: Industry, level: number) {
         super();
 
         this.player = player;
         this.industry = industry;
-        this.data = data;
+        this.data = INDUSTRIES.get(industry)[level - 1];
 
-        this.name = `${player.name} ${Industry[industry]} lvl ${data.level}`;
+        this.name = `${player.name} ${Industry[industry]} ${level}`;
 
         const frontUrl = player.index < 2
             ? "https://iili.io/HMC2BJs.jpg"
@@ -44,7 +46,7 @@ export class IndustryTile extends bge.Card {
             : "https://iili.io/HWYOFNR.jpg";
 
         const indexOffset = (player.index % 2) * 31;
-        const index = indexOffset + data.tileIndex;
+        const index = indexOffset + this.data.tileIndex;
 
         const row = 6 - Math.floor(index / 9);
         const col = index % 9;

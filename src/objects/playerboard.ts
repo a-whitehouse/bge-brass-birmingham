@@ -6,6 +6,7 @@ import INDUSTRIES from "../data/industrylevels";
 import { Player } from "../player";
 import { IndustryTile } from "./industrytile";
 import { IIndustryLevelData, Industry } from "../types";
+import { IPlayerIndustryState } from "../state";
 
 export class IndustryLevelSlot extends bge.Deck<IndustryTile> {
     readonly player: Player;
@@ -24,7 +25,7 @@ export class IndustryLevelSlot extends bge.Deck<IndustryTile> {
         const count = data.count ?? 1;
 
         for (let i = 0; i < count; ++i) {
-            this.add(new IndustryTile(player, industry, data));
+            this.add(new IndustryTile(player, industry, data.level));
         }
     }
 }
@@ -52,6 +53,31 @@ export class PlayerBoard extends bge.Card {
             }
 
             this.industryLevels.set(industry, slots);
+        }
+    }
+
+    serialize(): IPlayerIndustryState[] {
+        return [...this.industryLevels].map(([industry, slots]) => ({
+            industry: industry,
+            tiles: slots.reduce((s, x) => s + x.count, 0)
+        }));
+    }
+
+    deserialize(state: IPlayerIndustryState[]): void {
+        for (let industryState of state) {
+            const slots = this.industryLevels.get(industryState.industry);
+
+            let remaining = industryState.tiles;
+
+            for (let i = slots.length - 1; i >= 0; --i) {
+                const slot = slots[i];
+                const slotCount = slot.data.count;
+
+                slot.setCount(Math.max(0, Math.min(remaining, slotCount)),
+                    () => new IndustryTile(slot.player, slot.industry, slot.data.level));
+
+                remaining -= slotCount;
+            }
         }
     }
 }

@@ -6,6 +6,8 @@ import { IndustryTile } from "./industrytile";
 import { City, Industry } from "../types";
 import { ResourceToken } from "./resourcetoken";
 import { LinearArrangement } from "bge-core";
+import { IIndustryTileState } from "../state";
+import { GameBoard } from "./gameboard";
 
 const console = bge.Logger.get("industry-location");
 
@@ -13,6 +15,8 @@ const console = bge.Logger.get("industry-location");
  * A location that an industry can be built on by a player.
  */
 export class IndustryLocation extends bge.Zone {
+    private readonly _board: GameBoard;
+
     private _tile: IndustryTile;
 
     /**
@@ -37,10 +41,12 @@ export class IndustryLocation extends bge.Zone {
     })
     readonly spentResources: ResourceToken[] = [];
 
-    constructor(data: IIndustryLocationData) {
+    constructor(board: GameBoard, data: IIndustryLocationData) {
         super(2.25, 2.25);
 
+        this._board = board;
         this.data = data;
+
         this.hideIfEmpty = true;
         this.outlineStyle = bge.OutlineStyle.NONE;
 
@@ -60,12 +66,12 @@ export class IndustryLocation extends bge.Zone {
             throw new Error("Tile already has a location!");
         }
 
+        const game = this._board.game;
+
         if (this._tile != null) {
             if (tile != null) {
                 console.info(`Overbuilding ${this._tile.name} in ${this.name} with ${tile.name}`);
             }
-
-            const game = this._tile.player.game;
 
             this._tile.clearResources();
 
@@ -77,14 +83,63 @@ export class IndustryLocation extends bge.Zone {
             await game.delay.beat();
         }
 
-        this.children.getOptions("tile").rotation = bge.Rotation.IDENTITY;
+        this.children.getOptions("tile").rotation = undefined;
         this._tile = tile;
 
         if (tile != null) {
             tile.player.addBuiltIndustry(tile);
             tile.location = this;
 
-            await tile.player.game.delay.beat();
+            await game.delay.beat();
         }
+    }
+
+    serialize(): IIndustryTileState | null {
+        if (this._tile == null) {
+            return null;
+        }
+
+        return {
+            player: this._tile.player.index,
+            industry: this._tile.industry,
+            level: this._tile.data.level,
+
+            flipped: this._tile.hasFlipped,
+            resources: this._tile.resources.map(x => x.resource)
+        };
+    }
+
+    deserialize(state: IIndustryTileState | null): void {
+        this.clearSpentResources();
+
+        if (state == null) {
+            this._tile = null;
+            return;
+        }
+        
+        const game = this._board.game;
+
+        if (this._tile?.player.index !== state.player || this._tile?.industry !== state.industry || this._tile?.data.level !== state.level) {
+            this._tile = new IndustryTile(game.players[state.player], state.industry, state.level);
+            this._tile.location = this;
+        }
+
+        this._tile.hasFlipped = state.flipped;
+
+        if (this._tile.resources.length > state.resources.length) {
+            this._tile.resources.splice(state.resources.length, this._tile.resources.length - state.resources.length);
+        } else {
+            this._tile.resources.push(...state.resources.slice(this._tile.resources.length).map(x => new ResourceToken(x)));
+        }
+
+        state.resources.forEach((x, i) => {
+            if (this._tile.resources[i].resource !== x) {
+                this._tile.resources[i] = new ResourceToken(x);
+            }
+        })
+
+        this.children.getOptions("tile").rotation = state.flipped
+            ? bge.Rotation.y(180)
+            : undefined;
     }
 }
