@@ -8,6 +8,12 @@ const console = bge.Logger.get("develop");
 
 
 export async function develop(game: Game, player: Player) {
+    const ironSources = game.board.getResourceSources(Resource.Iron);
+
+    if (ironSources.tiles.length === 0 && game.ironMarket.getCost(1) > player.money) {
+        await Promise.reject("Can't affort to develop");
+    }
+
     await player.prompt.click(new bge.Button("Develop"));
 
     const messageRow = game.message.add("{0} is developing", player);
