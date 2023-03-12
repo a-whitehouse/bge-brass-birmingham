@@ -8,6 +8,7 @@ import { ResourceToken } from "./resourcetoken";
 import { LinearArrangement } from "bge-core";
 import { IIndustryTileState } from "../state";
 import { GameBoard } from "./gameboard";
+import { Player } from "../player";
 
 const console = bge.Logger.get("industry-location");
 
@@ -41,6 +42,66 @@ export class IndustryLocation extends bge.Zone {
     })
     readonly spentResources: ResourceToken[] = [];
 
+    private _costs: (number | string)[];
+    private readonly _costsVisibleFor: Player[] = [];
+
+    private getCostValue(index: number, count: number): (string | number) {
+        if (this._costs == null) {
+            return null;
+        }
+
+        if (this._costs.length !== count) {
+            return null;
+        }
+
+        return this._costs[index];
+    }
+
+    private getCostString(index: number, count: number): string {
+        const cost = this.getCostValue(index, count);
+
+        if (cost == null) {
+            return null;
+        }
+
+        if (typeof cost === "number") {
+            return `£${cost}`;
+        }
+
+        return cost;
+    }
+
+    private getCostColor(player: Player, index: number, count: number): bge.Color {
+        const cost = this.getCostValue(index, count);
+
+        if (cost == null) {
+            return undefined;
+        }
+
+        if (typeof cost === "number") {
+            if (cost <= player.money) {
+                return bge.Color.parse("ffff00");
+            }
+        }
+
+        return bge.Color.parse("ff0000");
+    }
+
+    @bge.display({ fontScale: 0.25, position: { z: 0.2 } })
+    get costCenter() {
+        return this.getCostString(0, 1);
+    }
+    
+    @bge.display({ fontScale: 0.25, position: { x: -0.3, y: 0.5, z: 0.2 } })
+    get costA() {
+        return this.getCostString(0, 2);
+    }
+    
+    @bge.display({ fontScale: 0.25, position: { x: 0.3, y: -0.5, z: 0.2 } })
+    get costB() {
+        return this.getCostString(1, 2);
+    }
+
     constructor(board: GameBoard, data: IIndustryLocationData) {
         super(2.25, 2.25);
 
@@ -51,10 +112,32 @@ export class IndustryLocation extends bge.Zone {
         this.outlineStyle = bge.OutlineStyle.NONE;
 
         this.name = `${City[this.data.city]}: ${data.industries.map(x => Industry[x]).join(" or ")}`;
+
+        this.children.getOptions("costCenter").visibleFor = this._costsVisibleFor;
+        this.children.getOptions("costA").visibleFor = this._costsVisibleFor;
+        this.children.getOptions("costB").visibleFor = this._costsVisibleFor;
     }
 
     clearSpentResources() {
         this.spentResources.splice(0, this.spentResources.length);
+    }
+
+    displayCosts(player: Player, costs: (number | string)[]): void {
+        this._costs = costs;
+        this._costsVisibleFor.splice(0, 1);
+        this._costsVisibleFor.push(player);
+
+        if (costs.length === 1) {
+            this.children.getOptions("costCenter").fontColor = this.getCostColor(player, 0, 1);
+        } else if (costs.length === 2) {
+            this.children.getOptions("costA").fontColor = this.getCostColor(player, 0, 2);
+            this.children.getOptions("costB").fontColor = this.getCostColor(player, 1, 2);
+        }
+    }
+
+    hideCosts(): void {
+        this._costs = null;
+        this._costsVisibleFor.splice(0, 1);
     }
 
     async setTile(tile?: IndustryTile) {
