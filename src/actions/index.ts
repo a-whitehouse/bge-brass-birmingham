@@ -125,14 +125,49 @@ export async function startRailEra(game: Game) {
     await game.delay.beat();
 }
 
-export async function grantIncome(players: Player[]) {
+export async function grantIncome(game: Game, players: Player[]) {
     for (let player of players) {
-        player.money += player.income;
-    }
+        if (player.income > 0) {
+            game.message.set("{0} gains £{1} of income", player, player.income);
+            player.money += player.income;
 
-    // TODO: if income is negative, and can't pay:
-    //  must sell off placed industry tile for half its cost
-    //  otherwise, lose 1VP per £1 short
+            await game.delay.short();
+        } else if (player.income < 0) {
+            game.message.set("{0} pays £{1} in interest", player, -player.income);
+            player.money += player.income;
+            
+            await game.delay.short();
+
+            while (player.money < 0) {
+                game.message.set("{0} is £{1} in debt!", player, -player.money);
+                await game.delay.beat();
+
+                const builtIndustries = player.builtIndustries.filter(x => (x.data.cost.coins ?? 0) > 0);
+                if (builtIndustries.length > 0) {
+                    const toSell = await player.prompt.clickAny(builtIndustries, {
+                        message: "Select a built industry to sell to repay your debt",
+                        autoResolveIfSingle: true
+                    });
+
+                    game.message.add("{0} sells their {1} to recover £{2}",
+                        player, toSell, toSell.data.cost.coins);
+
+                    toSell.location.setTile(null);
+                    player.money += toSell.data.cost.coins;
+                    await game.delay.short();
+                    continue;
+                }
+
+                game.message.add("{0} loses {1} victory points as they have no built industries to sell!",
+                    player, -player.money);
+
+                player.decreaseVictoryPoints(-player.money);
+                player.money = 0;
+
+                await game.delay.short();
+            }
+        }
+    }
 }
 
 export async function reorderPlayers(game: Game) {

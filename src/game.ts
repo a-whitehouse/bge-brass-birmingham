@@ -99,7 +99,9 @@ export class Game extends bge.StateMachineGame<Player> {
     async roundStart(): bge.GameState {
         this.turn = 0;
         
-        await grantIncome(this.turnOrder);
+        if (!this.firstRound) {
+            await grantIncome(this, this.turnOrder);
+        }
 
         return this.playerTurnStart;
     }

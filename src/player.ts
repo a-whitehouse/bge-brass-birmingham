@@ -55,6 +55,7 @@ export class Player extends bge.Player {
     incomeToken: ScoreToken;
 
     private _zone: bge.Zone;
+    private _money: number = 17;
 
     private readonly _builtIndustries: Set<IndustryTile> = new Set();
     private readonly _builtLinks: Set<LinkTile> = new Set();
@@ -67,7 +68,17 @@ export class Player extends bge.Player {
         return [...this._builtLinks];
     }
 
-    money: number = 17;
+    get money(): number {
+        return this._money;
+    }
+    
+    set money(value: number) {
+        this._money = value;
+        this.zone.children.getOptions("moneyDisplay").fontColor = value < 0
+            ? bge.Color.parse("ff0000")
+            : undefined;
+    }
+
     spent: number = 0;
 
     game: Game;
@@ -84,7 +95,7 @@ export class Player extends bge.Player {
     }
 
     @bge.display({ position: { x: 23, y: 8 }, label: "Money" })
-    get moneyDisplay() { return `£${this.money}`; }
+    get moneyDisplay() { return this.money >= 0 ? `£${this.money}` : `-£${-this.money}`; }
 
     @bge.display({ position: { x: 23, y: 2 }, label: "Spent This Round" })
     get spentDisplay() { return `£${this.spent}`; }
@@ -144,11 +155,15 @@ export class Player extends bge.Player {
     }
 
     decreaseIncome(delta: number): void {
-        this.incomeToken.decrease(delta);
+        this.incomeToken.decreaseBrackets(delta);
     }
 
     increaseVictoryPoints(delta: number): void {
         this.victoryPointToken.increase(delta);
+    }
+
+    decreaseVictoryPoints(delta: number): void {
+        this.victoryPointToken.decrease(delta);
     }
 
     get hasAnyBuiltTiles() {
