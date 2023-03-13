@@ -37,13 +37,13 @@ async function scoreLinks(game: Game) {
 
         if (linkPoints > 0) {
             game.message.set("{0} scores {1} points for their {2} between {3}!", player, linkPoints, link, link.location.cities.map(x => City[x]));
-            link.location.children.getOptions("tile").position = new bge.Vector3(0, 0, 2);
+            link.beingScored = true;
             await game.delay.beat();
             
             link.player.increaseVictoryPoints(linkPoints);
             await game.delay.short();
             
-            link.location.children.getOptions("tile").position = undefined;
+            link.beingScored = false;
         }
 
         await link.location.setTile(null);
@@ -63,13 +63,13 @@ async function scoreIndustries(game: Game) {
             
             game.message.set("{0} scores {1} points for their {2} in {3}!", tile.player, victoryPoints, tile, City[tile.location.city]);
 
-            tile.location.children.getOptions("tile").position = new bge.Vector3(0, 0, 2);
+            tile.beingScored = true;
             await game.delay.beat();
             
             tile.player.increaseVictoryPoints(victoryPoints);
             await game.delay.short();
             
-            tile.location.children.getOptions("tile").position = undefined;
+            tile.beingScored = false;
         }
     }
 }

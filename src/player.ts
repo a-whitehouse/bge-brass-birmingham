@@ -34,11 +34,15 @@ export class Player extends bge.Player {
     ];
 
     @bge.display({ position: { x: 15, y: -7 }, label: "Hand" })
+    @bge.display<Player>(function (ctx) { return { revealedFor: [this] }})
     readonly hand = new bge.Hand(Card, 20, {
         autoSort: Card.compare
     });
 
     @bge.display({ position: { x: 8.15, y: 5 }, label: "Discard" })
+    @bge.display<Player>(function (ctx) { return {
+        revealedFor: this.game.firstRound && this.discardPile.count === 1 ? [this] : undefined
+    }})
     readonly discardPile = new bge.Deck(Card, { orientation: bge.CardOrientation.FACE_UP });
 
     @bge.display({ position: { x: -12.2 } })
@@ -55,7 +59,6 @@ export class Player extends bge.Player {
     incomeToken: ScoreToken;
 
     private _zone: bge.Zone;
-    private _money: number = 17;
 
     private readonly _builtIndustries: Set<IndustryTile> = new Set();
     private readonly _builtLinks: Set<LinkTile> = new Set();
@@ -68,17 +71,7 @@ export class Player extends bge.Player {
         return [...this._builtLinks];
     }
 
-    get money(): number {
-        return this._money;
-    }
-    
-    set money(value: number) {
-        this._money = value;
-        this.zone.children.getOptions("moneyDisplay").fontColor = value < 0
-            ? bge.Color.parse("ff0000")
-            : undefined;
-    }
-
+    money: number = 17;
     spent: number = 0;
 
     game: Game;
@@ -95,6 +88,9 @@ export class Player extends bge.Player {
     }
 
     @bge.display({ position: { x: 23, y: 8 }, label: "Money" })
+    @bge.display<Player>(function (ctx) { return {
+        fontColor: this.money < 0 ? bge.Color.parse("ff0000") : undefined
+    }})
     get moneyDisplay() { return this.money >= 0 ? `£${this.money}` : `-£${-this.money}`; }
 
     @bge.display({ position: { x: 23, y: 2 }, label: "Spent This Round" })
@@ -131,14 +127,8 @@ export class Player extends bge.Player {
         this._zone.outlineColor = this.color;
 
         this._zone.children.addProperties(this);
-        this._zone.children.getOptions("hand").revealedFor = [this];
-        this._zone.children.getOptions("discardPile").revealedFor = [this];
 
         return this._zone;
-    }
-
-    revealDiscardPile(): void {
-        this.zone.children.getOptions("discardPile").revealedFor = undefined;
     }
 
     spendMoney(amount: number): void {
@@ -340,10 +330,6 @@ export class Player extends bge.Player {
         this.game.wildLocationPile.addRange(cards.filter(x => x.isWild && x instanceof CityCard));
 
         await this.game.delay.beat();
-
-        if (this.discardPile.count > 1) {
-            this.revealDiscardPile();
-        }
     }
     
     async confirm(): Promise<true> {

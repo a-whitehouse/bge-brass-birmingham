@@ -14,7 +14,12 @@ export class MerchantLocation extends bge.Zone {
     private readonly _board: GameBoard;
     readonly data: IMerchantLocationData;
 
-    @bge.display()
+    @bge.display<MerchantLocation>(function (ctx) { return {
+        position: {
+            x: this.data.beerPosX - this.data.posX,
+            y: this.data.beerPosY - this.data.posY
+        }
+    }})
     marketBeer: ResourceToken;
 
     @bge.display()
@@ -27,11 +32,6 @@ export class MerchantLocation extends bge.Zone {
         this.data = data;
 
         this.outlineStyle = bge.OutlineStyle.NONE;
-
-        this.children.getOptions("marketBeer").position = {
-            x: data.beerPosX - data.posX,
-            y: data.beerPosY - data.posY
-        };
     }
 
     async consumeBeer(targetTile: IndustryTile) {

@@ -32,7 +32,10 @@ export class IndustryLocation extends bge.Zone {
         return this.data.city;
     }
 
-    @bge.display()
+    @bge.display<IndustryLocation, IndustryTile>(function (ctx, value: IndustryTile) { return {
+        rotation: value?.hasFlipped ? bge.Rotation.y(180) : undefined,
+        position: value?.beingScored ? new bge.Vector3(0, 0, 2) : undefined
+    }})
     get tile() { return this._tile; }
 
     @bge.display({
@@ -80,7 +83,7 @@ export class IndustryLocation extends bge.Zone {
 
         if (typeof cost === "number") {
             if (cost <= player.money) {
-                return bge.Color.parse("ffff00");
+                return bge.Color.parse("ffffff");
             }
         }
 
@@ -88,16 +91,28 @@ export class IndustryLocation extends bge.Zone {
     }
 
     @bge.display({ fontScale: 0.25, position: { z: 0.2 } })
+    @bge.display<IndustryLocation>(function (ctx) { return {
+        visibleFor: this._costsVisibleFor,
+        fontColor: this.getCostColor(ctx.player as Player, 0, 1)
+    }})
     get costCenter() {
         return this.getCostString(0, 1);
     }
     
     @bge.display({ fontScale: 0.25, position: { x: -0.3, y: 0.5, z: 0.2 } })
+    @bge.display<IndustryLocation>(function (ctx) { return {
+        visibleFor: this._costsVisibleFor,
+        fontColor: this.getCostColor(ctx.player as Player, 0, 2)
+    }})
     get costA() {
         return this.getCostString(0, 2);
     }
     
     @bge.display({ fontScale: 0.25, position: { x: 0.3, y: -0.5, z: 0.2 } })
+    @bge.display<IndustryLocation>(function (ctx) { return {
+        visibleFor: this._costsVisibleFor,
+        fontColor: this.getCostColor(ctx.player as Player, 1, 2)
+    }})
     get costB() {
         return this.getCostString(1, 2);
     }
@@ -112,10 +127,6 @@ export class IndustryLocation extends bge.Zone {
         this.outlineStyle = bge.OutlineStyle.NONE;
 
         this.name = `${City[this.data.city]}: ${data.industries.map(x => Industry[x]).join(" or ")}`;
-
-        this.children.getOptions("costCenter").visibleFor = this._costsVisibleFor;
-        this.children.getOptions("costA").visibleFor = this._costsVisibleFor;
-        this.children.getOptions("costB").visibleFor = this._costsVisibleFor;
     }
 
     clearSpentResources() {
@@ -126,13 +137,6 @@ export class IndustryLocation extends bge.Zone {
         this._costs = costs;
         this._costsVisibleFor.splice(0, 1);
         this._costsVisibleFor.push(player);
-
-        if (costs.length === 1) {
-            this.children.getOptions("costCenter").fontColor = this.getCostColor(player, 0, 1);
-        } else if (costs.length === 2) {
-            this.children.getOptions("costA").fontColor = this.getCostColor(player, 0, 2);
-            this.children.getOptions("costB").fontColor = this.getCostColor(player, 1, 2);
-        }
     }
 
     hideCosts(): void {
@@ -166,7 +170,6 @@ export class IndustryLocation extends bge.Zone {
             await game.delay.beat();
         }
 
-        this.children.getOptions("tile").rotation = undefined;
         this._tile = tile;
 
         if (tile != null) {
@@ -219,10 +222,6 @@ export class IndustryLocation extends bge.Zone {
             if (this._tile.resources[i].resource !== x) {
                 this._tile.resources[i] = new ResourceToken(x);
             }
-        })
-
-        this.children.getOptions("tile").rotation = state.flipped
-            ? bge.Rotation.y(180)
-            : undefined;
+        });
     }
 }

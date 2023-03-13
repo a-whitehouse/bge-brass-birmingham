@@ -10,6 +10,8 @@ import { LinkLocation } from "./linklocation";
 export class LinkTile extends bge.Card {
 	readonly player: Player;
 
+	beingScored: boolean = false;
+
     location?: LinkLocation;
 
 	constructor(player: Player) {

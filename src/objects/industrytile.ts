@@ -27,6 +27,7 @@ export class IndustryTile extends bge.Card {
 
     location?: IndustryLocation;
     hasFlipped: boolean = false;
+    beingScored: boolean = false;
 
     constructor(player: Player, industry: Industry, level: number) {
         super();
@@ -80,7 +81,6 @@ export class IndustryTile extends bge.Card {
         }
 
         this.hasFlipped = true;
-        this.location.children.getOptions("tile").rotation = Rotation.y(180);
 
         await this.player.game.delay.beat();
 
