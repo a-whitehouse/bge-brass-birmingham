@@ -91,7 +91,9 @@ export class Player extends bge.Player {
     @bge.display<Player>(function (ctx) { return {
         fontColor: this.money < 0 ? bge.Color.parse("ff0000") : undefined
     }})
-    get moneyDisplay() { return this.money >= 0 ? `£${this.money}` : `-£${-this.money}`; }
+    get moneyDisplay() {
+        return this.money >= 0 ? `£${this.money}` : `-£${-this.money}`;
+    }
 
     @bge.display({ position: { x: 23, y: 2 }, label: "Spent This Round" })
     get spentDisplay() { return `£${this.spent}`; }

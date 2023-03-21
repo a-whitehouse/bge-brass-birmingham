@@ -1,6 +1,8 @@
 {
-  "name": "template-cardgame",
+  "name": "bge-brass-birmingham",
   "description": "Card game example, with prompts and scoring",
+  "type": "module",
+  "main": "./dist/index.js",
   "scripts": {
     "build": "bge build",
     "start": "bge serve"
