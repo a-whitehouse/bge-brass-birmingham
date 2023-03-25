@@ -7,8 +7,6 @@ import { ResourceToken } from "../objects/resourcetoken.js";
 import { Player } from "../player.js";
 import { SELLABLE_INDUSTRIES, City, Industry, Resource } from "../types.js";
 
-const console = bge.Logger.get("sell");
-
 export async function sell(game: Game, player: Player) {
     let sellOptions = getSellOptions(game, player);
 

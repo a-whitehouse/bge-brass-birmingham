@@ -12,7 +12,7 @@
             "args": [ "serve" ],
             "cwd": "${workspaceFolder}",
             "outFiles": [
-                "${workspaceFolder}/dist/*.js"
+                "${workspaceFolder}/dist/**/*.js"
             ]
         }
     ]

@@ -3,8 +3,6 @@ import * as bge from "bge-core";
 import { Game } from "../game.js";
 import { City, Industry } from "../types.js";
 
-const console = bge.Logger.get("scoring");
-
 export async function endOfEraScoring(game: Game) {
     await scoreLinks(game);
     await scoreIndustries(game);

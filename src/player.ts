@@ -12,8 +12,6 @@ import { PlayerToken } from "./objects/playertoken.js";
 import { LinkLocation } from "./objects/linklocation.js";
 import { IPlayerState } from "./state.js";
 
-const console = bge.Logger.get("player");
-
 export interface IDiscardAnyCardOptions<TReturn = void> {
     cards?: readonly Card[];
     message?: string;

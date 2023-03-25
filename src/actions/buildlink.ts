@@ -6,8 +6,6 @@ import { LinkLocation } from "../objects/linklocation.js";
 import { Player } from "../player.js";
 import { consumeResources } from "./index.js";
 
-const console = bge.Logger.get("link");
-
 export async function buildLink(game: Game, player: Player) {
 
 	if (player.linkTiles.count === 0) {

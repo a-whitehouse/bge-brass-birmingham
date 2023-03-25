@@ -10,8 +10,6 @@ import { IIndustryTileState } from "../state.js";
 import { GameBoard } from "./gameboard.js";
 import { Player } from "../player.js";
 
-const console = bge.Logger.get("industry-location");
-
 /**
  * A location that an industry can be built on by a player.
  */

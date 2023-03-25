@@ -8,8 +8,6 @@ import { Player } from "../player.js";
 import { Industry, Resource, Era, OVERBUILDABLE_INDUSTRIES, City } from "../types.js";
 import { consumeResources } from "./index.js";
 
-const console = bge.Logger.get("build-industry");
-
 interface IBuildableAtLocationInfo {
 	industries: Industry[];
 	costs: (number | string)[];
@@ -42,7 +40,6 @@ export async function buildIndustry(game: Game, player: Player) {
 
 	try {
 		for (let [buildableLoc, info] of buildableIndustries) {
-			console.log(`${buildableLoc.name}, ${info.costs}`);
 			buildableLoc.displayCosts(player, info.costs);
 		}
 

@@ -4,9 +4,6 @@ import { Game } from "../game.js";
 import { ALL_INDUSTRIES, Resource } from "../types.js";
 import { Player } from "../player.js";
 
-const console = bge.Logger.get("develop");
-
-
 export async function develop(game: Game, player: Player) {
     const ironSources = game.board.getResourceSources(Resource.Iron);
 

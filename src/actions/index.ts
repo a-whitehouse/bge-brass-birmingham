@@ -17,8 +17,6 @@ import { IResourceSources } from "../objects/gameboard.js";
 import { LinkLocation } from "../objects/linklocation.js";
 import { ResourceToken } from "../objects/resourcetoken.js";
 
-const console = bge.Logger.get("player-turn");
-
 const ALLOW_DRAIN_MARKETS = false;
 
 export enum PlayerActionResult {
