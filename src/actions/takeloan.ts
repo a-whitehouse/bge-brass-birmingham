@@ -1,7 +1,7 @@
 import * as bge from "bge-core";
 
-import { Game } from "../game";
-import { Player } from "../player";
+import { Game } from "../game.js";
+import { Player } from "../player.js";
 
 export async function takeLoan(game: Game, player: Player) {
 

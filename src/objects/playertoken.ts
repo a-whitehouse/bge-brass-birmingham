@@ -1,7 +1,7 @@
 import * as bge from "bge-core";
-import { Game } from "../game";
+import { Game } from "../game.js";
 
-import { Player } from "../player";
+import { Player } from "../player.js";
 
 
 @bge.width(4.3)

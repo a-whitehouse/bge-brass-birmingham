@@ -1,6 +1,6 @@
-import { IMerchantLocationData, City, MerchantBeerReward } from "../types";
+import { IMerchantLocationData, City, MerchantBeerReward } from "../types.js";
 
-import * as gameboard from "./gameboard"
+import * as gameboard from "./gameboard.js"
 
 const REFERENCE_WIDTH = 4000;
 const REFERENCE_HEIGHT = 4000;

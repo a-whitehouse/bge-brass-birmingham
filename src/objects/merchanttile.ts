@@ -1,7 +1,7 @@
 import * as bge from "bge-core";
-import { IMerchantState } from "../state";
+import { IMerchantState } from "../state.js";
 
-import { Industry, SELLABLE_INDUSTRIES } from "../types";
+import { Industry, SELLABLE_INDUSTRIES } from "../types.js";
 
 export enum MerchantTileValue {
     Blank,

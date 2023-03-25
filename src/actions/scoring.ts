@@ -1,7 +1,7 @@
 import * as bge from "bge-core";
 
-import { Game } from "../game";
-import { City, Industry } from "../types";
+import { Game } from "../game.js";
+import { City, Industry } from "../types.js";
 
 const console = bge.Logger.get("scoring");
 

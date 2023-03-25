@@ -1,21 +1,21 @@
 import * as bge from "bge-core";
 
-import { IndustryLocation } from "../objects/industrylocation";
-import { ResourceMarket } from "../objects/resourcemarket";
+import { IndustryLocation } from "../objects/industrylocation.js";
+import { ResourceMarket } from "../objects/resourcemarket.js";
 
-import { Game } from "../game";
-import { Player } from "../player";
-import { Resource, Era } from "../types";
+import { Game } from "../game.js";
+import { Player } from "../player.js";
+import { Resource, Era } from "../types.js";
 
-import { takeLoan } from "./takeloan";
-import { scout } from "./scout";
-import { buildLink } from "./buildlink";
-import { buildIndustry } from "./buildindustry";
-import { develop } from "./develop";
-import { sell } from "./sell";
-import { IResourceSources } from "../objects/gameboard";
-import { LinkLocation } from "../objects/linklocation";
-import { ResourceToken } from "../objects/resourcetoken";
+import { takeLoan } from "./takeloan.js";
+import { scout } from "./scout.js";
+import { buildLink } from "./buildlink.js";
+import { buildIndustry } from "./buildindustry.js";
+import { develop } from "./develop.js";
+import { sell } from "./sell.js";
+import { IResourceSources } from "../objects/gameboard.js";
+import { LinkLocation } from "../objects/linklocation.js";
+import { ResourceToken } from "../objects/resourcetoken.js";
 
 const console = bge.Logger.get("player-turn");
 

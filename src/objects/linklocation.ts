@@ -1,11 +1,11 @@
 import * as bge from "bge-core";
 import { LinearArrangement } from "bge-core";
-import { PlayerIndex } from "../state";
+import { PlayerIndex } from "../state.js";
 
-import { City, Era, ILinkLocationData } from "../types";
-import { GameBoard } from "./gameboard";
-import { LinkTile } from "./linktile";
-import { ResourceToken } from "./resourcetoken";
+import { City, Era, ILinkLocationData } from "../types.js";
+import { GameBoard } from "./gameboard.js";
+import { LinkTile } from "./linktile.js";
+import { ResourceToken } from "./resourcetoken.js";
 
 /**
  * A location that a link can be built on by a player.

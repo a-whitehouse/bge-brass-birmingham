@@ -1,11 +1,11 @@
 import * as bge from "bge-core";
 
-import { Resource } from "../types";
-import { GameBoard } from "./gameboard";
-import { ResourceToken, ResourceTokenSlot } from "./resourcetoken";
+import { Resource } from "../types.js";
+import { GameBoard } from "./gameboard.js";
+import { ResourceToken, ResourceTokenSlot } from "./resourcetoken.js";
 
-import * as marketdata from "../data/resourcemarkets";
-import { IndustryTile } from "./industrytile";
+import * as marketdata from "../data/resourcemarkets.js"
+import { IndustryTile } from "./industrytile.js";
 
 /**
  * Handles adding and removing iron or coal {@link ResourceToken}s from

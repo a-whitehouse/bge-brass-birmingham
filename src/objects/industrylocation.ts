@@ -1,14 +1,14 @@
 import * as bge from "bge-core";
 
-import { IIndustryLocationData } from "../types";
-import { IndustryTile } from "./industrytile";
+import { IIndustryLocationData } from "../types.js";
+import { IndustryTile } from "./industrytile.js";
 
-import { City, Industry } from "../types";
-import { ResourceToken } from "./resourcetoken";
+import { City, Industry } from "../types.js";
+import { ResourceToken } from "./resourcetoken.js";
 import { LinearArrangement } from "bge-core";
-import { IIndustryTileState } from "../state";
-import { GameBoard } from "./gameboard";
-import { Player } from "../player";
+import { IIndustryTileState } from "../state.js";
+import { GameBoard } from "./gameboard.js";
+import { Player } from "../player.js";
 
 const console = bge.Logger.get("industry-location");
 

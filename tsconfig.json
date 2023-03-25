@@ -2,15 +2,15 @@
   "compilerOptions": {
     "target": "es2016",
     "lib": [ "es2021", "dom" ],
-    "module": "es6",
+    "module": "ESNext",
     "rootDir": "src",
     "allowJs": false,
-    "sourceMap": false,
+    "sourceMap": true,
+    "declaration": false,
     "outDir": "dist",
-    "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": true,
     "experimentalDecorators": true,
-    "moduleResolution": "node"
+    "moduleResolution": "nodenext"
   }
 }

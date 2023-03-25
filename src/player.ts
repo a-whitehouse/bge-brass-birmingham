@@ -1,16 +1,16 @@
 import * as bge from "bge-core";
 
-import { Game } from "./game";
-import { Card, IndustryCard, CityCard } from "./objects/card";
-import { IndustryTile } from "./objects/industrytile";
-import { LinkTile } from "./objects/linktile"
-import { IndustryLevelSlot, PlayerBoard } from "./objects/playerboard";
-import { ScoreToken } from "./objects/scoring";
-import { IndustryLocation } from "./objects/industrylocation";
-import { ALL_INDUSTRIES, Industry, City, Era } from "./types";
-import { PlayerToken } from "./objects/playertoken";
-import { LinkLocation } from "./objects/linklocation";
-import { IPlayerState } from "./state";
+import { Game } from "./game.js";
+import { Card, IndustryCard, CityCard } from "./objects/card.js";
+import { IndustryTile } from "./objects/industrytile.js";
+import { LinkTile } from "./objects/linktile.js";
+import { IndustryLevelSlot, PlayerBoard } from "./objects/playerboard.js";
+import { ScoreToken } from "./objects/scoring.js";
+import { IndustryLocation } from "./objects/industrylocation.js";
+import { ALL_INDUSTRIES, Industry, City, Era } from "./types.js";
+import { PlayerToken } from "./objects/playertoken.js";
+import { LinkLocation } from "./objects/linklocation.js";
+import { IPlayerState } from "./state.js";
 
 const console = bge.Logger.get("player");
 

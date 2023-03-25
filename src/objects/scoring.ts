@@ -1,9 +1,9 @@
 import * as bge from "bge-core";
 import { LinearArrangement } from "bge-core";
 
-import * as scoretrack from "../data/scoretrack";
+import * as scoretrack from "../data/scoretrack.js"
 
-import { Player } from "../player";
+import { Player } from "../player.js";
 
 export enum ScoreTokenKind {
     VICTORY_POINTS,

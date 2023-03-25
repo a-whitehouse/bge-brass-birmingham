@@ -1,8 +1,8 @@
 import * as bge from "bge-core";
-import { Game } from "../game";
+import { Game } from "../game.js";
 
-import { ALL_INDUSTRIES, Resource } from "../types";
-import { Player } from "../player";
+import { ALL_INDUSTRIES, Resource } from "../types.js";
+import { Player } from "../player.js";
 
 const console = bge.Logger.get("develop");
 

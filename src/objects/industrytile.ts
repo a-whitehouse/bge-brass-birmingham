@@ -1,13 +1,13 @@
 import * as bge from "bge-core";
 import { LinearArrangement, Rotation } from "bge-core";
 
-import INDUSTRIES from "../data/industrylevels";
+import INDUSTRIES from "../data/industrylevels.js"
 
-import { Player } from "../player";
-import { IIndustryTileState } from "../state";
-import { IIndustryLevelData, Industry } from "../types";
-import { IndustryLocation } from "./industrylocation";
-import { ResourceToken } from "./resourcetoken";
+import { Player } from "../player.js";
+import { IIndustryTileState } from "../state.js";
+import { IIndustryLevelData, Industry } from "../types.js";
+import { IndustryLocation } from "./industrylocation.js";
+import { ResourceToken } from "./resourcetoken.js";
 
 @bge.width(2.25)
 @bge.height(2.25)

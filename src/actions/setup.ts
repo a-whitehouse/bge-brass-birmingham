@@ -1,11 +1,11 @@
-import { Game } from "../game";
-import { Card, CityCard, IndustryCard } from "../objects/card";
-import { LinkTile } from "../objects/linktile";
-import { MerchantTile } from "../objects/merchanttile";
-import { PlayerToken } from "../objects/playertoken";
-import { ResourceToken } from "../objects/resourcetoken";
-import { ScoreTokenKind } from "../objects/scoring";
-import { ALL_INDUSTRIES, City, Resource } from "../types";
+import { Game } from "../game.js";
+import { Card, CityCard, IndustryCard } from "../objects/card.js";
+import { LinkTile } from "../objects/linktile.js";
+import { MerchantTile } from "../objects/merchanttile.js";
+import { PlayerToken } from "../objects/playertoken.js";
+import { ResourceToken } from "../objects/resourcetoken.js";
+import { ScoreTokenKind } from "../objects/scoring.js";
+import { ALL_INDUSTRIES, City, Resource } from "../types.js";
 
 export async function setup(game: Game) {
     for (let player of game.players) {

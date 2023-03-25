@@ -1,4 +1,4 @@
-import { ALL_INDUSTRIES, City, ICardData, Industry } from "../types";
+import { ALL_INDUSTRIES, City, ICardData, Industry } from "../types.js";
 
 export default [
     { city: City.Derby, count: [0, 0, 3] },

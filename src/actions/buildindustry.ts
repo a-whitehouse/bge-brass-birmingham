@@ -1,12 +1,12 @@
 import * as bge from "bge-core";
 
-import { Game } from "../game";
-import { IResourceSources } from "../objects/gameboard";
-import { IndustryLocation } from "../objects/industrylocation";
-import { ResourceToken } from "../objects/resourcetoken";
-import { Player } from "../player";
-import { Industry, Resource, Era, OVERBUILDABLE_INDUSTRIES, City } from "../types";
-import { consumeResources } from ".";
+import { Game } from "../game.js";
+import { IResourceSources } from "../objects/gameboard.js";
+import { IndustryLocation } from "../objects/industrylocation.js";
+import { ResourceToken } from "../objects/resourcetoken.js";
+import { Player } from "../player.js";
+import { Industry, Resource, Era, OVERBUILDABLE_INDUSTRIES, City } from "../types.js";
+import { consumeResources } from "./index.js";
 
 const console = bge.Logger.get("build-industry");
 
