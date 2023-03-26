@@ -1,11 +1,11 @@
 import * as bge from "bge-core";
 import { LinearArrangement } from "bge-core";
-import { PlayerIndex } from "../state";
+import { PlayerIndex } from "../state.js";
 
-import { City, Era, ILinkLocationData } from "../types";
-import { GameBoard } from "./gameboard";
-import { LinkTile } from "./linktile";
-import { ResourceToken } from "./resourcetoken";
+import { City, Era, ILinkLocationData } from "../types.js";
+import { GameBoard } from "./gameboard.js";
+import { LinkTile } from "./linktile.js";
+import { ResourceToken } from "./resourcetoken.js";
 
 /**
  * A location that a link can be built on by a player.
@@ -26,7 +26,10 @@ export class LinkLocation extends bge.Zone {
         return this.data.cities;
     }
 
-    @bge.display()
+    @bge.display<LinkLocation, LinkTile>(function (ctx, value) { return {
+        rotation: this._board.game.era === Era.Rail ? bge.Rotation.y(180) : undefined,
+        position: value?.beingScored ? new bge.Vector3(0, 0, 2) : undefined
+    }})
     get tile() { return this._tile; }
 
     /**
@@ -85,10 +88,6 @@ export class LinkLocation extends bge.Zone {
             tile.player.addBuiltLink(tile);
             tile.location = this;
 
-            this.children.getOptions("tile").rotation = game.era === Era.Rail
-                ? bge.Rotation.y(180)
-                : undefined;
-
             await game.delay.beat();
         }
     }
@@ -114,9 +113,5 @@ export class LinkLocation extends bge.Zone {
 
         this._tile = new LinkTile(this._board.game.players[state]);
         this._tile.location = this;
-        
-        this.children.getOptions("tile").rotation = game.era === Era.Rail
-            ? bge.Rotation.y(180)
-            : undefined;
     }
 }

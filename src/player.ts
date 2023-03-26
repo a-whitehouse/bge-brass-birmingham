@@ -1,18 +1,16 @@
 import * as bge from "bge-core";
 
-import { Game } from "./game";
-import { Card, IndustryCard, CityCard } from "./objects/card";
-import { IndustryTile } from "./objects/industrytile";
-import { LinkTile } from "./objects/linktile"
-import { IndustryLevelSlot, PlayerBoard } from "./objects/playerboard";
-import { ScoreToken } from "./objects/scoring";
-import { IndustryLocation } from "./objects/industrylocation";
-import { ALL_INDUSTRIES, Industry, City, Era } from "./types";
-import { PlayerToken } from "./objects/playertoken";
-import { LinkLocation } from "./objects/linklocation";
-import { IPlayerState } from "./state";
-
-const console = bge.Logger.get("player");
+import { Game } from "./game.js";
+import { Card, IndustryCard, CityCard } from "./objects/card.js";
+import { IndustryTile } from "./objects/industrytile.js";
+import { LinkTile } from "./objects/linktile.js";
+import { IndustryLevelSlot, PlayerBoard } from "./objects/playerboard.js";
+import { ScoreToken } from "./objects/scoring.js";
+import { IndustryLocation } from "./objects/industrylocation.js";
+import { ALL_INDUSTRIES, Industry, City, Era } from "./types.js";
+import { PlayerToken } from "./objects/playertoken.js";
+import { LinkLocation } from "./objects/linklocation.js";
+import { IPlayerState } from "./state.js";
 
 export interface IDiscardAnyCardOptions<TReturn = void> {
     cards?: readonly Card[];
@@ -34,11 +32,15 @@ export class Player extends bge.Player {
     ];
 
     @bge.display({ position: { x: 15, y: -7 }, label: "Hand" })
+    @bge.display<Player>(function (ctx) { return { revealedFor: [this] }})
     readonly hand = new bge.Hand(Card, 20, {
         autoSort: Card.compare
     });
 
     @bge.display({ position: { x: 8.15, y: 5 }, label: "Discard" })
+    @bge.display<Player>(function (ctx) { return {
+        revealedFor: this.game.firstRound && this.discardPile.count === 1 ? [this] : undefined
+    }})
     readonly discardPile = new bge.Deck(Card, { orientation: bge.CardOrientation.FACE_UP });
 
     @bge.display({ position: { x: -12.2 } })
@@ -84,7 +86,12 @@ export class Player extends bge.Player {
     }
 
     @bge.display({ position: { x: 23, y: 8 }, label: "Money" })
-    get moneyDisplay() { return `£${this.money}`; }
+    @bge.display<Player>(function (ctx) { return {
+        fontColor: this.money < 0 ? bge.Color.parse("ff0000") : undefined
+    }})
+    get moneyDisplay() {
+        return this.money >= 0 ? `£${this.money}` : `-£${-this.money}`;
+    }
 
     @bge.display({ position: { x: 23, y: 2 }, label: "Spent This Round" })
     get spentDisplay() { return `£${this.spent}`; }
@@ -120,14 +127,8 @@ export class Player extends bge.Player {
         this._zone.outlineColor = this.color;
 
         this._zone.children.addProperties(this);
-        this._zone.children.getOptions("hand").revealedFor = [this];
-        this._zone.children.getOptions("discardPile").revealedFor = [this];
 
         return this._zone;
-    }
-
-    revealDiscardPile(): void {
-        this.zone.children.getOptions("discardPile").revealedFor = undefined;
     }
 
     spendMoney(amount: number): void {
@@ -144,11 +145,15 @@ export class Player extends bge.Player {
     }
 
     decreaseIncome(delta: number): void {
-        this.incomeToken.decrease(delta);
+        this.incomeToken.decreaseBrackets(delta);
     }
 
     increaseVictoryPoints(delta: number): void {
         this.victoryPointToken.increase(delta);
+    }
+
+    decreaseVictoryPoints(delta: number): void {
+        this.victoryPointToken.decrease(delta);
     }
 
     get hasAnyBuiltTiles() {
@@ -325,10 +330,6 @@ export class Player extends bge.Player {
         this.game.wildLocationPile.addRange(cards.filter(x => x.isWild && x instanceof CityCard));
 
         await this.game.delay.beat();
-
-        if (this.discardPile.count > 1) {
-            this.revealDiscardPile();
-        }
     }
     
     async confirm(): Promise<true> {

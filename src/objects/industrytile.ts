@@ -1,13 +1,13 @@
 import * as bge from "bge-core";
 import { LinearArrangement, Rotation } from "bge-core";
 
-import INDUSTRIES from "../data/industrylevels";
+import INDUSTRIES from "../data/industrylevels.js"
 
-import { Player } from "../player";
-import { IIndustryTileState } from "../state";
-import { IIndustryLevelData, Industry } from "../types";
-import { IndustryLocation } from "./industrylocation";
-import { ResourceToken } from "./resourcetoken";
+import { Player } from "../player.js";
+import { IIndustryTileState } from "../state.js";
+import { IIndustryLevelData, Industry } from "../types.js";
+import { IndustryLocation } from "./industrylocation.js";
+import { ResourceToken } from "./resourcetoken.js";
 
 @bge.width(2.25)
 @bge.height(2.25)
@@ -27,6 +27,7 @@ export class IndustryTile extends bge.Card {
 
     location?: IndustryLocation;
     hasFlipped: boolean = false;
+    beingScored: boolean = false;
 
     constructor(player: Player, industry: Industry, level: number) {
         super();
@@ -80,7 +81,6 @@ export class IndustryTile extends bge.Card {
         }
 
         this.hasFlipped = true;
-        this.location.children.getOptions("tile").rotation = Rotation.y(180);
 
         await this.player.game.delay.beat();
 

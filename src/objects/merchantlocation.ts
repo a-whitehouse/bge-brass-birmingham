@@ -1,20 +1,25 @@
 
 import * as bge from "bge-core";
 
-import { ResourceToken } from "./resourcetoken";
-import { MerchantTile, MerchantTileValue } from "./merchanttile";
+import { ResourceToken } from "./resourcetoken.js";
+import { MerchantTile, MerchantTileValue } from "./merchanttile.js";
 
-import { IMerchantLocationData, MerchantBeerReward, Resource } from "../types";
-import { developOnce } from "../actions/develop";
-import { IndustryTile } from "./industrytile";
-import { IMerchantState } from "../state";
-import { GameBoard } from "./gameboard";
+import { IMerchantLocationData, MerchantBeerReward, Resource } from "../types.js";
+import { developOnce } from "../actions/develop.js";
+import { IndustryTile } from "./industrytile.js";
+import { IMerchantState } from "../state.js";
+import { GameBoard } from "./gameboard.js";
 
 export class MerchantLocation extends bge.Zone {
     private readonly _board: GameBoard;
     readonly data: IMerchantLocationData;
 
-    @bge.display()
+    @bge.display<MerchantLocation>(function (ctx) { return {
+        position: {
+            x: this.data.beerPosX - this.data.posX,
+            y: this.data.beerPosY - this.data.posY
+        }
+    }})
     marketBeer: ResourceToken;
 
     @bge.display()
@@ -27,11 +32,6 @@ export class MerchantLocation extends bge.Zone {
         this.data = data;
 
         this.outlineStyle = bge.OutlineStyle.NONE;
-
-        this.children.getOptions("marketBeer").position = {
-            x: data.beerPosX - data.posX,
-            y: data.beerPosY - data.posY
-        };
     }
 
     async consumeBeer(targetTile: IndustryTile) {

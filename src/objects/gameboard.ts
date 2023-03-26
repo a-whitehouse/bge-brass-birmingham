@@ -1,24 +1,24 @@
 import * as bge from "bge-core";
 
-import * as gameboard from "../data/gameboard";
-import INDUSTRY_LOCATIONS from "../data/buildinglocations";
-import LINK_LOCATIONS from "../data/linklocations";
-import MERCHANT_LOCATIONS from "../data/merchantlocations";
+import * as gameboard from "../data/gameboard.js"
+import INDUSTRY_LOCATIONS from "../data/buildinglocations.js"
+import LINK_LOCATIONS from "../data/linklocations.js"
+import MERCHANT_LOCATIONS from "../data/merchantlocations.js"
 
-import { ResourceMarket } from "./resourcemarket";
+import { ResourceMarket } from "./resourcemarket.js";
 
-import { IndustryLocation } from "./industrylocation";
-import { LinkLocation } from "./linklocation";
-import { IndustryTile } from "./industrytile";
-import { LinkTile } from "./linktile";
-import { PlayerTokenSlot } from "./playertoken";
-import { MerchantLocation } from "./merchantlocation";
+import { IndustryLocation } from "./industrylocation.js";
+import { LinkLocation } from "./linklocation.js";
+import { IndustryTile } from "./industrytile.js";
+import { LinkTile } from "./linktile.js";
+import { PlayerTokenSlot } from "./playertoken.js";
+import { MerchantLocation } from "./merchantlocation.js";
 
-import { Player } from "../player";
-import { Game } from "../game";
-import { City, Resource, MARKET_CITIES, BUILDABLE_CITIES } from "../types";
-import { IBoardState } from "../state";
-import { Card } from "./card";
+import { Player } from "../player.js";
+import { Game } from "../game.js";
+import { City, Resource, MARKET_CITIES, BUILDABLE_CITIES } from "../types.js";
+import { IBoardState } from "../state.js";
+import { Card } from "./card.js";
 
 /**
  * The main board in the middle of the table.

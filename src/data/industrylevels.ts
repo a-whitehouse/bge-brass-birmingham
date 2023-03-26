@@ -1,6 +1,6 @@
-import { IIndustryLevelData, Industry } from "../types";
+import { IIndustryLevelData, Industry } from "../types.js";
 
-import * as playerboard from "./playerboard";
+import * as playerboard from "./playerboard.js"
 
 const REFERENCE_WIDTH = 2113.5;
 const REFERENCE_HEIGHT = 1710;

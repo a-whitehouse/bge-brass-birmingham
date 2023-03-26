@@ -1,9 +1,9 @@
 import * as bge from "bge-core";
 
-import { IndustryLocation } from "./industrylocation";
-import { City, Industry, ALL_INDUSTRIES, FARM_CITIES } from "../types";
+import { IndustryLocation } from "./industrylocation.js";
+import { City, Industry, ALL_INDUSTRIES, FARM_CITIES } from "../types.js";
 
-import CARDS from "../data/cards";
+import CARDS from "../data/cards.js"
 import { LinearCardContainer } from "bge-core";
 
 @bge.width(Card.WIDTH)

@@ -1,12 +1,12 @@
 import * as bge from "bge-core";
 
-import { Game } from "../game";
-import { Card } from "../objects/card";
-import { IndustryLocation } from "../objects/industrylocation";
-import { ResourceToken } from "../objects/resourcetoken";
-import { ScoreTokenKind } from "../objects/scoring";
-import { Player } from "../player";
-import { City, Industry, Resource } from "../types";
+import { Game } from "../game.js";
+import { Card } from "../objects/card.js";
+import { IndustryLocation } from "../objects/industrylocation.js";
+import { ResourceToken } from "../objects/resourcetoken.js";
+import { ScoreTokenKind } from "../objects/scoring.js";
+import { Player } from "../player.js";
+import { City, Industry, Resource } from "../types.js";
 
 export async function scout(game: Game, player: Player) {
 	if (player.hasWildCardInHand) {

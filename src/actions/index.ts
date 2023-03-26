@@ -1,23 +1,21 @@
 import * as bge from "bge-core";
 
-import { IndustryLocation } from "../objects/industrylocation";
-import { ResourceMarket } from "../objects/resourcemarket";
+import { IndustryLocation } from "../objects/industrylocation.js";
+import { ResourceMarket } from "../objects/resourcemarket.js";
 
-import { Game } from "../game";
-import { Player } from "../player";
-import { Resource, Era } from "../types";
+import { Game } from "../game.js";
+import { Player } from "../player.js";
+import { Resource, Era } from "../types.js";
 
-import { takeLoan } from "./takeloan";
-import { scout } from "./scout";
-import { buildLink } from "./buildlink";
-import { buildIndustry } from "./buildindustry";
-import { develop } from "./develop";
-import { sell } from "./sell";
-import { IResourceSources } from "../objects/gameboard";
-import { LinkLocation } from "../objects/linklocation";
-import { ResourceToken } from "../objects/resourcetoken";
-
-const console = bge.Logger.get("player-turn");
+import { takeLoan } from "./takeloan.js";
+import { scout } from "./scout.js";
+import { buildLink } from "./buildlink.js";
+import { buildIndustry } from "./buildindustry.js";
+import { develop } from "./develop.js";
+import { sell } from "./sell.js";
+import { IResourceSources } from "../objects/gameboard.js";
+import { LinkLocation } from "../objects/linklocation.js";
+import { ResourceToken } from "../objects/resourcetoken.js";
 
 const ALLOW_DRAIN_MARKETS = false;
 
@@ -125,14 +123,49 @@ export async function startRailEra(game: Game) {
     await game.delay.beat();
 }
 
-export async function grantIncome(players: Player[]) {
+export async function grantIncome(game: Game, players: Player[]) {
     for (let player of players) {
-        player.money += player.income;
-    }
+        if (player.income > 0) {
+            game.message.set("{0} gains £{1} of income", player, player.income);
+            player.money += player.income;
 
-    // TODO: if income is negative, and can't pay:
-    //  must sell off placed industry tile for half its cost
-    //  otherwise, lose 1VP per £1 short
+            await game.delay.short();
+        } else if (player.income < 0) {
+            game.message.set("{0} pays £{1} in interest", player, -player.income);
+            player.money += player.income;
+            
+            await game.delay.short();
+
+            while (player.money < 0) {
+                game.message.set("{0} is £{1} in debt!", player, -player.money);
+                await game.delay.beat();
+
+                const builtIndustries = player.builtIndustries.filter(x => (x.data.cost.coins ?? 0) > 0);
+                if (builtIndustries.length > 0) {
+                    const toSell = await player.prompt.clickAny(builtIndustries, {
+                        message: "Select a built industry to sell to repay your debt",
+                        autoResolveIfSingle: true
+                    });
+
+                    game.message.add("{0} sells their {1} to recover £{2}",
+                        player, toSell, toSell.data.cost.coins);
+
+                    toSell.location.setTile(null);
+                    player.money += toSell.data.cost.coins;
+                    await game.delay.short();
+                    continue;
+                }
+
+                game.message.add("{0} loses {1} victory points as they have no built industries to sell!",
+                    player, -player.money);
+
+                player.decreaseVictoryPoints(-player.money);
+                player.money = 0;
+
+                await game.delay.short();
+            }
+        }
+    }
 }
 
 export async function reorderPlayers(game: Game) {

@@ -1,13 +1,11 @@
 import * as bge from "bge-core";
 
-import { Game } from "../game";
-import { IndustryTile } from "../objects/industrytile";
-import { MerchantLocation } from "../objects/merchantlocation";
-import { ResourceToken } from "../objects/resourcetoken";
-import { Player } from "../player";
-import { SELLABLE_INDUSTRIES, City, Industry, Resource } from "../types";
-
-const console = bge.Logger.get("sell");
+import { Game } from "../game.js";
+import { IndustryTile } from "../objects/industrytile.js";
+import { MerchantLocation } from "../objects/merchantlocation.js";
+import { ResourceToken } from "../objects/resourcetoken.js";
+import { Player } from "../player.js";
+import { SELLABLE_INDUSTRIES, City, Industry, Resource } from "../types.js";
 
 export async function sell(game: Game, player: Player) {
     let sellOptions = getSellOptions(game, player);

@@ -1,6 +1,6 @@
 import * as bge from "bge-core";
 
-import { Resource } from "../types";
+import { Resource } from "../types.js";
 
 /**
  * A coal, iron, or beer token.

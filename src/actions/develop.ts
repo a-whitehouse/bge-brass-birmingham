@@ -1,13 +1,16 @@
 import * as bge from "bge-core";
-import { Game } from "../game";
+import { Game } from "../game.js";
 
-import { ALL_INDUSTRIES, Resource } from "../types";
-import { Player } from "../player";
-
-const console = bge.Logger.get("develop");
-
+import { ALL_INDUSTRIES, Resource } from "../types.js";
+import { Player } from "../player.js";
 
 export async function develop(game: Game, player: Player) {
+    const ironSources = game.board.getResourceSources(Resource.Iron);
+
+    if (ironSources.tiles.length === 0 && game.ironMarket.getCost(1) > player.money) {
+        await Promise.reject("Can't affort to develop");
+    }
+
     await player.prompt.click(new bge.Button("Develop"));
 
     const messageRow = game.message.add("{0} is developing", player);

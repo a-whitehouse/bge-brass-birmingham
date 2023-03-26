@@ -1,16 +1,24 @@
 import * as bge from "bge-core";
 
-import { Player } from "./player";
-import { GameBoard } from "./objects/gameboard";
-import { ResourceMarket } from "./objects/resourcemarket";
-import { Resource, Era } from "./types";
+import { Player } from "./player.js";
+import { GameBoard } from "./objects/gameboard.js";
+import { ResourceMarket } from "./objects/resourcemarket.js";
+import { Resource, Era } from "./types.js";
 
-import { grantIncome, playerAction, PlayerActionResult, reorderPlayers, resetSpentMoney, startRailEra } from "./actions";
-import { Card } from "./objects/card";
-import { ScoreTrack } from "./objects/scoring";
-import { IGameState } from "./state";
-import { setup } from "./actions/setup";
-import { endOfEraScoring } from "./actions/scoring";
+import {
+    grantIncome,
+    playerAction,
+    PlayerActionResult,
+    reorderPlayers,
+    resetSpentMoney,
+    startRailEra
+} from "./actions/index.js";
+
+import { Card } from "./objects/card.js";
+import { ScoreTrack } from "./objects/scoring.js";
+import { IGameState } from "./state.js";
+import { setup } from "./actions/setup.js";
+import { endOfEraScoring } from "./actions/scoring.js";
 
 /**
  * @summary This class contains the meat of your game.
@@ -99,7 +107,9 @@ export class Game extends bge.StateMachineGame<Player> {
     async roundStart(): bge.GameState {
         this.turn = 0;
         
-        await grantIncome(this.turnOrder);
+        if (!this.firstRound) {
+            await grantIncome(this, this.turnOrder);
+        }
 
         return this.playerTurnStart;
     }

@@ -1,9 +1,9 @@
 import * as bge from "bge-core";
 import { LinearArrangement } from "bge-core";
 
-import * as scoretrack from "../data/scoretrack";
+import * as scoretrack from "../data/scoretrack.js"
 
-import { Player } from "../player";
+import { Player } from "../player.js";
 
 export enum ScoreTokenKind {
     VICTORY_POINTS,
@@ -44,14 +44,26 @@ export class ScoreToken extends bge.Token {
 
         this.moveTo(this.value + delta);
     }
-    
+
     decrease(delta: number): void {
         if (delta < 0) {
             throw new Error("Must decrease by at least 0");
         }
 
-        if (this.kind === ScoreTokenKind.VICTORY_POINTS) {
-            throw new Error("Can't decrease victory points!");
+        if (this.kind === ScoreTokenKind.INCOME) {
+            throw new Error("Income can only decrease in brackets!");
+        }
+
+        this.moveTo(Math.max(0, this.value - delta));
+    }
+    
+    decreaseBrackets(delta: number): void {
+        if (delta < 0) {
+            throw new Error("Must decrease by at least 0");
+        }
+
+        if (this.kind !== ScoreTokenKind.INCOME) {
+            throw new Error("Can only decrease income by brackets!");
         }
 
         let lastIncome = this.slot.income;

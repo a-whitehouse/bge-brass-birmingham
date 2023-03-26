@@ -1,12 +1,12 @@
 import * as bge from "bge-core";
 
-import * as playerboard from "../data/playerboard";
-import INDUSTRIES from "../data/industrylevels";
+import * as playerboard from "../data/playerboard.js"
+import INDUSTRIES from "../data/industrylevels.js"
 
-import { Player } from "../player";
-import { IndustryTile } from "./industrytile";
-import { IIndustryLevelData, Industry } from "../types";
-import { IPlayerIndustryState } from "../state";
+import { Player } from "../player.js";
+import { IndustryTile } from "./industrytile.js";
+import { IIndustryLevelData, Industry } from "../types.js";
+import { IPlayerIndustryState } from "../state.js";
 
 export class IndustryLevelSlot extends bge.Deck<IndustryTile> {
     readonly player: Player;

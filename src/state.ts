@@ -1,5 +1,5 @@
-import { Era, Industry, Resource } from "./types";
-import { MerchantTileValue } from "./objects/merchanttile";
+import { Era, Industry, Resource } from "./types.js";
+import { MerchantTileValue } from "./objects/merchanttile.js";
 
 export interface IGameState {
     era: Era;
